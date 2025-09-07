@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
 import {
   CaseStatusDistribution,
   CaseCategoryDistribution,
   RevenueByMonth,
   TimeTrackingStats,
-} from '@/types/dashboard';
+} from "@/types/dashboard";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import {
   PieChart,
   Pie,
@@ -27,7 +27,7 @@ import {
   ResponsiveContainer,
   LineChart,
   Line,
-} from 'recharts';
+} from "recharts";
 
 interface ChartsProps {
   caseStatusDistribution: CaseStatusDistribution[];
@@ -43,12 +43,12 @@ export function Charts({
   timeTrackingStats,
 }: ChartsProps) {
   const COLORS = [
-    '#0088FE',
-    '#00C49F',
-    '#FFBB28',
-    '#FF8042',
-    '#8884D8',
-    '#82CA9D',
+    "#0088FE",
+    "#00C49F",
+    "#FFBB28",
+    "#FF8042",
+    "#8884D8",
+    "#82CA9D",
   ];
 
   return (
@@ -134,8 +134,8 @@ export function Charts({
               <YAxis yAxisId="right" orientation="right" />
               <Tooltip
                 formatter={(value, name) => [
-                  name === 'revenue' ? `¥${value.toLocaleString()}` : value,
-                  name === 'revenue' ? '収益' : 'ケース数',
+                  name === "revenue" ? `¥${value.toLocaleString()}` : value,
+                  name === "revenue" ? "収益" : "ケース数",
                 ]}
               />
               <Legend />

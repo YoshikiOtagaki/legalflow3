@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { ReactNode } from 'react';
-import { cn } from '@/lib/utils';
+import { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 interface ResponsiveTableProps {
   children: ReactNode;
@@ -11,7 +11,7 @@ interface ResponsiveTableProps {
 export function ResponsiveTable({ children, className }: ResponsiveTableProps) {
   return (
     <div className="overflow-x-auto">
-      <table className={cn('min-w-full divide-y divide-gray-200', className)}>
+      <table className={cn("min-w-full divide-y divide-gray-200", className)}>
         {children}
       </table>
     </div>
@@ -27,7 +27,7 @@ export function ResponsiveTableHeader({
   children,
   className,
 }: ResponsiveTableHeaderProps) {
-  return <thead className={cn('bg-gray-50', className)}>{children}</thead>;
+  return <thead className={cn("bg-gray-50", className)}>{children}</thead>;
 }
 
 interface ResponsiveTableBodyProps {
@@ -40,7 +40,7 @@ export function ResponsiveTableBody({
   className,
 }: ResponsiveTableBodyProps) {
   return (
-    <tbody className={cn('bg-white divide-y divide-gray-200', className)}>
+    <tbody className={cn("bg-white divide-y divide-gray-200", className)}>
       {children}
     </tbody>
   );
@@ -55,7 +55,7 @@ export function ResponsiveTableRow({
   children,
   className,
 }: ResponsiveTableRowProps) {
-  return <tr className={cn('hover:bg-gray-50', className)}>{children}</tr>;
+  return <tr className={cn("hover:bg-gray-50", className)}>{children}</tr>;
 }
 
 interface ResponsiveTableCellProps {
@@ -69,15 +69,15 @@ export function ResponsiveTableCell({
   className,
   isHeader = false,
 }: ResponsiveTableCellProps) {
-  const Component = isHeader ? 'th' : 'td';
+  const Component = isHeader ? "th" : "td";
 
   return (
     <Component
       className={cn(
         isHeader
-          ? 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
-          : 'px-6 py-4 whitespace-nowrap text-sm text-gray-900',
-        className
+          ? "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+          : "px-6 py-4 whitespace-nowrap text-sm text-gray-900",
+        className,
       )}
     >
       {children}

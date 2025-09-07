@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useAuthStore } from '@/store/auth';
+import { useState, useEffect } from "react";
+import { useAuthStore } from "@/store/auth";
 import {
   Document,
   DocumentListResponse,
   DocumentFilters,
   DocumentGenerationRequest,
   DocumentGenerationResponse,
-} from '@/types/document';
+} from "@/types/document";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
 export function useDocuments(filters: DocumentFilters = {}) {
   const { accessToken } = useAuthStore();
@@ -35,9 +35,9 @@ export function useDocuments(filters: DocumentFilters = {}) {
       const queryParams = new URLSearchParams();
 
       Object.entries({ ...filters, ...newFilters }).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
+        if (value !== undefined && value !== null && value !== "") {
           if (Array.isArray(value)) {
-            value.forEach(v => queryParams.append(key, v.toString()));
+            value.forEach((v) => queryParams.append(key, v.toString()));
           } else {
             queryParams.append(key, value.toString());
           }
@@ -47,13 +47,13 @@ export function useDocuments(filters: DocumentFilters = {}) {
       const response = await fetch(`${API_BASE_URL}/documents?${queryParams}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
       });
 
       if (!response.ok) {
-        throw new Error('ドキュメントの取得に失敗しました');
+        throw new Error("ドキュメントの取得に失敗しました");
       }
 
       const data: DocumentListResponse = await response.json();
@@ -65,7 +65,7 @@ export function useDocuments(filters: DocumentFilters = {}) {
         totalPages: data.totalPages,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'エラーが発生しました');
+      setError(err instanceof Error ? err.message : "エラーが発生しました");
     } finally {
       setLoading(false);
     }
@@ -105,19 +105,19 @@ export function useDocument(id: string) {
       const response = await fetch(`${API_BASE_URL}/documents/${id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
       });
 
       if (!response.ok) {
-        throw new Error('ドキュメントの取得に失敗しました');
+        throw new Error("ドキュメントの取得に失敗しました");
       }
 
       const data = await response.json();
       setDocument(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'エラーが発生しました');
+      setError(err instanceof Error ? err.message : "エラーが発生しました");
     } finally {
       setLoading(false);
     }
@@ -143,28 +143,28 @@ export function useDocumentGeneration() {
   const [error, setError] = useState<string | null>(null);
 
   const generateDocument = async (
-    request: DocumentGenerationRequest
+    request: DocumentGenerationRequest,
   ): Promise<DocumentGenerationResponse> => {
-    if (!accessToken) throw new Error('認証が必要です');
+    if (!accessToken) throw new Error("認証が必要です");
 
     setIsGenerating(true);
     setError(null);
 
     try {
       const response = await fetch(`${API_BASE_URL}/documents/generate`, {
-        method: 'POST',
+        method: "POST",
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify(request),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
-          errorData.message || 'ドキュメントの生成に失敗しました'
+          errorData.message || "ドキュメントの生成に失敗しました",
         );
       }
 
@@ -172,7 +172,7 @@ export function useDocumentGeneration() {
       return data;
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : 'エラーが発生しました';
+        err instanceof Error ? err.message : "エラーが発生しました";
       setError(errorMessage);
       throw err;
     } finally {

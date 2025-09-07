@@ -51,11 +51,11 @@ export interface TimeTrackingStats {
 export interface RecentActivity {
   id: string;
   type:
-    | 'case_created'
-    | 'case_updated'
-    | 'document_created'
-    | 'timesheet_entry'
-    | 'notification';
+    | "case_created"
+    | "case_updated"
+    | "document_created"
+    | "timesheet_entry"
+    | "notification";
   title: string;
   description: string;
   timestamp: string;
@@ -72,7 +72,7 @@ export interface UpcomingDeadlines {
   dueDate: string;
   caseId: string;
   caseTitle: string;
-  priority: 'high' | 'medium' | 'low';
+  priority: "high" | "medium" | "low";
   isOverdue: boolean;
 }
 

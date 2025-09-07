@@ -1,25 +1,25 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useNotificationSettings } from '@/hooks/use-notifications';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState, useEffect } from "react";
+import { useNotificationSettings } from "@/hooks/use-notifications";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
+} from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   Bell,
   Mail,
@@ -28,7 +28,7 @@ import {
   Clock,
   Save,
   RefreshCw,
-} from 'lucide-react';
+} from "lucide-react";
 
 export function NotificationSettings() {
   const { settings, loading, error, updateSettings } =
@@ -40,13 +40,13 @@ export function NotificationSettings() {
     pushEnabled: false,
     lineEnabled: false,
     inAppEnabled: false,
-    emailAddress: '',
-    phoneNumber: '',
-    lineUserId: '',
-    quietHoursStart: '',
-    quietHoursEnd: '',
-    timezone: 'Asia/Tokyo',
-    language: 'ja',
+    emailAddress: "",
+    phoneNumber: "",
+    lineUserId: "",
+    quietHoursStart: "",
+    quietHoursEnd: "",
+    timezone: "Asia/Tokyo",
+    language: "ja",
   });
 
   useEffect(() => {
@@ -57,11 +57,11 @@ export function NotificationSettings() {
         pushEnabled: settings.pushEnabled,
         lineEnabled: settings.lineEnabled,
         inAppEnabled: settings.inAppEnabled,
-        emailAddress: settings.emailAddress || '',
-        phoneNumber: settings.phoneNumber || '',
-        lineUserId: settings.lineUserId || '',
-        quietHoursStart: settings.quietHoursStart || '',
-        quietHoursEnd: settings.quietHoursEnd || '',
+        emailAddress: settings.emailAddress || "",
+        phoneNumber: settings.phoneNumber || "",
+        lineUserId: settings.lineUserId || "",
+        quietHoursStart: settings.quietHoursStart || "",
+        quietHoursEnd: settings.quietHoursEnd || "",
         timezone: settings.timezone,
         language: settings.language,
       });
@@ -73,10 +73,10 @@ export function NotificationSettings() {
 
     try {
       await updateSettings(formData);
-      alert('設定を保存しました');
+      alert("設定を保存しました");
     } catch (error) {
-      console.error('設定保存エラー:', error);
-      alert('設定の保存に失敗しました');
+      console.error("設定保存エラー:", error);
+      alert("設定の保存に失敗しました");
     } finally {
       setIsSaving(false);
     }
@@ -90,11 +90,11 @@ export function NotificationSettings() {
         pushEnabled: settings.pushEnabled,
         lineEnabled: settings.lineEnabled,
         inAppEnabled: settings.inAppEnabled,
-        emailAddress: settings.emailAddress || '',
-        phoneNumber: settings.phoneNumber || '',
-        lineUserId: settings.lineUserId || '',
-        quietHoursStart: settings.quietHoursStart || '',
-        quietHoursEnd: settings.quietHoursEnd || '',
+        emailAddress: settings.emailAddress || "",
+        phoneNumber: settings.phoneNumber || "",
+        lineUserId: settings.lineUserId || "",
+        quietHoursStart: settings.quietHoursStart || "",
+        quietHoursEnd: settings.quietHoursEnd || "",
         timezone: settings.timezone,
         language: settings.language,
       });
@@ -170,8 +170,8 @@ export function NotificationSettings() {
                 </div>
                 <Switch
                   checked={formData.emailEnabled}
-                  onCheckedChange={checked =>
-                    setFormData(prev => ({ ...prev, emailEnabled: checked }))
+                  onCheckedChange={(checked) =>
+                    setFormData((prev) => ({ ...prev, emailEnabled: checked }))
                   }
                 />
               </div>
@@ -183,8 +183,8 @@ export function NotificationSettings() {
                     type="email"
                     placeholder="example@example.com"
                     value={formData.emailAddress}
-                    onChange={e =>
-                      setFormData(prev => ({
+                    onChange={(e) =>
+                      setFormData((prev) => ({
                         ...prev,
                         emailAddress: e.target.value,
                       }))
@@ -206,8 +206,8 @@ export function NotificationSettings() {
                 </div>
                 <Switch
                   checked={formData.smsEnabled}
-                  onCheckedChange={checked =>
-                    setFormData(prev => ({ ...prev, smsEnabled: checked }))
+                  onCheckedChange={(checked) =>
+                    setFormData((prev) => ({ ...prev, smsEnabled: checked }))
                   }
                 />
               </div>
@@ -219,8 +219,8 @@ export function NotificationSettings() {
                     type="tel"
                     placeholder="090-1234-5678"
                     value={formData.phoneNumber}
-                    onChange={e =>
-                      setFormData(prev => ({
+                    onChange={(e) =>
+                      setFormData((prev) => ({
                         ...prev,
                         phoneNumber: e.target.value,
                       }))
@@ -246,8 +246,8 @@ export function NotificationSettings() {
                 </div>
                 <Switch
                   checked={formData.pushEnabled}
-                  onCheckedChange={checked =>
-                    setFormData(prev => ({ ...prev, pushEnabled: checked }))
+                  onCheckedChange={(checked) =>
+                    setFormData((prev) => ({ ...prev, pushEnabled: checked }))
                   }
                 />
               </div>
@@ -267,8 +267,8 @@ export function NotificationSettings() {
                 </div>
                 <Switch
                   checked={formData.lineEnabled}
-                  onCheckedChange={checked =>
-                    setFormData(prev => ({ ...prev, lineEnabled: checked }))
+                  onCheckedChange={(checked) =>
+                    setFormData((prev) => ({ ...prev, lineEnabled: checked }))
                   }
                 />
               </div>
@@ -279,8 +279,8 @@ export function NotificationSettings() {
                     id="lineUserId"
                     placeholder="LINEユーザーIDを入力"
                     value={formData.lineUserId}
-                    onChange={e =>
-                      setFormData(prev => ({
+                    onChange={(e) =>
+                      setFormData((prev) => ({
                         ...prev,
                         lineUserId: e.target.value,
                       }))
@@ -304,8 +304,8 @@ export function NotificationSettings() {
             </div>
             <Switch
               checked={formData.inAppEnabled}
-              onCheckedChange={checked =>
-                setFormData(prev => ({ ...prev, inAppEnabled: checked }))
+              onCheckedChange={(checked) =>
+                setFormData((prev) => ({ ...prev, inAppEnabled: checked }))
               }
             />
           </div>
@@ -331,8 +331,8 @@ export function NotificationSettings() {
                 id="quietHoursStart"
                 type="time"
                 value={formData.quietHoursStart}
-                onChange={e =>
-                  setFormData(prev => ({
+                onChange={(e) =>
+                  setFormData((prev) => ({
                     ...prev,
                     quietHoursStart: e.target.value,
                   }))
@@ -345,8 +345,8 @@ export function NotificationSettings() {
                 id="quietHoursEnd"
                 type="time"
                 value={formData.quietHoursEnd}
-                onChange={e =>
-                  setFormData(prev => ({
+                onChange={(e) =>
+                  setFormData((prev) => ({
                     ...prev,
                     quietHoursEnd: e.target.value,
                   }))
@@ -371,8 +371,8 @@ export function NotificationSettings() {
               <Label htmlFor="timezone">タイムゾーン</Label>
               <Select
                 value={formData.timezone}
-                onValueChange={value =>
-                  setFormData(prev => ({ ...prev, timezone: value }))
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, timezone: value }))
                 }
               >
                 <SelectTrigger>
@@ -395,8 +395,8 @@ export function NotificationSettings() {
               <Label htmlFor="language">言語</Label>
               <Select
                 value={formData.language}
-                onValueChange={value =>
-                  setFormData(prev => ({ ...prev, language: value }))
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, language: value }))
                 }
               >
                 <SelectTrigger>

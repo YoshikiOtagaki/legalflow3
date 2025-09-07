@@ -1,43 +1,41 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useAuthStore } from '@/store/auth';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useAuthStore } from "@/store/auth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 
 const registerSchema = z
   .object({
-    email: z.string().email('有効なメールアドレスを入力してください'),
-    password: z.string().min(6, 'パスワードは6文字以上で入力してください'),
+    email: z.string().email("有効なメールアドレスを入力してください"),
+    password: z.string().min(6, "パスワードは6文字以上で入力してください"),
     confirmPassword: z
       .string()
-      .min(6, 'パスワードは6文字以上で入力してください'),
-    name: z.string().min(1, '名前を入力してください'),
-    role: z.enum(['Lawyer', 'Client', 'Staff'], {
-      required_error: '役割を選択してください',
-    }),
+      .min(6, "パスワードは6文字以上で入力してください"),
+    name: z.string().min(1, "名前を入力してください"),
+    role: z.enum(["Lawyer", "Client", "Staff"]),
   })
-  .refine(data => data.password === data.confirmPassword, {
-    message: 'パスワードが一致しません',
-    path: ['confirmPassword'],
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "パスワードが一致しません",
+    path: ["confirmPassword"],
   });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
@@ -68,11 +66,11 @@ export function RegisterForm({
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      role: 'Client',
+      role: "Client",
     },
   });
 
-  const selectedRole = watch('role');
+  const selectedRole = watch("role");
 
   const onSubmit = async (data: RegisterFormData) => {
     setIsSubmitting(true);
@@ -105,7 +103,7 @@ export function RegisterForm({
               id="name"
               type="text"
               placeholder="山田太郎"
-              {...register('name')}
+              {...register("name")}
               disabled={isSubmitting}
             />
             {errors.name && (
@@ -119,7 +117,7 @@ export function RegisterForm({
               id="email"
               type="email"
               placeholder="example@example.com"
-              {...register('email')}
+              {...register("email")}
               disabled={isSubmitting}
             />
             {errors.email && (
@@ -131,8 +129,8 @@ export function RegisterForm({
             <Label htmlFor="role">役割</Label>
             <Select
               value={selectedRole}
-              onValueChange={value =>
-                setValue('role', value as 'Lawyer' | 'Client' | 'Staff')
+              onValueChange={(value) =>
+                setValue("role", value as "Lawyer" | "Client" | "Staff")
               }
               disabled={isSubmitting}
             >
@@ -156,7 +154,7 @@ export function RegisterForm({
               id="password"
               type="password"
               placeholder="パスワードを入力"
-              {...register('password')}
+              {...register("password")}
               disabled={isSubmitting}
             />
             {errors.password && (
@@ -170,7 +168,7 @@ export function RegisterForm({
               id="confirmPassword"
               type="password"
               placeholder="パスワードを再入力"
-              {...register('confirmPassword')}
+              {...register("confirmPassword")}
               disabled={isSubmitting}
             />
             {errors.confirmPassword && (
@@ -191,7 +189,7 @@ export function RegisterForm({
             className="w-full"
             disabled={isSubmitting || isLoading}
           >
-            {isSubmitting || isLoading ? '登録中...' : '新規登録'}
+            {isSubmitting || isLoading ? "登録中..." : "新規登録"}
           </Button>
 
           <div className="text-center text-sm">

@@ -1,25 +1,25 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState, ElementType } from "react";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { Bell, Mail, MessageSquare, Smartphone, Calendar } from 'lucide-react';
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Bell, Mail, MessageSquare, Smartphone, Calendar } from "lucide-react";
 
 interface NotificationPreferences {
   email: {
@@ -117,8 +117,8 @@ export function NotificationPreferences() {
     },
     quietHours: {
       enabled: false,
-      startTime: '22:00',
-      endTime: '08:00',
+      startTime: "22:00",
+      endTime: "08:00",
     },
   });
 
@@ -128,27 +128,34 @@ export function NotificationPreferences() {
     setIsLoading(true);
     try {
       // TODO: API呼び出し
-      console.log('Saving preferences:', preferences);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // シミュレーション
+      console.log("Saving preferences:", preferences);
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // シミュレーション
     } catch (error) {
-      console.error('Failed to save preferences:', error);
+      console.error("Failed to save preferences:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   const updatePreference = (path: string, value: boolean | string) => {
-    setPreferences(prev => {
-      const newPrefs = { ...prev };
-      const keys = path.split('.');
-      let current: any = newPrefs;
-
-      for (let i = 0; i < keys.length - 1; i++) {
-        current = current[keys[i]];
+    setPreferences((prev) => {
+      const [key1, key2] = path.split(".") as [
+        keyof NotificationPreferences,
+        string | undefined,
+      ];
+      if (key2) {
+        return {
+          ...prev,
+          [key1]: {
+            ...prev[key1],
+            [key2]: value,
+          },
+        };
       }
-
-      current[keys[keys.length - 1]] = value;
-      return newPrefs;
+      return {
+        ...prev,
+        [key1]: value,
+      };
     });
   };
 
@@ -161,7 +168,7 @@ export function NotificationPreferences() {
   }: {
     title: string;
     description: string;
-    icon: any;
+    icon: ElementType;
     channel: keyof NotificationPreferences;
     enabled: boolean;
   }) => (
@@ -177,7 +184,7 @@ export function NotificationPreferences() {
           </div>
           <Switch
             checked={enabled}
-            onCheckedChange={checked =>
+            onCheckedChange={(checked) =>
               updatePreference(`${channel}.enabled`, checked)
             }
           />
@@ -187,21 +194,21 @@ export function NotificationPreferences() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Object.entries(preferences[channel]).map(([key, value]) => {
-              if (key === 'enabled') return null;
+              if (key === "enabled") return null;
               return (
                 <div key={key} className="flex items-center justify-between">
                   <Label htmlFor={`${channel}-${key}`} className="text-sm">
-                    {key === 'caseUpdates' && 'ケース更新'}
-                    {key === 'deadlineReminders' && '期限リマインダー'}
-                    {key === 'documentUploads' && 'ドキュメントアップロード'}
-                    {key === 'timesheetReminders' && 'タイムシートリマインダー'}
-                    {key === 'systemAlerts' && 'システムアラート'}
-                    {key === 'urgentAlerts' && '緊急アラート'}
+                    {key === "caseUpdates" && "ケース更新"}
+                    {key === "deadlineReminders" && "期限リマインダー"}
+                    {key === "documentUploads" && "ドキュメントアップロード"}
+                    {key === "timesheetReminders" && "タイムシートリマインダー"}
+                    {key === "systemAlerts" && "システムアラート"}
+                    {key === "urgentAlerts" && "緊急アラート"}
                   </Label>
                   <Switch
                     id={`${channel}-${key}`}
                     checked={value as boolean}
-                    onCheckedChange={checked =>
+                    onCheckedChange={(checked) =>
                       updatePreference(`${channel}.${key}`, checked)
                     }
                   />
@@ -222,7 +229,7 @@ export function NotificationPreferences() {
           <p className="text-gray-600">通知の種類と頻度を設定できます</p>
         </div>
         <Button onClick={handleSave} disabled={isLoading}>
-          {isLoading ? '保存中...' : '設定を保存'}
+          {isLoading ? "保存中..." : "設定を保存"}
         </Button>
       </div>
 
@@ -287,15 +294,15 @@ export function NotificationPreferences() {
             {Object.entries(preferences.frequency).map(([key, value]) => (
               <div key={key} className="flex items-center justify-between">
                 <Label htmlFor={`frequency-${key}`} className="text-sm">
-                  {key === 'immediate' && '即座'}
-                  {key === 'daily' && '毎日'}
-                  {key === 'weekly' && '毎週'}
-                  {key === 'monthly' && '毎月'}
+                  {key === "immediate" && "即座"}
+                  {key === "daily" && "毎日"}
+                  {key === "weekly" && "毎週"}
+                  {key === "monthly" && "毎月"}
                 </Label>
                 <Switch
                   id={`frequency-${key}`}
                   checked={value as boolean}
-                  onCheckedChange={checked =>
+                  onCheckedChange={(checked) =>
                     updatePreference(`frequency.${key}`, checked)
                   }
                 />
@@ -321,8 +328,8 @@ export function NotificationPreferences() {
             <Switch
               id="quiet-hours-enabled"
               checked={preferences.quietHours.enabled}
-              onCheckedChange={checked =>
-                updatePreference('quietHours.enabled', checked)
+              onCheckedChange={(checked) =>
+                updatePreference("quietHours.enabled", checked)
               }
             />
           </div>
@@ -337,8 +344,8 @@ export function NotificationPreferences() {
                   id="start-time"
                   type="time"
                   value={preferences.quietHours.startTime}
-                  onChange={e =>
-                    updatePreference('quietHours.startTime', e.target.value)
+                  onChange={(e) =>
+                    updatePreference("quietHours.startTime", e.target.value)
                   }
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 />
@@ -351,8 +358,8 @@ export function NotificationPreferences() {
                   id="end-time"
                   type="time"
                   value={preferences.quietHours.endTime}
-                  onChange={e =>
-                    updatePreference('quietHours.endTime', e.target.value)
+                  onChange={(e) =>
+                    updatePreference("quietHours.endTime", e.target.value)
                   }
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 />

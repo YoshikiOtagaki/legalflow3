@@ -1,14 +1,14 @@
-import { AuthInitializer } from '@/components/AuthInitializer';
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import './globals.css';
-import { QueryProvider } from '@/providers/query-provider';
+import { AuthInitializer } from "@/components/AuthInitializer";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { QueryProvider } from "@/providers/query-provider";
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'LegalFlow3',
-  description: '法律事務所向けケース管理システム',
+  title: "LegalFlow3",
+  description: "法律事務所向けケース管理システム",
 };
 
 export default function RootLayout({

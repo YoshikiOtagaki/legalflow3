@@ -1,23 +1,23 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { ProtectedRoute } from '@/components/auth/protected-route';
-import { NotificationList } from '@/components/notifications/notification-list';
-import { NotificationSettings } from '@/components/notifications/notification-settings';
-import { NotificationPreferences } from '@/components/notifications/notification-preferences';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useState } from "react";
+import { ProtectedRoute } from "@/components/auth/protected-route";
+import { NotificationList } from "@/components/notifications/notification-list";
+import { NotificationSettings } from "@/components/notifications/notification-settings";
+import { NotificationPreferences } from "@/components/notifications/notification-preferences";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function NotificationsPage() {
-  const [activeTab, setActiveTab] = useState('list');
+  const [activeTab, setActiveTab] = useState("list");
 
   const handleNotificationSelect = (notificationId: string) => {
     // TODO: 通知詳細ページに遷移
-    console.log('Notification selected:', notificationId);
+    console.log("Notification selected:", notificationId);
   };
 
   const handleMarkAllRead = () => {
     // TODO: 一括既読化後の処理
-    console.log('All notifications marked as read');
+    console.log("All notifications marked as read");
   };
 
   return (

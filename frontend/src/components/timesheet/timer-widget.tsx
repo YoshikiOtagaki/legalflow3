@@ -1,26 +1,26 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useTimer } from '@/hooks/use-timesheet';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState, useEffect } from "react";
+import { useTimer } from "@/hooks/use-timesheet";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Play, Pause, Square, Clock, FileText, Tag } from 'lucide-react';
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Play, Pause, Square, Clock, FileText, Tag } from "lucide-react";
 
 interface TimerWidgetProps {
   caseId?: string;
@@ -37,9 +37,9 @@ export function TimerWidget({ caseId, onTimerStop }: TimerWidgetProps) {
     resumeTimer,
   } = useTimer();
 
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState("");
   const [tags, setTags] = useState<string[]>([]);
-  const [newTag, setNewTag] = useState('');
+  const [newTag, setNewTag] = useState("");
   const [elapsedTime, setElapsedTime] = useState(0);
 
   // 経過時間の計算
@@ -64,17 +64,17 @@ export function TimerWidget({ caseId, onTimerStop }: TimerWidgetProps) {
 
   const handleStart = async () => {
     if (!description.trim()) {
-      alert('作業内容を入力してください');
+      alert("作業内容を入力してください");
       return;
     }
 
     try {
       await startTimer(caseId || null, description, tags);
-      setDescription('');
+      setDescription("");
       setTags([]);
     } catch (error) {
-      console.error('タイマー開始エラー:', error);
-      alert('タイマーの開始に失敗しました');
+      console.error("タイマー開始エラー:", error);
+      alert("タイマーの開始に失敗しました");
     }
   };
 
@@ -85,8 +85,8 @@ export function TimerWidget({ caseId, onTimerStop }: TimerWidgetProps) {
       await stopTimer(currentTimer.id);
       onTimerStop?.(currentTimer.id);
     } catch (error) {
-      console.error('タイマー停止エラー:', error);
-      alert('タイマーの停止に失敗しました');
+      console.error("タイマー停止エラー:", error);
+      alert("タイマーの停止に失敗しました");
     }
   };
 
@@ -100,26 +100,26 @@ export function TimerWidget({ caseId, onTimerStop }: TimerWidgetProps) {
         await resumeTimer(currentTimer.id);
       }
     } catch (error) {
-      console.error('タイマー操作エラー:', error);
-      alert('タイマーの操作に失敗しました');
+      console.error("タイマー操作エラー:", error);
+      alert("タイマーの操作に失敗しました");
     }
   };
 
   const addTag = () => {
     if (newTag.trim() && !tags.includes(newTag.trim())) {
       setTags([...tags, newTag.trim()]);
-      setNewTag('');
+      setNewTag("");
     }
   };
 
   const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
+    setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
   const formatTime = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
-    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+    return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
   };
 
   return (
@@ -196,7 +196,7 @@ export function TimerWidget({ caseId, onTimerStop }: TimerWidgetProps) {
                 id="description"
                 placeholder="作業内容を入力してください"
                 value={description}
-                onChange={e => setDescription(e.target.value)}
+                onChange={(e) => setDescription(e.target.value)}
               />
             </div>
 
@@ -207,8 +207,8 @@ export function TimerWidget({ caseId, onTimerStop }: TimerWidgetProps) {
                   id="tags"
                   placeholder="タグを入力"
                   value={newTag}
-                  onChange={e => setNewTag(e.target.value)}
-                  onKeyPress={e => e.key === 'Enter' && addTag()}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && addTag()}
                 />
                 <Button onClick={addTag} size="sm">
                   <Tag className="h-4 w-4" />

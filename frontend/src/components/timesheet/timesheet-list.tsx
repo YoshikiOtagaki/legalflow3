@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useTimesheet } from '@/hooks/use-timesheet';
-import { TimesheetFilters } from '@/types/timesheet';
+import { useState } from "react";
+import { useTimesheet } from "@/hooks/use-timesheet";
+import { TimesheetFilters } from "@/types/timesheet";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Search,
   Filter,
@@ -22,7 +22,7 @@ import {
   Edit,
   Trash2,
   Play,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface TimesheetListProps {
   caseId?: string;
@@ -43,10 +43,10 @@ export function TimesheetList({
     caseId,
     page: 1,
     limit: 10,
-    sortBy: 'startTime',
-    sortOrder: 'desc',
+    sortBy: "startTime",
+    sortOrder: "desc",
   });
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { entries, loading, error, pagination, fetchEntries, deleteEntry } =
     useTimesheet(filters);
@@ -71,29 +71,29 @@ export function TimesheetList({
   };
 
   const handleDelete = async (entryId: string) => {
-    if (window.confirm('このエントリを削除しますか？')) {
+    if (window.confirm("このエントリを削除しますか？")) {
       try {
         await deleteEntry(entryId);
         onDeleteEntry?.(entryId);
       } catch (error) {
-        console.error('削除エラー:', error);
-        alert('削除に失敗しました');
+        console.error("削除エラー:", error);
+        alert("削除に失敗しました");
       }
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case '進行中':
-        return 'bg-blue-100 text-blue-800';
-      case '完了':
-        return 'bg-green-100 text-green-800';
-      case '承認待ち':
-        return 'bg-yellow-100 text-yellow-800';
-      case '請求済み':
-        return 'bg-purple-100 text-purple-800';
+      case "進行中":
+        return "bg-blue-100 text-blue-800";
+      case "完了":
+        return "bg-green-100 text-green-800";
+      case "承認待ち":
+        return "bg-yellow-100 text-yellow-800";
+      case "請求済み":
+        return "bg-purple-100 text-purple-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -104,9 +104,9 @@ export function TimesheetList({
   };
 
   const formatTime = (timeString: string) => {
-    return new Date(timeString).toLocaleTimeString('ja-JP', {
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Date(timeString).toLocaleTimeString("ja-JP", {
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -155,7 +155,7 @@ export function TimesheetList({
                 <Input
                   placeholder="作業内容で検索..."
                   value={searchTerm}
-                  onChange={e => handleSearch(e.target.value)}
+                  onChange={(e) => handleSearch(e.target.value)}
                   className="pl-10"
                 />
               </div>
@@ -164,8 +164,8 @@ export function TimesheetList({
             <div className="space-y-2">
               <label className="text-sm font-medium">ステータス</label>
               <select
-                value={filters.statusId || ''}
-                onChange={e => handleFilterChange('statusId', e.target.value)}
+                value={filters.statusId || ""}
+                onChange={(e) => handleFilterChange("statusId", e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-md"
               >
                 <option value="">すべて</option>
@@ -180,10 +180,10 @@ export function TimesheetList({
               <label className="text-sm font-medium">並び順</label>
               <select
                 value={`${filters.sortBy}-${filters.sortOrder}`}
-                onChange={e => {
-                  const [sortBy, sortOrder] = e.target.value.split('-');
-                  handleFilterChange('sortBy', sortBy);
-                  handleFilterChange('sortOrder', sortOrder as 'asc' | 'desc');
+                onChange={(e) => {
+                  const [sortBy, sortOrder] = e.target.value.split("-");
+                  handleFilterChange("sortBy", sortBy);
+                  handleFilterChange("sortOrder", sortOrder as "asc" | "desc");
                 }}
                 className="w-full p-2 border border-gray-300 rounded-md"
               >
@@ -209,7 +209,7 @@ export function TimesheetList({
             </CardContent>
           </Card>
         ) : (
-          entries.map(entry => (
+          entries.map((entry) => (
             <Card key={entry.id} className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex justify-between items-start">
@@ -218,12 +218,12 @@ export function TimesheetList({
                       {entry.description}
                     </CardTitle>
                     <CardDescription>
-                      {entry.case?.title || 'ケース未指定'}
+                      {entry.case?.title || "ケース未指定"}
                     </CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge className={getStatusColor(entry.status?.name || '')}>
-                      {entry.status?.name || '未設定'}
+                    <Badge className={getStatusColor(entry.status?.name || "")}>
+                      {entry.status?.name || "未設定"}
                     </Badge>
                     <Button
                       variant="outline"
@@ -258,7 +258,7 @@ export function TimesheetList({
                   <div>
                     <p className="text-sm text-gray-600">終了時間</p>
                     <p className="font-medium">
-                      {entry.endTime ? formatTime(entry.endTime) : '未完了'}
+                      {entry.endTime ? formatTime(entry.endTime) : "未完了"}
                     </p>
                   </div>
                   <div>
@@ -272,7 +272,7 @@ export function TimesheetList({
                     <p className="font-medium">
                       {entry.billableHours
                         ? formatDuration(entry.billableHours * 60)
-                        : '未設定'}
+                        : "未設定"}
                     </p>
                   </div>
                 </div>
@@ -304,8 +304,8 @@ export function TimesheetList({
 
                 <div className="flex justify-between items-center">
                   <div className="text-sm text-gray-500">
-                    作成日:{' '}
-                    {new Date(entry.createdAt).toLocaleDateString('ja-JP')}
+                    作成日:{" "}
+                    {new Date(entry.createdAt).toLocaleDateString("ja-JP")}
                   </div>
                   <div className="flex items-center gap-2">
                     {!entry.endTime && (

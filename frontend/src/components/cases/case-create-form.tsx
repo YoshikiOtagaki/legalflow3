@@ -1,43 +1,42 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useAuthStore } from '@/store/auth';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useAuthStore } from "@/store/auth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Calendar, ArrowLeft, Save } from 'lucide-react';
+} from "@/components/ui/select";
+import { Calendar, ArrowLeft, Save } from "lucide-react";
+import { apiClient } from "@/lib/api-client";
 
 const caseCreateSchema = z.object({
-  title: z.string().min(1, 'タイトルを入力してください'),
-  caseNumber: z.string().min(1, 'ケース番号を入力してください'),
+  title: z.string().min(1, "タイトルを入力してください"),
+  caseNumber: z.string().min(1, "ケース番号を入力してください"),
   description: z.string().optional(),
-  categoryId: z.string().min(1, 'カテゴリを選択してください'),
-  statusId: z.string().min(1, 'ステータスを選択してください'),
-  phaseId: z.string().min(1, 'フェーズを選択してください'),
-  priorityId: z.string().min(1, '優先度を選択してください'),
+  categoryId: z.string().min(1, "カテゴリを選択してください"),
+  statusId: z.string().min(1, "ステータスを選択してください"),
+  phaseId: z.string().min(1, "フェーズを選択してください"),
+  priorityId: z.string().min(1, "優先度を選択してください"),
   courtId: z.string().optional(),
   assignedLawyerId: z.string().optional(),
   clientId: z.string().optional(),
   opposingPartyId: z.string().optional(),
-  startDate: z.string().min(1, '開始日を入力してください'),
+  startDate: z.string().min(1, "開始日を入力してください"),
   endDate: z.string().optional(),
   estimatedEndDate: z.string().optional(),
 });
@@ -55,7 +54,7 @@ interface Option {
 }
 
 export function CaseCreateForm({ onSuccess, onCancel }: CaseCreateFormProps) {
-  const { accessToken } = useAuthStore();
+  const {} = useAuthStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [categories, setCategories] = useState<Option[]>([]);
   const [statuses, setStatuses] = useState<Option[]>([]);
@@ -74,113 +73,77 @@ export function CaseCreateForm({ onSuccess, onCancel }: CaseCreateFormProps) {
   } = useForm<CaseCreateFormData>({
     resolver: zodResolver(caseCreateSchema),
     defaultValues: {
-      startDate: new Date().toISOString().split('T')[0],
+      startDate: new Date().toISOString().split("T")[0],
     },
   });
-
-  const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
   // オプションデータの取得
   useEffect(() => {
     const fetchOptions = async () => {
-      if (!accessToken) return;
-
       try {
         // カテゴリ
-        const categoriesRes = await fetch(`${API_BASE_URL}/case-categories`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        if (categoriesRes.ok) {
-          const categoriesData = await categoriesRes.json();
-          setCategories(categoriesData.categories || []);
+        const categoriesRes = await apiClient.getCaseCategories();
+        if (categoriesRes.success) {
+          setCategories(categoriesRes.data?.categories || []);
         }
 
         // ステータス
-        const statusesRes = await fetch(`${API_BASE_URL}/case-statuses`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        if (statusesRes.ok) {
-          const statusesData = await statusesRes.json();
-          setStatuses(statusesData.statuses || []);
+        const statusesRes = await apiClient.getCaseStatuses();
+        if (statusesRes.success) {
+          setStatuses(statusesRes.data?.statuses || []);
         }
 
         // フェーズ
-        const phasesRes = await fetch(`${API_BASE_URL}/case-phases`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        if (phasesRes.ok) {
-          const phasesData = await phasesRes.json();
-          setPhases(phasesData.phases || []);
+        const phasesRes = await apiClient.getCasePhases();
+        if (phasesRes.success) {
+          setPhases(phasesRes.data?.phases || []);
         }
 
         // 優先度
-        const prioritiesRes = await fetch(`${API_BASE_URL}/case-priorities`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        if (prioritiesRes.ok) {
-          const prioritiesData = await prioritiesRes.json();
-          setPriorities(prioritiesData.priorities || []);
+        const prioritiesRes = await apiClient.getCasePriorities();
+        if (prioritiesRes.success) {
+          setPriorities(prioritiesRes.data?.priorities || []);
         }
 
         // 裁判所
-        const courtsRes = await fetch(`${API_BASE_URL}/courthouses`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        if (courtsRes.ok) {
-          const courtsData = await courtsRes.json();
-          setCourts(courtsData.courthouses || []);
+        const courtsRes = await apiClient.getCourts();
+        if (courtsRes.success) {
+          setCourts(courtsRes.data?.courthouses || []);
         }
 
         // 弁護士
-        const lawyersRes = await fetch(`${API_BASE_URL}/lawyers`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        if (lawyersRes.ok) {
-          const lawyersData = await lawyersRes.json();
-          setLawyers(lawyersData.lawyers || []);
+        const lawyersRes = await apiClient.getLawyers();
+        if (lawyersRes.success) {
+          setLawyers(lawyersRes.data?.lawyers || []);
         }
 
         // 当事者
-        const partiesRes = await fetch(`${API_BASE_URL}/parties`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        if (partiesRes.ok) {
-          const partiesData = await partiesRes.json();
-          setParties(partiesData.parties || []);
+        const partiesRes = await apiClient.getParties();
+        if (partiesRes.success) {
+          setParties(partiesRes.data?.data || []);
         }
       } catch (error) {
-        console.error('オプションデータの取得に失敗:', error);
+        console.error("オプションデータの取得に失敗:", error);
       }
     };
 
     fetchOptions();
-  }, [accessToken]);
+  }, []);
 
   const onSubmit = async (data: CaseCreateFormData) => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/cases`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(data),
-      });
+      const response = await apiClient.createCase(data);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'ケースの作成に失敗しました');
+      if (!response.success) {
+        throw new Error(response.message || "ケースの作成に失敗しました");
       }
 
-      const result = await response.json();
-      onSuccess?.(result.id);
+      onSuccess?.(response.data?.id || "");
     } catch (error) {
-      console.error('ケース作成エラー:', error);
-      alert(error instanceof Error ? error.message : 'エラーが発生しました');
+      console.error("ケース作成エラー:", error);
+      alert(error instanceof Error ? error.message : "エラーが発生しました");
     } finally {
       setIsSubmitting(false);
     }
@@ -214,7 +177,7 @@ export function CaseCreateForm({ onSuccess, onCancel }: CaseCreateFormProps) {
                 <Input
                   id="title"
                   placeholder="ケースのタイトルを入力"
-                  {...register('title')}
+                  {...register("title")}
                   disabled={isSubmitting}
                 />
                 {errors.title && (
@@ -227,7 +190,7 @@ export function CaseCreateForm({ onSuccess, onCancel }: CaseCreateFormProps) {
                 <Input
                   id="caseNumber"
                   placeholder="例: 2024-001"
-                  {...register('caseNumber')}
+                  {...register("caseNumber")}
                   disabled={isSubmitting}
                 />
                 {errors.caseNumber && (
@@ -244,7 +207,7 @@ export function CaseCreateForm({ onSuccess, onCancel }: CaseCreateFormProps) {
                 id="description"
                 placeholder="ケースの詳細な説明を入力"
                 rows={4}
-                {...register('description')}
+                {...register("description")}
                 disabled={isSubmitting}
               />
               {errors.description && (
@@ -269,15 +232,15 @@ export function CaseCreateForm({ onSuccess, onCancel }: CaseCreateFormProps) {
               <div className="space-y-2">
                 <Label htmlFor="categoryId">カテゴリ *</Label>
                 <Select
-                  value={watch('categoryId') || ''}
-                  onValueChange={value => setValue('categoryId', value)}
+                  value={watch("categoryId") || ""}
+                  onValueChange={(value) => setValue("categoryId", value)}
                   disabled={isSubmitting}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="カテゴリを選択" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map(category => (
+                    {categories.map((category) => (
                       <SelectItem key={category.id} value={category.id}>
                         {category.name}
                       </SelectItem>
@@ -294,15 +257,15 @@ export function CaseCreateForm({ onSuccess, onCancel }: CaseCreateFormProps) {
               <div className="space-y-2">
                 <Label htmlFor="statusId">ステータス *</Label>
                 <Select
-                  value={watch('statusId') || ''}
-                  onValueChange={value => setValue('statusId', value)}
+                  value={watch("statusId") || ""}
+                  onValueChange={(value) => setValue("statusId", value)}
                   disabled={isSubmitting}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="ステータスを選択" />
                   </SelectTrigger>
                   <SelectContent>
-                    {statuses.map(status => (
+                    {statuses.map((status) => (
                       <SelectItem key={status.id} value={status.id}>
                         {status.name}
                       </SelectItem>
@@ -319,15 +282,15 @@ export function CaseCreateForm({ onSuccess, onCancel }: CaseCreateFormProps) {
               <div className="space-y-2">
                 <Label htmlFor="phaseId">フェーズ *</Label>
                 <Select
-                  value={watch('phaseId') || ''}
-                  onValueChange={value => setValue('phaseId', value)}
+                  value={watch("phaseId") || ""}
+                  onValueChange={(value) => setValue("phaseId", value)}
                   disabled={isSubmitting}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="フェーズを選択" />
                   </SelectTrigger>
                   <SelectContent>
-                    {phases.map(phase => (
+                    {phases.map((phase) => (
                       <SelectItem key={phase.id} value={phase.id}>
                         {phase.name}
                       </SelectItem>
@@ -344,15 +307,15 @@ export function CaseCreateForm({ onSuccess, onCancel }: CaseCreateFormProps) {
               <div className="space-y-2">
                 <Label htmlFor="priorityId">優先度 *</Label>
                 <Select
-                  value={watch('priorityId') || ''}
-                  onValueChange={value => setValue('priorityId', value)}
+                  value={watch("priorityId") || ""}
+                  onValueChange={(value) => setValue("priorityId", value)}
                   disabled={isSubmitting}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="優先度を選択" />
                   </SelectTrigger>
                   <SelectContent>
-                    {priorities.map(priority => (
+                    {priorities.map((priority) => (
                       <SelectItem key={priority.id} value={priority.id}>
                         {priority.name}
                       </SelectItem>
@@ -382,15 +345,15 @@ export function CaseCreateForm({ onSuccess, onCancel }: CaseCreateFormProps) {
               <div className="space-y-2">
                 <Label htmlFor="assignedLawyerId">担当弁護士</Label>
                 <Select
-                  value={watch('assignedLawyerId') || ''}
-                  onValueChange={value => setValue('assignedLawyerId', value)}
+                  value={watch("assignedLawyerId") || ""}
+                  onValueChange={(value) => setValue("assignedLawyerId", value)}
                   disabled={isSubmitting}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="担当弁護士を選択" />
                   </SelectTrigger>
                   <SelectContent>
-                    {lawyers.map(lawyer => (
+                    {lawyers.map((lawyer) => (
                       <SelectItem key={lawyer.id} value={lawyer.id}>
                         {lawyer.name}
                       </SelectItem>
@@ -402,15 +365,15 @@ export function CaseCreateForm({ onSuccess, onCancel }: CaseCreateFormProps) {
               <div className="space-y-2">
                 <Label htmlFor="courtId">裁判所</Label>
                 <Select
-                  value={watch('courtId') || ''}
-                  onValueChange={value => setValue('courtId', value)}
+                  value={watch("courtId") || ""}
+                  onValueChange={(value) => setValue("courtId", value)}
                   disabled={isSubmitting}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="裁判所を選択" />
                   </SelectTrigger>
                   <SelectContent>
-                    {courts.map(court => (
+                    {courts.map((court) => (
                       <SelectItem key={court.id} value={court.id}>
                         {court.name}
                       </SelectItem>
@@ -422,15 +385,15 @@ export function CaseCreateForm({ onSuccess, onCancel }: CaseCreateFormProps) {
               <div className="space-y-2">
                 <Label htmlFor="clientId">クライアント</Label>
                 <Select
-                  value={watch('clientId') || ''}
-                  onValueChange={value => setValue('clientId', value)}
+                  value={watch("clientId") || ""}
+                  onValueChange={(value) => setValue("clientId", value)}
                   disabled={isSubmitting}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="クライアントを選択" />
                   </SelectTrigger>
                   <SelectContent>
-                    {parties.map(party => (
+                    {parties.map((party) => (
                       <SelectItem key={party.id} value={party.id}>
                         {party.name}
                       </SelectItem>
@@ -442,15 +405,15 @@ export function CaseCreateForm({ onSuccess, onCancel }: CaseCreateFormProps) {
               <div className="space-y-2">
                 <Label htmlFor="opposingPartyId">相手方</Label>
                 <Select
-                  value={watch('opposingPartyId') || ''}
-                  onValueChange={value => setValue('opposingPartyId', value)}
+                  value={watch("opposingPartyId") || ""}
+                  onValueChange={(value) => setValue("opposingPartyId", value)}
                   disabled={isSubmitting}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="相手方を選択" />
                   </SelectTrigger>
                   <SelectContent>
-                    {parties.map(party => (
+                    {parties.map((party) => (
                       <SelectItem key={party.id} value={party.id}>
                         {party.name}
                       </SelectItem>
@@ -480,7 +443,7 @@ export function CaseCreateForm({ onSuccess, onCancel }: CaseCreateFormProps) {
                 <Input
                   id="startDate"
                   type="date"
-                  {...register('startDate')}
+                  {...register("startDate")}
                   disabled={isSubmitting}
                 />
                 {errors.startDate && (
@@ -495,7 +458,7 @@ export function CaseCreateForm({ onSuccess, onCancel }: CaseCreateFormProps) {
                 <Input
                   id="endDate"
                   type="date"
-                  {...register('endDate')}
+                  {...register("endDate")}
                   disabled={isSubmitting}
                 />
               </div>
@@ -505,7 +468,7 @@ export function CaseCreateForm({ onSuccess, onCancel }: CaseCreateFormProps) {
                 <Input
                   id="estimatedEndDate"
                   type="date"
-                  {...register('estimatedEndDate')}
+                  {...register("estimatedEndDate")}
                   disabled={isSubmitting}
                 />
               </div>
@@ -517,7 +480,8 @@ export function CaseCreateForm({ onSuccess, onCancel }: CaseCreateFormProps) {
         <div className="flex justify-end gap-4">
           {onCancel && (
             <Button type="button" variant="outline" onClick={onCancel}>
-              キャンセル
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              戻る
             </Button>
           )}
           <Button type="submit" disabled={isSubmitting}>

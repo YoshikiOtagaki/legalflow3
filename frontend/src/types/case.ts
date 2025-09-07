@@ -105,7 +105,7 @@ export interface Lawyer {
 export interface Party {
   id: string;
   name: string;
-  type: 'Individual' | 'Corporate';
+  type: "Individual" | "Corporate";
   email?: string;
   phone?: string;
   address?: string;
@@ -134,5 +134,5 @@ export interface CaseFilters {
   page?: number;
   limit?: number;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }

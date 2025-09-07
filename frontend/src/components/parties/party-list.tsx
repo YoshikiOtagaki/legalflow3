@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useParties } from '@/hooks/use-parties';
+import { useState } from "react";
+import { useParties } from "@/hooks/use-parties";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Search,
   Plus,
@@ -22,7 +22,7 @@ import {
   Mail,
   Phone,
   MapPin,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface PartyListProps {
   onPartySelect?: (partyId: string) => void;
@@ -38,28 +38,28 @@ export function PartyList({
   onDeleteParty,
 }: PartyListProps) {
   const { parties, loading, error, deleteParty } = useParties();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<
-    'all' | 'Individual' | 'Corporate'
-  >('all');
+    "all" | "Individual" | "Corporate"
+  >("all");
 
-  const filteredParties = parties.filter(party => {
+  const filteredParties = parties.filter((party) => {
     const matchesSearch =
       party.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       party.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       party.phone?.includes(searchTerm);
-    const matchesType = filterType === 'all' || party.type === filterType;
+    const matchesType = filterType === "all" || party.type === filterType;
     return matchesSearch && matchesType;
   });
 
   const handleDelete = async (partyId: string) => {
-    if (window.confirm('この当事者を削除しますか？')) {
+    if (window.confirm("この当事者を削除しますか？")) {
       try {
         await deleteParty(partyId);
         onDeleteParty?.(partyId);
       } catch (error) {
-        console.error('削除エラー:', error);
-        alert('削除に失敗しました');
+        console.error("削除エラー:", error);
+        alert("削除に失敗しました");
       }
     }
   };
@@ -106,7 +106,7 @@ export function PartyList({
                 <Input
                   placeholder="名前、メール、電話番号で検索..."
                   value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
                 />
               </div>
@@ -116,23 +116,23 @@ export function PartyList({
               <label className="text-sm font-medium">タイプ</label>
               <div className="flex gap-2">
                 <Button
-                  variant={filterType === 'all' ? 'default' : 'outline'}
+                  variant={filterType === "all" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setFilterType('all')}
+                  onClick={() => setFilterType("all")}
                 >
                   すべて
                 </Button>
                 <Button
-                  variant={filterType === 'Individual' ? 'default' : 'outline'}
+                  variant={filterType === "Individual" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setFilterType('Individual')}
+                  onClick={() => setFilterType("Individual")}
                 >
                   個人
                 </Button>
                 <Button
-                  variant={filterType === 'Corporate' ? 'default' : 'outline'}
+                  variant={filterType === "Corporate" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setFilterType('Corporate')}
+                  onClick={() => setFilterType("Corporate")}
                 >
                   法人
                 </Button>
@@ -152,13 +152,13 @@ export function PartyList({
             </CardContent>
           </Card>
         ) : (
-          filteredParties.map(party => (
+          filteredParties.map((party) => (
             <Card key={party.id} className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-gray-100 rounded-full">
-                      {party.type === 'Individual' ? (
+                      {party.type === "Individual" ? (
                         <User className="h-5 w-5 text-gray-600" />
                       ) : (
                         <Building className="h-5 w-5 text-gray-600" />
@@ -167,13 +167,13 @@ export function PartyList({
                     <div>
                       <CardTitle className="text-lg">{party.name}</CardTitle>
                       <CardDescription>
-                        {party.type === 'Individual' ? '個人' : '法人'}
+                        {party.type === "Individual" ? "個人" : "法人"}
                       </CardDescription>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant="outline">
-                      {party.type === 'Individual' ? '個人' : '法人'}
+                      {party.type === "Individual" ? "個人" : "法人"}
                     </Badge>
                     <Button
                       variant="outline"
@@ -228,8 +228,8 @@ export function PartyList({
                 </div>
 
                 <div className="mt-4 text-sm text-gray-500">
-                  作成日:{' '}
-                  {new Date(party.createdAt).toLocaleDateString('ja-JP')}
+                  作成日:{" "}
+                  {new Date(party.createdAt).toLocaleDateString("ja-JP")}
                 </div>
               </CardContent>
             </Card>

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useParams } from 'next/navigation';
-import { ProtectedRoute } from '@/components/auth/protected-route';
-import { CaseDetail } from '@/components/cases/case-detail';
+import { useParams } from "next/navigation";
+import { ProtectedRoute } from "@/components/auth/protected-route";
+import { CaseDetail } from "@/components/cases/case-detail";
 
 export default function CaseDetailPage() {
   const params = useParams();
@@ -14,7 +14,7 @@ export default function CaseDetailPage() {
 
   const handleEdit = () => {
     // TODO: 編集フォームを開く
-    console.log('Edit case:', caseId);
+    console.log("Edit case:", caseId);
   };
 
   return (

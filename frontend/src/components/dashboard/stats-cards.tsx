@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { DashboardStats } from '@/types/dashboard';
+import { DashboardStats } from "@/types/dashboard";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import {
   FileText,
   Users,
@@ -17,7 +17,7 @@ import {
   TrendingDown,
   Activity,
   Calendar,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface StatsCardsProps {
   stats: DashboardStats;
@@ -33,7 +33,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
   };
 
   const formatPercentage = (value: number) => {
-    const sign = value >= 0 ? '+' : '';
+    const sign = value >= 0 ? "+" : "";
     return `${sign}${value.toFixed(1)}%`;
   };
 
@@ -46,7 +46,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
   };
 
   const getGrowthColor = (value: number) => {
-    return value >= 0 ? 'text-green-600' : 'text-red-600';
+    return value >= 0 ? "text-green-600" : "text-red-600";
   };
 
   return (

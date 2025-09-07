@@ -1,20 +1,20 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { ProtectedRoute } from '@/components/auth/protected-route';
-import { useAuthStore } from '@/store/auth';
-import { useDashboard } from '@/hooks/use-dashboard';
-import { StatsCards } from '@/components/dashboard/stats-cards';
-import { Charts } from '@/components/dashboard/charts';
-import { ActivityFeed } from '@/components/dashboard/activity-feed';
-import { Button } from '@/components/ui/button';
+import { useEffect, useState } from "react";
+import { ProtectedRoute } from "@/components/auth/protected-route";
+import { useAuthStore } from "@/store/auth";
+import { useDashboard } from "@/hooks/use-dashboard";
+import { StatsCards } from "@/components/dashboard/stats-cards";
+import { Charts } from "@/components/dashboard/charts";
+import { ActivityFeed } from "@/components/dashboard/activity-feed";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import {
   FileText,
   Users,
@@ -24,7 +24,7 @@ import {
   Activity,
   Calendar,
   Bell,
-} from 'lucide-react';
+} from "lucide-react";
 
 export default function Dashboard() {
   const { user, logout } = useAuthStore();
@@ -91,7 +91,7 @@ export default function Dashboard() {
               <h1 className="text-3xl font-bold text-gray-900">LegalFlow3</h1>
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-gray-700">
-                  こんにちは、{user?.name || user?.username}さん
+                  こんにちは、{user?.username}さん
                 </span>
                 <Button onClick={handleLogout} variant="outline">
                   ログアウト
@@ -133,7 +133,7 @@ export default function Dashboard() {
                   <Button
                     variant="outline"
                     className="h-20 flex flex-col items-center justify-center space-y-2"
-                    onClick={() => (window.location.href = '/cases')}
+                    onClick={() => (window.location.href = "/cases")}
                   >
                     <FileText className="h-6 w-6" />
                     <span className="text-sm">ケース管理</span>
@@ -142,7 +142,7 @@ export default function Dashboard() {
                   <Button
                     variant="outline"
                     className="h-20 flex flex-col items-center justify-center space-y-2"
-                    onClick={() => (window.location.href = '/parties')}
+                    onClick={() => (window.location.href = "/parties")}
                   >
                     <Users className="h-6 w-6" />
                     <span className="text-sm">当事者管理</span>
@@ -151,7 +151,7 @@ export default function Dashboard() {
                   <Button
                     variant="outline"
                     className="h-20 flex flex-col items-center justify-center space-y-2"
-                    onClick={() => (window.location.href = '/timesheet')}
+                    onClick={() => (window.location.href = "/timesheet")}
                   >
                     <Clock className="h-6 w-6" />
                     <span className="text-sm">タイムシート</span>
@@ -160,7 +160,7 @@ export default function Dashboard() {
                   <Button
                     variant="outline"
                     className="h-20 flex flex-col items-center justify-center space-y-2"
-                    onClick={() => (window.location.href = '/documents')}
+                    onClick={() => (window.location.href = "/documents")}
                   >
                     <FileText className="h-6 w-6" />
                     <span className="text-sm">ドキュメント</span>

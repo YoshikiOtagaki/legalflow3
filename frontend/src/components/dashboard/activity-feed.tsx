@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { RecentActivity, UpcomingDeadlines } from '@/types/dashboard';
+import { RecentActivity, UpcomingDeadlines } from "@/types/dashboard";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   FileText,
   Clock,
@@ -19,7 +19,7 @@ import {
   CheckCircle,
   Edit,
   Plus,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface ActivityFeedProps {
   recentActivities: RecentActivity[];
@@ -32,15 +32,15 @@ export function ActivityFeed({
 }: ActivityFeedProps) {
   const getActivityIcon = (type: string) => {
     switch (type) {
-      case 'case_created':
+      case "case_created":
         return <Plus className="h-4 w-4 text-green-600" />;
-      case 'case_updated':
+      case "case_updated":
         return <Edit className="h-4 w-4 text-blue-600" />;
-      case 'document_created':
+      case "document_created":
         return <FileText className="h-4 w-4 text-purple-600" />;
-      case 'timesheet_entry':
+      case "timesheet_entry":
         return <Clock className="h-4 w-4 text-orange-600" />;
-      case 'notification':
+      case "notification":
         return <Bell className="h-4 w-4 text-red-600" />;
       default:
         return <CheckCircle className="h-4 w-4 text-gray-600" />;
@@ -49,31 +49,31 @@ export function ActivityFeed({
 
   const getActivityColor = (type: string) => {
     switch (type) {
-      case 'case_created':
-        return 'bg-green-100 text-green-800';
-      case 'case_updated':
-        return 'bg-blue-100 text-blue-800';
-      case 'document_created':
-        return 'bg-purple-100 text-purple-800';
-      case 'timesheet_entry':
-        return 'bg-orange-100 text-orange-800';
-      case 'notification':
-        return 'bg-red-100 text-red-800';
+      case "case_created":
+        return "bg-green-100 text-green-800";
+      case "case_updated":
+        return "bg-blue-100 text-blue-800";
+      case "document_created":
+        return "bg-purple-100 text-purple-800";
+      case "timesheet_entry":
+        return "bg-orange-100 text-orange-800";
+      case "notification":
+        return "bg-red-100 text-red-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high':
-        return 'bg-red-100 text-red-800';
-      case 'medium':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'low':
-        return 'bg-green-100 text-green-800';
+      case "high":
+        return "bg-red-100 text-red-800";
+      case "medium":
+        return "bg-yellow-100 text-yellow-800";
+      case "low":
+        return "bg-green-100 text-green-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -84,7 +84,7 @@ export function ActivityFeed({
 
     if (diff < 60000) {
       // 1分未満
-      return 'たった今';
+      return "たった今";
     } else if (diff < 3600000) {
       // 1時間未満
       return `${Math.floor(diff / 60000)}分前`;
@@ -92,7 +92,7 @@ export function ActivityFeed({
       // 1日未満
       return `${Math.floor(diff / 3600000)}時間前`;
     } else {
-      return date.toLocaleDateString('ja-JP');
+      return date.toLocaleDateString("ja-JP");
     }
   };
 
@@ -105,9 +105,9 @@ export function ActivityFeed({
     if (days < 0) {
       return `${Math.abs(days)}日遅れ`;
     } else if (days === 0) {
-      return '今日';
+      return "今日";
     } else if (days === 1) {
-      return '明日';
+      return "明日";
     } else {
       return `${days}日後`;
     }
@@ -133,7 +133,7 @@ export function ActivityFeed({
                 アクティビティがありません
               </p>
             ) : (
-              recentActivities.map(activity => (
+              recentActivities.map((activity) => (
                 <div
                   key={activity.id}
                   className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50"
@@ -149,7 +149,7 @@ export function ActivityFeed({
                       <Badge
                         className={`text-xs ${getActivityColor(activity.type)}`}
                       >
-                        {activity.type.replace('_', ' ')}
+                        {activity.type.replace("_", " ")}
                       </Badge>
                     </div>
                     <p className="text-sm text-gray-600 mb-1">
@@ -185,7 +185,7 @@ export function ActivityFeed({
             {upcomingDeadlines.length === 0 ? (
               <p className="text-gray-500 text-center py-4">期限がありません</p>
             ) : (
-              upcomingDeadlines.map(deadline => (
+              upcomingDeadlines.map((deadline) => (
                 <div
                   key={deadline.id}
                   className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50"
@@ -221,7 +221,7 @@ export function ActivityFeed({
                     </p>
                     <p className="text-xs text-gray-500">
                       {formatDeadline(deadline.dueDate)} (
-                      {new Date(deadline.dueDate).toLocaleDateString('ja-JP')})
+                      {new Date(deadline.dueDate).toLocaleDateString("ja-JP")})
                     </p>
                   </div>
                 </div>

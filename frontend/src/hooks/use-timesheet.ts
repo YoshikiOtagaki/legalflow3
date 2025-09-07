@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useAuthStore } from '@/store/auth';
+import { useState, useEffect } from "react";
+import { useAuthStore } from "@/store/auth";
 import {
   TimesheetEntry,
   TimesheetListResponse,
   TimesheetFilters,
   TimesheetSummary,
   Timer,
-} from '@/types/timesheet';
+} from "@/types/timesheet";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
 export function useTimesheet(filters: TimesheetFilters = {}) {
   const { accessToken, user } = useAuthStore();
@@ -35,7 +35,7 @@ export function useTimesheet(filters: TimesheetFilters = {}) {
       const queryParams = new URLSearchParams();
 
       Object.entries({ ...filters, ...newFilters }).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
+        if (value !== undefined && value !== null && value !== "") {
           queryParams.append(key, value.toString());
         }
       });
@@ -45,14 +45,14 @@ export function useTimesheet(filters: TimesheetFilters = {}) {
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-          credentials: 'include',
-        }
+          credentials: "include",
+        },
       );
 
       if (!response.ok) {
-        throw new Error('タイムシートエントリの取得に失敗しました');
+        throw new Error("タイムシートエントリの取得に失敗しました");
       }
 
       const data: TimesheetListResponse = await response.json();
@@ -64,40 +64,43 @@ export function useTimesheet(filters: TimesheetFilters = {}) {
         totalPages: data.totalPages,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'エラーが発生しました');
+      setError(err instanceof Error ? err.message : "エラーが発生しました");
     } finally {
       setLoading(false);
     }
   };
 
   const createEntry = async (
-    entryData: Omit<TimesheetEntry, 'id' | 'createdAt' | 'updatedAt' | 'userId'>
+    entryData: Omit<
+      TimesheetEntry,
+      "id" | "createdAt" | "updatedAt" | "userId"
+    >,
   ) => {
     if (!accessToken) return;
 
     try {
       const response = await fetch(`${API_BASE_URL}/timesheet-entries`, {
-        method: 'POST',
+        method: "POST",
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify(entryData),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
-          errorData.message || 'タイムシートエントリの作成に失敗しました'
+          errorData.message || "タイムシートエントリの作成に失敗しました",
         );
       }
 
       const newEntry = await response.json();
-      setEntries(prev => [newEntry, ...prev]);
+      setEntries((prev) => [newEntry, ...prev]);
       return newEntry;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'エラーが発生しました');
+      setError(err instanceof Error ? err.message : "エラーが発生しました");
       throw err;
     }
   };
@@ -105,36 +108,36 @@ export function useTimesheet(filters: TimesheetFilters = {}) {
   const updateEntry = async (
     id: string,
     entryData: Partial<
-      Omit<TimesheetEntry, 'id' | 'createdAt' | 'updatedAt' | 'userId'>
-    >
+      Omit<TimesheetEntry, "id" | "createdAt" | "updatedAt" | "userId">
+    >,
   ) => {
     if (!accessToken) return;
 
     try {
       const response = await fetch(`${API_BASE_URL}/timesheet-entries/${id}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify(entryData),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
-          errorData.message || 'タイムシートエントリの更新に失敗しました'
+          errorData.message || "タイムシートエントリの更新に失敗しました",
         );
       }
 
       const updatedEntry = await response.json();
-      setEntries(prev =>
-        prev.map(entry => (entry.id === id ? updatedEntry : entry))
+      setEntries((prev) =>
+        prev.map((entry) => (entry.id === id ? updatedEntry : entry)),
       );
       return updatedEntry;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'エラーが発生しました');
+      setError(err instanceof Error ? err.message : "エラーが発生しました");
       throw err;
     }
   };
@@ -144,24 +147,24 @@ export function useTimesheet(filters: TimesheetFilters = {}) {
 
     try {
       const response = await fetch(`${API_BASE_URL}/timesheet-entries/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
       });
 
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
-          errorData.message || 'タイムシートエントリの削除に失敗しました'
+          errorData.message || "タイムシートエントリの削除に失敗しました",
         );
       }
 
-      setEntries(prev => prev.filter(entry => entry.id !== id));
+      setEntries((prev) => prev.filter((entry) => entry.id !== id));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'エラーが発生しました');
+      setError(err instanceof Error ? err.message : "エラーが発生しました");
       throw err;
     }
   };
@@ -200,13 +203,13 @@ export function useTimer() {
       const response = await fetch(`${API_BASE_URL}/timers`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
       });
 
       if (!response.ok) {
-        throw new Error('タイマーの取得に失敗しました');
+        throw new Error("タイマーの取得に失敗しました");
       }
 
       const data = await response.json();
@@ -219,7 +222,7 @@ export function useTimer() {
         setIsRunning(true);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'エラーが発生しました');
+      setError(err instanceof Error ? err.message : "エラーが発生しました");
     } finally {
       setLoading(false);
     }
@@ -228,18 +231,18 @@ export function useTimer() {
   const startTimer = async (
     caseId: string | null,
     description: string,
-    tags: string[] = []
+    tags: string[] = [],
   ) => {
     if (!accessToken) return;
 
     try {
       const response = await fetch(`${API_BASE_URL}/timers/start`, {
-        method: 'POST',
+        method: "POST",
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify({
           caseId,
           description,
@@ -249,16 +252,16 @@ export function useTimer() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'タイマーの開始に失敗しました');
+        throw new Error(errorData.message || "タイマーの開始に失敗しました");
       }
 
       const newTimer = await response.json();
       setCurrentTimer(newTimer);
       setIsRunning(true);
-      setTimers(prev => [newTimer, ...prev]);
+      setTimers((prev) => [newTimer, ...prev]);
       return newTimer;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'エラーが発生しました');
+      setError(err instanceof Error ? err.message : "エラーが発生しました");
       throw err;
     }
   };
@@ -268,28 +271,28 @@ export function useTimer() {
 
     try {
       const response = await fetch(`${API_BASE_URL}/timers/${timerId}/stop`, {
-        method: 'POST',
+        method: "POST",
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'タイマーの停止に失敗しました');
+        throw new Error(errorData.message || "タイマーの停止に失敗しました");
       }
 
       const updatedTimer = await response.json();
       setCurrentTimer(null);
       setIsRunning(false);
-      setTimers(prev =>
-        prev.map(timer => (timer.id === timerId ? updatedTimer : timer))
+      setTimers((prev) =>
+        prev.map((timer) => (timer.id === timerId ? updatedTimer : timer)),
       );
       return updatedTimer;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'エラーが発生しました');
+      setError(err instanceof Error ? err.message : "エラーが発生しました");
       throw err;
     }
   };
@@ -299,30 +302,30 @@ export function useTimer() {
 
     try {
       const response = await fetch(`${API_BASE_URL}/timers/${timerId}/pause`, {
-        method: 'POST',
+        method: "POST",
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
       });
 
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
-          errorData.message || 'タイマーの一時停止に失敗しました'
+          errorData.message || "タイマーの一時停止に失敗しました",
         );
       }
 
       const updatedTimer = await response.json();
       setCurrentTimer(updatedTimer);
       setIsRunning(false);
-      setTimers(prev =>
-        prev.map(timer => (timer.id === timerId ? updatedTimer : timer))
+      setTimers((prev) =>
+        prev.map((timer) => (timer.id === timerId ? updatedTimer : timer)),
       );
       return updatedTimer;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'エラーが発生しました');
+      setError(err instanceof Error ? err.message : "エラーが発生しました");
       throw err;
     }
   };
@@ -332,28 +335,28 @@ export function useTimer() {
 
     try {
       const response = await fetch(`${API_BASE_URL}/timers/${timerId}/resume`, {
-        method: 'POST',
+        method: "POST",
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'タイマーの再開に失敗しました');
+        throw new Error(errorData.message || "タイマーの再開に失敗しました");
       }
 
       const updatedTimer = await response.json();
       setCurrentTimer(updatedTimer);
       setIsRunning(true);
-      setTimers(prev =>
-        prev.map(timer => (timer.id === timerId ? updatedTimer : timer))
+      setTimers((prev) =>
+        prev.map((timer) => (timer.id === timerId ? updatedTimer : timer)),
       );
       return updatedTimer;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'エラーが発生しました');
+      setError(err instanceof Error ? err.message : "エラーが発生しました");
       throw err;
     }
   };

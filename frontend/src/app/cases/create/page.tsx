@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { ProtectedRoute } from '@/components/auth/protected-route';
-import { CaseCreateForm } from '@/components/cases/case-create-form';
+import { useRouter } from "next/navigation";
+import { ProtectedRoute } from "@/components/auth/protected-route";
+import { CaseCreateForm } from "@/components/cases/case-create-form";
 
 export default function CaseCreatePage() {
   const router = useRouter();
@@ -12,7 +12,7 @@ export default function CaseCreatePage() {
   };
 
   const handleCancel = () => {
-    router.push('/cases');
+    router.push("/cases");
   };
 
   return (

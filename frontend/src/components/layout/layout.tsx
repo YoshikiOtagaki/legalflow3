@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { Navigation } from './navigation';
-import { ProtectedRoute } from '@/components/auth/protected-route';
+import { Navigation } from "./navigation";
+import { ProtectedRoute } from "@/components/auth/protected-route";
 
 interface LayoutProps {
   children: React.ReactNode;

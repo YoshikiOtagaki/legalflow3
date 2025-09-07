@@ -5,7 +5,7 @@ export interface Notification {
   type: NotificationType;
   title: string;
   message: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   isRead: boolean;
   isArchived: boolean;
   priority: NotificationPriority;
@@ -41,9 +41,9 @@ export interface NotificationPriority {
 export interface NotificationChannel {
   id: string;
   name: string;
-  type: 'email' | 'sms' | 'push' | 'line' | 'in_app';
+  type: "email" | "sms" | "push" | "line" | "in_app";
   isEnabled: boolean;
-  config?: Record<string, any>;
+  config?: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
 }
@@ -94,5 +94,5 @@ export interface NotificationFilters {
   page?: number;
   limit?: number;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }

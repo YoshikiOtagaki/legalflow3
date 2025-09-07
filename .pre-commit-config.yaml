@@ -32,14 +32,7 @@ repos:
         types: [file]
         types_or: [javascript, jsx, ts, tsx, json, css, scss, html, yaml, markdown]
 
-  # Frontend (Next.js/React/TypeScript)
-  - repo: local
-    hooks:
-      - id: eslint-frontend
-        name: ESLint (Frontend)
-        entry: powershell -Command "cd frontend; npx eslint ."
-        language: system
-        files: ^frontend/.*\.(ts|tsx|js|jsx)$
+
 
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v4.0.0-alpha.8

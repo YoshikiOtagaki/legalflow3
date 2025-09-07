@@ -1,41 +1,41 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useParties } from '@/hooks/use-parties';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useParties } from "@/hooks/use-parties";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Save, ArrowLeft } from 'lucide-react';
+} from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Save, ArrowLeft } from "lucide-react";
 
 const partyFormSchema = z.object({
-  name: z.string().min(1, '名前を入力してください'),
-  type: z.enum(['Individual', 'Corporate'], {
-    required_error: 'タイプを選択してください',
+  name: z.string().min(1, "名前を入力してください"),
+  type: z.enum(["Individual", "Corporate"], {
+    required_error: "タイプを選択してください",
   }),
   email: z
     .string()
-    .email('有効なメールアドレスを入力してください')
+    .email("有効なメールアドレスを入力してください")
     .optional()
-    .or(z.literal('')),
+    .or(z.literal("")),
   phone: z.string().optional(),
   address: z.string().optional(),
 });
@@ -52,7 +52,7 @@ export function PartyForm({ partyId, onSuccess, onCancel }: PartyFormProps) {
   const { parties, createParty, updateParty } = useParties();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const existingParty = partyId ? parties.find(p => p.id === partyId) : null;
+  const existingParty = partyId ? parties.find((p) => p.id === partyId) : null;
   const isEdit = !!existingParty;
 
   const {
@@ -64,15 +64,15 @@ export function PartyForm({ partyId, onSuccess, onCancel }: PartyFormProps) {
   } = useForm<PartyFormData>({
     resolver: zodResolver(partyFormSchema),
     defaultValues: {
-      name: existingParty?.name || '',
-      type: existingParty?.type || 'Individual',
-      email: existingParty?.email || '',
-      phone: existingParty?.phone || '',
-      address: existingParty?.address || '',
+      name: existingParty?.name || "",
+      type: existingParty?.type || "Individual",
+      email: existingParty?.email || "",
+      phone: existingParty?.phone || "",
+      address: existingParty?.address || "",
     },
   });
 
-  const selectedType = watch('type');
+  const selectedType = watch("type");
 
   const onSubmit = async (data: PartyFormData) => {
     setIsSubmitting(true);
@@ -92,8 +92,8 @@ export function PartyForm({ partyId, onSuccess, onCancel }: PartyFormProps) {
         onSuccess?.(newParty.id);
       }
     } catch (error) {
-      console.error('当事者保存エラー:', error);
-      alert(error instanceof Error ? error.message : 'エラーが発生しました');
+      console.error("当事者保存エラー:", error);
+      alert(error instanceof Error ? error.message : "エラーが発生しました");
     } finally {
       setIsSubmitting(false);
     }
@@ -109,7 +109,7 @@ export function PartyForm({ partyId, onSuccess, onCancel }: PartyFormProps) {
           </Button>
         )}
         <h1 className="text-3xl font-bold">
-          {isEdit ? '当事者を編集' : '新しい当事者を作成'}
+          {isEdit ? "当事者を編集" : "新しい当事者を作成"}
         </h1>
       </div>
 
@@ -127,7 +127,7 @@ export function PartyForm({ partyId, onSuccess, onCancel }: PartyFormProps) {
               <Input
                 id="name"
                 placeholder="当事者の名前を入力"
-                {...register('name')}
+                {...register("name")}
                 disabled={isSubmitting}
               />
               {errors.name && (
@@ -139,8 +139,8 @@ export function PartyForm({ partyId, onSuccess, onCancel }: PartyFormProps) {
               <Label>タイプ *</Label>
               <RadioGroup
                 value={selectedType}
-                onValueChange={value =>
-                  setValue('type', value as 'Individual' | 'Corporate')
+                onValueChange={(value) =>
+                  setValue("type", value as "Individual" | "Corporate")
                 }
                 disabled={isSubmitting}
                 className="flex gap-6"
@@ -175,7 +175,7 @@ export function PartyForm({ partyId, onSuccess, onCancel }: PartyFormProps) {
                 id="email"
                 type="email"
                 placeholder="example@example.com"
-                {...register('email')}
+                {...register("email")}
                 disabled={isSubmitting}
               />
               {errors.email && (
@@ -189,7 +189,7 @@ export function PartyForm({ partyId, onSuccess, onCancel }: PartyFormProps) {
                 id="phone"
                 type="tel"
                 placeholder="090-1234-5678"
-                {...register('phone')}
+                {...register("phone")}
                 disabled={isSubmitting}
               />
               {errors.phone && (
@@ -203,7 +203,7 @@ export function PartyForm({ partyId, onSuccess, onCancel }: PartyFormProps) {
                 id="address"
                 placeholder="住所を入力"
                 rows={3}
-                {...register('address')}
+                {...register("address")}
                 disabled={isSubmitting}
               />
               {errors.address && (
@@ -224,12 +224,12 @@ export function PartyForm({ partyId, onSuccess, onCancel }: PartyFormProps) {
             {isSubmitting ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                {isEdit ? '更新中...' : '作成中...'}
+                {isEdit ? "更新中..." : "作成中..."}
               </>
             ) : (
               <>
                 <Save className="h-4 w-4 mr-2" />
-                {isEdit ? '更新' : '作成'}
+                {isEdit ? "更新" : "作成"}
               </>
             )}
           </Button>

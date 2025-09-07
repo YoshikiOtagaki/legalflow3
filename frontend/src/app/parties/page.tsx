@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { ProtectedRoute } from '@/components/auth/protected-route';
-import { PartyList } from '@/components/parties/party-list';
-import { PartyForm } from '@/components/parties/party-form';
+import { useState } from "react";
+import { ProtectedRoute } from "@/components/auth/protected-route";
+import { PartyList } from "@/components/parties/party-list";
+import { PartyForm } from "@/components/parties/party-form";
 
 export default function PartiesPage() {
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -33,7 +33,7 @@ export default function PartiesPage() {
 
   const handleDeleteParty = (partyId: string) => {
     // 削除後の処理（必要に応じて）
-    console.log('Party deleted:', partyId);
+    console.log("Party deleted:", partyId);
   };
 
   return (

@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { ProtectedRoute } from '@/components/auth/protected-route';
-import { CaseList } from '@/components/cases/case-list';
-import { CaseDetail } from '@/components/cases/case-detail';
+import { useState } from "react";
+import { ProtectedRoute } from "@/components/auth/protected-route";
+import { CaseList } from "@/components/cases/case-list";
+import { CaseDetail } from "@/components/cases/case-detail";
 
 export default function CasesPage() {
   const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
@@ -44,7 +44,7 @@ export default function CasesPage() {
                 onBack={handleBackToList}
                 onEdit={() => {
                   // TODO: 編集フォームを開く
-                  console.log('Edit case:', selectedCaseId);
+                  console.log("Edit case:", selectedCaseId);
                 }}
               />
             ) : (

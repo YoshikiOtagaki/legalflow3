@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useDocuments } from '@/hooks/use-documents';
-import { DocumentFilters } from '@/types/document';
+import { useState } from "react";
+import { useDocuments } from "@/hooks/use-documents";
+import { DocumentFilters } from "@/types/document";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Search,
   Filter,
@@ -24,7 +24,7 @@ import {
   Trash2,
   Upload,
   File,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface DocumentListProps {
   caseId?: string;
@@ -45,10 +45,10 @@ export function DocumentList({
     caseId,
     page: 1,
     limit: 10,
-    sortBy: 'createdAt',
-    sortOrder: 'desc',
+    sortBy: "createdAt",
+    sortOrder: "desc",
   });
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { documents, loading, error, pagination, fetchDocuments } =
     useDocuments(filters);
@@ -74,26 +74,26 @@ export function DocumentList({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case '下書き':
-        return 'bg-gray-100 text-gray-800';
-      case 'レビュー中':
-        return 'bg-yellow-100 text-yellow-800';
-      case '承認済み':
-        return 'bg-green-100 text-green-800';
-      case '公開済み':
-        return 'bg-blue-100 text-blue-800';
-      case 'アーカイブ':
-        return 'bg-purple-100 text-purple-800';
+      case "下書き":
+        return "bg-gray-100 text-gray-800";
+      case "レビュー中":
+        return "bg-yellow-100 text-yellow-800";
+      case "承認済み":
+        return "bg-green-100 text-green-800";
+      case "公開済み":
+        return "bg-blue-100 text-blue-800";
+      case "アーカイブ":
+        return "bg-purple-100 text-purple-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'PDF':
+      case "PDF":
         return <File className="h-4 w-4" />;
-      case 'Word':
+      case "Word":
         return <FileText className="h-4 w-4" />;
       default:
         return <File className="h-4 w-4" />;
@@ -101,10 +101,10 @@ export function DocumentList({
   };
 
   const formatFileSize = (bytes?: number) => {
-    if (!bytes) return '不明';
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    if (!bytes) return "不明";
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + ' ' + sizes[i];
+    return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + " " + sizes[i];
   };
 
   if (loading) {
@@ -162,7 +162,7 @@ export function DocumentList({
                 <Input
                   placeholder="タイトル、説明で検索..."
                   value={searchTerm}
-                  onChange={e => handleSearch(e.target.value)}
+                  onChange={(e) => handleSearch(e.target.value)}
                   className="pl-10"
                 />
               </div>
@@ -171,8 +171,8 @@ export function DocumentList({
             <div className="space-y-2">
               <label className="text-sm font-medium">ステータス</label>
               <select
-                value={filters.statusId || ''}
-                onChange={e => handleFilterChange('statusId', e.target.value)}
+                value={filters.statusId || ""}
+                onChange={(e) => handleFilterChange("statusId", e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-md"
               >
                 <option value="">すべて</option>
@@ -188,10 +188,10 @@ export function DocumentList({
               <label className="text-sm font-medium">並び順</label>
               <select
                 value={`${filters.sortBy}-${filters.sortOrder}`}
-                onChange={e => {
-                  const [sortBy, sortOrder] = e.target.value.split('-');
-                  handleFilterChange('sortBy', sortBy);
-                  handleFilterChange('sortOrder', sortOrder as 'asc' | 'desc');
+                onChange={(e) => {
+                  const [sortBy, sortOrder] = e.target.value.split("-");
+                  handleFilterChange("sortBy", sortBy);
+                  handleFilterChange("sortOrder", sortOrder as "asc" | "desc");
                 }}
                 className="w-full p-2 border border-gray-300 rounded-md"
               >
@@ -223,7 +223,7 @@ export function DocumentList({
             </CardContent>
           </Card>
         ) : (
-          documents.map(document => (
+          documents.map((document) => (
             <Card
               key={document.id}
               className="hover:shadow-md transition-shadow"
@@ -232,23 +232,23 @@ export function DocumentList({
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-gray-100 rounded-lg">
-                      {getTypeIcon(document.type?.name || '')}
+                      {getTypeIcon(document.type?.name || "")}
                     </div>
                     <div>
                       <CardTitle className="text-lg">
                         {document.title}
                       </CardTitle>
                       <CardDescription>
-                        {document.case?.title} -{' '}
-                        {document.type?.name || '不明なタイプ'}
+                        {document.case?.title} -{" "}
+                        {document.type?.name || "不明なタイプ"}
                       </CardDescription>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge
-                      className={getStatusColor(document.status?.name || '')}
+                      className={getStatusColor(document.status?.name || "")}
                     >
-                      {document.status?.name || '未設定'}
+                      {document.status?.name || "未設定"}
                     </Badge>
                     {document.version > 1 && (
                       <Badge variant="outline">v{document.version}</Badge>
@@ -267,7 +267,7 @@ export function DocumentList({
                   <div>
                     <p className="text-sm text-gray-600">作成者</p>
                     <p className="font-medium">
-                      {document.createdBy?.name || '不明'}
+                      {document.createdBy?.name || "不明"}
                     </p>
                   </div>
                   <div>
@@ -279,13 +279,13 @@ export function DocumentList({
                   <div>
                     <p className="text-sm text-gray-600">作成日</p>
                     <p className="font-medium">
-                      {new Date(document.createdAt).toLocaleDateString('ja-JP')}
+                      {new Date(document.createdAt).toLocaleDateString("ja-JP")}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">更新日</p>
                     <p className="font-medium">
-                      {new Date(document.updatedAt).toLocaleDateString('ja-JP')}
+                      {new Date(document.updatedAt).toLocaleDateString("ja-JP")}
                     </p>
                   </div>
                 </div>
@@ -308,7 +308,7 @@ export function DocumentList({
 
                 <div className="flex justify-between items-center">
                   <div className="text-sm text-gray-500">
-                    {document.isLatest ? '最新版' : '旧版'}
+                    {document.isLatest ? "最新版" : "旧版"}
                   </div>
                   <div className="flex items-center gap-2">
                     <Button

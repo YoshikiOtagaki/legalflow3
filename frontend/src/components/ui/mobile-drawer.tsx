@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface MobileDrawerProps {
   children: React.ReactNode;
   trigger: React.ReactNode;
   title?: string;
-  side?: 'left' | 'right';
+  side?: "left" | "right";
   className?: string;
 }
 
@@ -17,7 +17,7 @@ export function MobileDrawer({
   children,
   trigger,
   title,
-  side = 'right',
+  side = "right",
   className,
 }: MobileDrawerProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,13 +25,13 @@ export function MobileDrawer({
   // ボディのスクロールを無効化
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     }
 
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     };
   }, [isOpen]);
 
@@ -51,14 +51,14 @@ export function MobileDrawer({
       {/* ドロワー */}
       <div
         className={cn(
-          'fixed inset-y-0 z-50 w-80 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:hidden',
-          side === 'left' ? 'left-0' : 'right-0',
+          "fixed inset-y-0 z-50 w-80 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:hidden",
+          side === "left" ? "left-0" : "right-0",
           isOpen
-            ? 'translate-x-0'
-            : side === 'left'
-              ? '-translate-x-full'
-              : 'translate-x-full',
-          className
+            ? "translate-x-0"
+            : side === "left"
+              ? "-translate-x-full"
+              : "translate-x-full",
+          className,
         )}
       >
         <div className="flex flex-col h-full">

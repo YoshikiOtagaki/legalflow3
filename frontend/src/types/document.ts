@@ -17,7 +17,7 @@ export interface Document {
   parentDocument?: Document;
   childDocuments?: Document[];
   tags: string[];
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
   createdById: string;
@@ -97,14 +97,14 @@ export interface DocumentFilters {
   page?: number;
   limit?: number;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }
 
 export interface DocumentGenerationRequest {
   templateId: string;
   caseId: string;
-  data: Record<string, any>;
-  outputFormat: 'docx' | 'pdf';
+  data: Record<string, unknown>;
+  outputFormat: "docx" | "pdf";
 }
 
 export interface DocumentGenerationResponse {

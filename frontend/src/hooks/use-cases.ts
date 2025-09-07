@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useAuthStore } from '@/store/auth';
-import { Case, CaseListResponse, CaseFilters } from '@/types/case';
+import { useState, useEffect } from "react";
+import { useAuthStore } from "@/store/auth";
+import { Case, CaseListResponse, CaseFilters } from "@/types/case";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
 export function useCases(filters: CaseFilters = {}) {
   const { accessToken } = useAuthStore();
@@ -29,7 +29,7 @@ export function useCases(filters: CaseFilters = {}) {
       const queryParams = new URLSearchParams();
 
       Object.entries({ ...filters, ...newFilters }).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
+        if (value !== undefined && value !== null && value !== "") {
           queryParams.append(key, value.toString());
         }
       });
@@ -37,13 +37,13 @@ export function useCases(filters: CaseFilters = {}) {
       const response = await fetch(`${API_BASE_URL}/cases?${queryParams}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
       });
 
       if (!response.ok) {
-        throw new Error('ケースの取得に失敗しました');
+        throw new Error("ケースの取得に失敗しました");
       }
 
       const data: CaseListResponse = await response.json();
@@ -55,7 +55,7 @@ export function useCases(filters: CaseFilters = {}) {
         totalPages: data.totalPages,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'エラーが発生しました');
+      setError(err instanceof Error ? err.message : "エラーが発生しました");
     } finally {
       setLoading(false);
     }
@@ -95,19 +95,19 @@ export function useCase(id: string) {
       const response = await fetch(`${API_BASE_URL}/cases/${id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
       });
 
       if (!response.ok) {
-        throw new Error('ケースの取得に失敗しました');
+        throw new Error("ケースの取得に失敗しました");
       }
 
       const data = await response.json();
       setCase(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'エラーが発生しました');
+      setError(err instanceof Error ? err.message : "エラーが発生しました");
     } finally {
       setLoading(false);
     }
