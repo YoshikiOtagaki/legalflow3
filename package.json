@@ -39,7 +39,6 @@
     "clean:backend": "cd backend/api_service && npm run clean",
     "clean:frontend": "cd frontend && npm run clean",
     "setup": "npm run install:all && npm run build:all",
-    "postinstall": "npm run install:all",
     "amplify:build": "npx @aws-amplify/backend-cli pipeline-deploy --branch $AWS_BRANCH --app-id $AWS_APP_ID",
     "amplify:deploy": "npx @aws-amplify/backend-cli sandbox deploy",
     "amplify:delete": "npx @aws-amplify/backend-cli sandbox delete",
