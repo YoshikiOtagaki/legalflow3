@@ -37,7 +37,7 @@ repos:
     hooks:
       - id: eslint-frontend
         name: ESLint (Frontend)
-        entry: powershell -Command "cd frontend; npm run lint"
+        entry: powershell -Command "cd frontend; npx eslint ."
         language: system
         files: ^frontend/.*\.(ts|tsx|js|jsx)$
 
