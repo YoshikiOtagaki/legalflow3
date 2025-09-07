@@ -1,11 +1,11 @@
-'use client'
+'use client';
 
-import { ReactNode } from 'react'
-import { cn } from '@/lib/utils'
+import { ReactNode } from 'react';
+import { cn } from '@/lib/utils';
 
 interface ResponsiveTableProps {
-  children: ReactNode
-  className?: string
+  children: ReactNode;
+  className?: string;
 }
 
 export function ResponsiveTable({ children, className }: ResponsiveTableProps) {
@@ -15,60 +15,61 @@ export function ResponsiveTable({ children, className }: ResponsiveTableProps) {
         {children}
       </table>
     </div>
-  )
+  );
 }
 
 interface ResponsiveTableHeaderProps {
-  children: ReactNode
-  className?: string
+  children: ReactNode;
+  className?: string;
 }
 
-export function ResponsiveTableHeader({ children, className }: ResponsiveTableHeaderProps) {
-  return (
-    <thead className={cn('bg-gray-50', className)}>
-      {children}
-    </thead>
-  )
+export function ResponsiveTableHeader({
+  children,
+  className,
+}: ResponsiveTableHeaderProps) {
+  return <thead className={cn('bg-gray-50', className)}>{children}</thead>;
 }
 
 interface ResponsiveTableBodyProps {
-  children: ReactNode
-  className?: string
+  children: ReactNode;
+  className?: string;
 }
 
-export function ResponsiveTableBody({ children, className }: ResponsiveTableBodyProps) {
+export function ResponsiveTableBody({
+  children,
+  className,
+}: ResponsiveTableBodyProps) {
   return (
     <tbody className={cn('bg-white divide-y divide-gray-200', className)}>
       {children}
     </tbody>
-  )
+  );
 }
 
 interface ResponsiveTableRowProps {
-  children: ReactNode
-  className?: string
+  children: ReactNode;
+  className?: string;
 }
 
-export function ResponsiveTableRow({ children, className }: ResponsiveTableRowProps) {
-  return (
-    <tr className={cn('hover:bg-gray-50', className)}>
-      {children}
-    </tr>
-  )
+export function ResponsiveTableRow({
+  children,
+  className,
+}: ResponsiveTableRowProps) {
+  return <tr className={cn('hover:bg-gray-50', className)}>{children}</tr>;
 }
 
 interface ResponsiveTableCellProps {
-  children: ReactNode
-  className?: string
-  isHeader?: boolean
+  children: ReactNode;
+  className?: string;
+  isHeader?: boolean;
 }
 
 export function ResponsiveTableCell({
   children,
   className,
-  isHeader = false
+  isHeader = false,
 }: ResponsiveTableCellProps) {
-  const Component = isHeader ? 'th' : 'td'
+  const Component = isHeader ? 'th' : 'td';
 
   return (
     <Component
@@ -81,5 +82,5 @@ export function ResponsiveTableCell({
     >
       {children}
     </Component>
-  )
+  );
 }

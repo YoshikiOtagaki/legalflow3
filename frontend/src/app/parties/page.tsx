@@ -1,40 +1,40 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { ProtectedRoute } from '@/components/auth/protected-route'
-import { PartyList } from '@/components/parties/party-list'
-import { PartyForm } from '@/components/parties/party-form'
+import { useState } from 'react';
+import { ProtectedRoute } from '@/components/auth/protected-route';
+import { PartyList } from '@/components/parties/party-list';
+import { PartyForm } from '@/components/parties/party-form';
 
 export default function PartiesPage() {
-  const [showCreateForm, setShowCreateForm] = useState(false)
-  const [editingPartyId, setEditingPartyId] = useState<string | null>(null)
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingPartyId, setEditingPartyId] = useState<string | null>(null);
 
   const handleCreateParty = () => {
-    setEditingPartyId(null)
-    setShowCreateForm(true)
-  }
+    setEditingPartyId(null);
+    setShowCreateForm(true);
+  };
 
   const handleEditParty = (partyId: string) => {
-    setEditingPartyId(partyId)
-    setShowCreateForm(true)
-  }
+    setEditingPartyId(partyId);
+    setShowCreateForm(true);
+  };
 
   const handleSuccess = (partyId: string) => {
-    setShowCreateForm(false)
-    setEditingPartyId(null)
+    setShowCreateForm(false);
+    setEditingPartyId(null);
     // リストを更新するためにページをリロード
-    window.location.reload()
-  }
+    window.location.reload();
+  };
 
   const handleCancel = () => {
-    setShowCreateForm(false)
-    setEditingPartyId(null)
-  }
+    setShowCreateForm(false);
+    setEditingPartyId(null);
+  };
 
   const handleDeleteParty = (partyId: string) => {
     // 削除後の処理（必要に応じて）
-    console.log('Party deleted:', partyId)
-  }
+    console.log('Party deleted:', partyId);
+  };
 
   return (
     <ProtectedRoute>
@@ -66,5 +66,5 @@ export default function PartiesPage() {
         </main>
       </div>
     </ProtectedRoute>
-  )
+  );
 }

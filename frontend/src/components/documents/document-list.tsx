@@ -1,12 +1,18 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useDocuments } from '@/hooks/use-documents'
-import { DocumentFilters } from '@/types/document'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
+import { useState } from 'react';
+import { useDocuments } from '@/hooks/use-documents';
+import { DocumentFilters } from '@/types/document';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import {
   Search,
   Filter,
@@ -17,15 +23,15 @@ import {
   Edit,
   Trash2,
   Upload,
-  File
-} from 'lucide-react'
+  File,
+} from 'lucide-react';
 
 interface DocumentListProps {
-  caseId?: string
-  onDocumentSelect?: (documentId: string) => void
-  onCreateDocument?: () => void
-  onUploadDocument?: () => void
-  onGenerateDocument?: () => void
+  caseId?: string;
+  onDocumentSelect?: (documentId: string) => void;
+  onCreateDocument?: () => void;
+  onUploadDocument?: () => void;
+  onGenerateDocument?: () => void;
 }
 
 export function DocumentList({
@@ -33,7 +39,7 @@ export function DocumentList({
   onDocumentSelect,
   onCreateDocument,
   onUploadDocument,
-  onGenerateDocument
+  onGenerateDocument,
 }: DocumentListProps) {
   const [filters, setFilters] = useState<DocumentFilters>({
     caseId,
@@ -41,71 +47,72 @@ export function DocumentList({
     limit: 10,
     sortBy: 'createdAt',
     sortOrder: 'desc',
-  })
-  const [searchTerm, setSearchTerm] = useState('')
+  });
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const { documents, loading, error, pagination, fetchDocuments } = useDocuments(filters)
+  const { documents, loading, error, pagination, fetchDocuments } =
+    useDocuments(filters);
 
   const handleSearch = (value: string) => {
-    setSearchTerm(value)
-    const newFilters = { ...filters, search: value, page: 1 }
-    setFilters(newFilters)
-    fetchDocuments(newFilters)
-  }
+    setSearchTerm(value);
+    const newFilters = { ...filters, search: value, page: 1 };
+    setFilters(newFilters);
+    fetchDocuments(newFilters);
+  };
 
   const handleFilterChange = (key: keyof DocumentFilters, value: string) => {
-    const newFilters = { ...filters, [key]: value, page: 1 }
-    setFilters(newFilters)
-    fetchDocuments(newFilters)
-  }
+    const newFilters = { ...filters, [key]: value, page: 1 };
+    setFilters(newFilters);
+    fetchDocuments(newFilters);
+  };
 
   const handlePageChange = (page: number) => {
-    const newFilters = { ...filters, page }
-    setFilters(newFilters)
-    fetchDocuments(newFilters)
-  }
+    const newFilters = { ...filters, page };
+    setFilters(newFilters);
+    fetchDocuments(newFilters);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case '下書き':
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-gray-100 text-gray-800';
       case 'レビュー中':
-        return 'bg-yellow-100 text-yellow-800'
+        return 'bg-yellow-100 text-yellow-800';
       case '承認済み':
-        return 'bg-green-100 text-green-800'
+        return 'bg-green-100 text-green-800';
       case '公開済み':
-        return 'bg-blue-100 text-blue-800'
+        return 'bg-blue-100 text-blue-800';
       case 'アーカイブ':
-        return 'bg-purple-100 text-purple-800'
+        return 'bg-purple-100 text-purple-800';
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-gray-100 text-gray-800';
     }
-  }
+  };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'PDF':
-        return <File className="h-4 w-4" />
+        return <File className="h-4 w-4" />;
       case 'Word':
-        return <FileText className="h-4 w-4" />
+        return <FileText className="h-4 w-4" />;
       default:
-        return <File className="h-4 w-4" />
+        return <File className="h-4 w-4" />;
     }
-  }
+  };
 
   const formatFileSize = (bytes?: number) => {
-    if (!bytes) return '不明'
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(1024))
-    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i]
-  }
+    if (!bytes) return '不明';
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + ' ' + sizes[i];
+  };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -114,7 +121,7 @@ export function DocumentList({
         <p className="text-red-500 mb-4">{error}</p>
         <Button onClick={() => fetchDocuments()}>再試行</Button>
       </div>
-    )
+    );
   }
 
   return (
@@ -155,7 +162,7 @@ export function DocumentList({
                 <Input
                   placeholder="タイトル、説明で検索..."
                   value={searchTerm}
-                  onChange={(e) => handleSearch(e.target.value)}
+                  onChange={e => handleSearch(e.target.value)}
                   className="pl-10"
                 />
               </div>
@@ -165,7 +172,7 @@ export function DocumentList({
               <label className="text-sm font-medium">ステータス</label>
               <select
                 value={filters.statusId || ''}
-                onChange={(e) => handleFilterChange('statusId', e.target.value)}
+                onChange={e => handleFilterChange('statusId', e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-md"
               >
                 <option value="">すべて</option>
@@ -181,10 +188,10 @@ export function DocumentList({
               <label className="text-sm font-medium">並び順</label>
               <select
                 value={`${filters.sortBy}-${filters.sortOrder}`}
-                onChange={(e) => {
-                  const [sortBy, sortOrder] = e.target.value.split('-')
-                  handleFilterChange('sortBy', sortBy)
-                  handleFilterChange('sortOrder', sortOrder as 'asc' | 'desc')
+                onChange={e => {
+                  const [sortBy, sortOrder] = e.target.value.split('-');
+                  handleFilterChange('sortBy', sortBy);
+                  handleFilterChange('sortOrder', sortOrder as 'asc' | 'desc');
                 }}
                 className="w-full p-2 border border-gray-300 rounded-md"
               >
@@ -204,16 +211,23 @@ export function DocumentList({
         {documents.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">
-              <p className="text-gray-500 mb-4">ドキュメントが見つかりませんでした</p>
+              <p className="text-gray-500 mb-4">
+                ドキュメントが見つかりませんでした
+              </p>
               <div className="flex gap-2 justify-center">
                 <Button onClick={onCreateDocument}>新規作成</Button>
-                <Button onClick={onUploadDocument} variant="outline">アップロード</Button>
+                <Button onClick={onUploadDocument} variant="outline">
+                  アップロード
+                </Button>
               </div>
             </CardContent>
           </Card>
         ) : (
-          documents.map((document) => (
-            <Card key={document.id} className="hover:shadow-md transition-shadow">
+          documents.map(document => (
+            <Card
+              key={document.id}
+              className="hover:shadow-md transition-shadow"
+            >
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-3">
@@ -221,20 +235,23 @@ export function DocumentList({
                       {getTypeIcon(document.type?.name || '')}
                     </div>
                     <div>
-                      <CardTitle className="text-lg">{document.title}</CardTitle>
+                      <CardTitle className="text-lg">
+                        {document.title}
+                      </CardTitle>
                       <CardDescription>
-                        {document.case?.title} - {document.type?.name || '不明なタイプ'}
+                        {document.case?.title} -{' '}
+                        {document.type?.name || '不明なタイプ'}
                       </CardDescription>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge className={getStatusColor(document.status?.name || '')}>
+                    <Badge
+                      className={getStatusColor(document.status?.name || '')}
+                    >
                       {document.status?.name || '未設定'}
                     </Badge>
                     {document.version > 1 && (
-                      <Badge variant="outline">
-                        v{document.version}
-                      </Badge>
+                      <Badge variant="outline">v{document.version}</Badge>
                     )}
                   </div>
                 </div>
@@ -249,11 +266,15 @@ export function DocumentList({
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                   <div>
                     <p className="text-sm text-gray-600">作成者</p>
-                    <p className="font-medium">{document.createdBy?.name || '不明'}</p>
+                    <p className="font-medium">
+                      {document.createdBy?.name || '不明'}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">ファイルサイズ</p>
-                    <p className="font-medium">{formatFileSize(document.fileSize)}</p>
+                    <p className="font-medium">
+                      {formatFileSize(document.fileSize)}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">作成日</p>
@@ -273,7 +294,11 @@ export function DocumentList({
                   <div className="mb-4">
                     <div className="flex flex-wrap gap-1">
                       {document.tags.map((tag, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
+                        <Badge
+                          key={index}
+                          variant="secondary"
+                          className="text-xs"
+                        >
                           {tag}
                         </Badge>
                       ))}
@@ -333,5 +358,5 @@ export function DocumentList({
         </div>
       )}
     </div>
-  )
+  );
 }

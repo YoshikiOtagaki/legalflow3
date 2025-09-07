@@ -1,19 +1,31 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useCases } from '@/hooks/use-cases'
-import { CaseFilters } from '@/types/case'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
-import { Search, Filter, Plus, Eye, Edit, Trash2 } from 'lucide-react'
-import Link from 'next/link'
+import { useState } from 'react';
+import { useCases } from '@/hooks/use-cases';
+import { CaseFilters } from '@/types/case';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Search, Filter, Plus, Eye, Edit, Trash2 } from 'lucide-react';
+import Link from 'next/link';
 
 interface CaseListProps {
-  onCaseSelect?: (caseId: string) => void
-  onCreateCase?: () => void
+  onCaseSelect?: (caseId: string) => void;
+  onCreateCase?: () => void;
 }
 
 export function CaseList({ onCaseSelect, onCreateCase }: CaseListProps) {
@@ -22,64 +34,64 @@ export function CaseList({ onCaseSelect, onCreateCase }: CaseListProps) {
     limit: 10,
     sortBy: 'createdAt',
     sortOrder: 'desc',
-  })
-  const [searchTerm, setSearchTerm] = useState('')
+  });
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const { cases, loading, error, pagination, fetchCases } = useCases(filters)
+  const { cases, loading, error, pagination, fetchCases } = useCases(filters);
 
   const handleSearch = (value: string) => {
-    setSearchTerm(value)
-    const newFilters = { ...filters, search: value, page: 1 }
-    setFilters(newFilters)
-    fetchCases(newFilters)
-  }
+    setSearchTerm(value);
+    const newFilters = { ...filters, search: value, page: 1 };
+    setFilters(newFilters);
+    fetchCases(newFilters);
+  };
 
   const handleFilterChange = (key: keyof CaseFilters, value: string) => {
-    const newFilters = { ...filters, [key]: value, page: 1 }
-    setFilters(newFilters)
-    fetchCases(newFilters)
-  }
+    const newFilters = { ...filters, [key]: value, page: 1 };
+    setFilters(newFilters);
+    fetchCases(newFilters);
+  };
 
   const handlePageChange = (page: number) => {
-    const newFilters = { ...filters, page }
-    setFilters(newFilters)
-    fetchCases(newFilters)
-  }
+    const newFilters = { ...filters, page };
+    setFilters(newFilters);
+    fetchCases(newFilters);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case '進行中':
-        return 'bg-blue-100 text-blue-800'
+        return 'bg-blue-100 text-blue-800';
       case '完了':
-        return 'bg-green-100 text-green-800'
+        return 'bg-green-100 text-green-800';
       case '保留':
-        return 'bg-yellow-100 text-yellow-800'
+        return 'bg-yellow-100 text-yellow-800';
       case 'キャンセル':
-        return 'bg-red-100 text-red-800'
+        return 'bg-red-100 text-red-800';
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-gray-100 text-gray-800';
     }
-  }
+  };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case '高':
-        return 'bg-red-100 text-red-800'
+        return 'bg-red-100 text-red-800';
       case '中':
-        return 'bg-yellow-100 text-yellow-800'
+        return 'bg-yellow-100 text-yellow-800';
       case '低':
-        return 'bg-green-100 text-green-800'
+        return 'bg-green-100 text-green-800';
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-gray-100 text-gray-800';
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -88,7 +100,7 @@ export function CaseList({ onCaseSelect, onCreateCase }: CaseListProps) {
         <p className="text-red-500 mb-4">{error}</p>
         <Button onClick={() => fetchCases()}>再試行</Button>
       </div>
-    )
+    );
   }
 
   return (
@@ -119,7 +131,7 @@ export function CaseList({ onCaseSelect, onCreateCase }: CaseListProps) {
                 <Input
                   placeholder="ケース名、番号で検索..."
                   value={searchTerm}
-                  onChange={(e) => handleSearch(e.target.value)}
+                  onChange={e => handleSearch(e.target.value)}
                   className="pl-10"
                 />
               </div>
@@ -129,7 +141,9 @@ export function CaseList({ onCaseSelect, onCreateCase }: CaseListProps) {
               <label className="text-sm font-medium">ステータス</label>
               <Select
                 value={filters.statusId || 'all'}
-                onValueChange={(value) => handleFilterChange('statusId', value === 'all' ? '' : value)}
+                onValueChange={value =>
+                  handleFilterChange('statusId', value === 'all' ? '' : value)
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="すべて" />
@@ -148,7 +162,9 @@ export function CaseList({ onCaseSelect, onCreateCase }: CaseListProps) {
               <label className="text-sm font-medium">優先度</label>
               <Select
                 value={filters.priorityId || 'all'}
-                onValueChange={(value) => handleFilterChange('priorityId', value === 'all' ? '' : value)}
+                onValueChange={value =>
+                  handleFilterChange('priorityId', value === 'all' ? '' : value)
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="すべて" />
@@ -166,18 +182,22 @@ export function CaseList({ onCaseSelect, onCreateCase }: CaseListProps) {
               <label className="text-sm font-medium">並び順</label>
               <Select
                 value={`${filters.sortBy}-${filters.sortOrder}`}
-                onValueChange={(value) => {
-                  const [sortBy, sortOrder] = value.split('-')
-                  handleFilterChange('sortBy', sortBy)
-                  handleFilterChange('sortOrder', sortOrder as 'asc' | 'desc')
+                onValueChange={value => {
+                  const [sortBy, sortOrder] = value.split('-');
+                  handleFilterChange('sortBy', sortBy);
+                  handleFilterChange('sortOrder', sortOrder as 'asc' | 'desc');
                 }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="並び順" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="createdAt-desc">作成日（新しい順）</SelectItem>
-                  <SelectItem value="createdAt-asc">作成日（古い順）</SelectItem>
+                  <SelectItem value="createdAt-desc">
+                    作成日（新しい順）
+                  </SelectItem>
+                  <SelectItem value="createdAt-asc">
+                    作成日（古い順）
+                  </SelectItem>
                   <SelectItem value="title-asc">タイトル（A-Z）</SelectItem>
                   <SelectItem value="title-desc">タイトル（Z-A）</SelectItem>
                 </SelectContent>
@@ -197,7 +217,7 @@ export function CaseList({ onCaseSelect, onCreateCase }: CaseListProps) {
             </CardContent>
           </Card>
         ) : (
-          cases.map((case_) => (
+          cases.map(case_ => (
             <Card key={case_.id} className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex justify-between items-start">
@@ -211,7 +231,9 @@ export function CaseList({ onCaseSelect, onCreateCase }: CaseListProps) {
                     <Badge className={getStatusColor(case_.status?.name || '')}>
                       {case_.status?.name || '未設定'}
                     </Badge>
-                    <Badge className={getPriorityColor(case_.priority?.name || '')}>
+                    <Badge
+                      className={getPriorityColor(case_.priority?.name || '')}
+                    >
                       {case_.priority?.name || '未設定'}
                     </Badge>
                   </div>
@@ -221,15 +243,21 @@ export function CaseList({ onCaseSelect, onCreateCase }: CaseListProps) {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                   <div>
                     <p className="text-sm text-gray-600">カテゴリ</p>
-                    <p className="font-medium">{case_.category?.name || '未設定'}</p>
+                    <p className="font-medium">
+                      {case_.category?.name || '未設定'}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">担当弁護士</p>
-                    <p className="font-medium">{case_.assignedLawyer?.name || '未割り当て'}</p>
+                    <p className="font-medium">
+                      {case_.assignedLawyer?.name || '未割り当て'}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">クライアント</p>
-                    <p className="font-medium">{case_.client?.name || '未設定'}</p>
+                    <p className="font-medium">
+                      {case_.client?.name || '未設定'}
+                    </p>
                   </div>
                 </div>
 
@@ -241,7 +269,8 @@ export function CaseList({ onCaseSelect, onCreateCase }: CaseListProps) {
 
                 <div className="flex justify-between items-center">
                   <div className="text-sm text-gray-500">
-                    作成日: {new Date(case_.createdAt).toLocaleDateString('ja-JP')}
+                    作成日:{' '}
+                    {new Date(case_.createdAt).toLocaleDateString('ja-JP')}
                   </div>
                   <div className="flex items-center gap-2">
                     <Button
@@ -288,5 +317,5 @@ export function CaseList({ onCaseSelect, onCreateCase }: CaseListProps) {
         </div>
       )}
     </div>
-  )
+  );
 }

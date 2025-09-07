@@ -1,43 +1,59 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { useParties } from '@/hooks/use-parties'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Save, ArrowLeft } from 'lucide-react'
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useParties } from '@/hooks/use-parties';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Save, ArrowLeft } from 'lucide-react';
 
 const partyFormSchema = z.object({
   name: z.string().min(1, '名前を入力してください'),
   type: z.enum(['Individual', 'Corporate'], {
     required_error: 'タイプを選択してください',
   }),
-  email: z.string().email('有効なメールアドレスを入力してください').optional().or(z.literal('')),
+  email: z
+    .string()
+    .email('有効なメールアドレスを入力してください')
+    .optional()
+    .or(z.literal('')),
   phone: z.string().optional(),
   address: z.string().optional(),
-})
+});
 
-type PartyFormData = z.infer<typeof partyFormSchema>
+type PartyFormData = z.infer<typeof partyFormSchema>;
 
 interface PartyFormProps {
-  partyId?: string
-  onSuccess?: (partyId: string) => void
-  onCancel?: () => void
+  partyId?: string;
+  onSuccess?: (partyId: string) => void;
+  onCancel?: () => void;
 }
 
 export function PartyForm({ partyId, onSuccess, onCancel }: PartyFormProps) {
-  const { parties, createParty, updateParty } = useParties()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { parties, createParty, updateParty } = useParties();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const existingParty = partyId ? parties.find(p => p.id === partyId) : null
-  const isEdit = !!existingParty
+  const existingParty = partyId ? parties.find(p => p.id === partyId) : null;
+  const isEdit = !!existingParty;
 
   const {
     register,
@@ -54,12 +70,12 @@ export function PartyForm({ partyId, onSuccess, onCancel }: PartyFormProps) {
       phone: existingParty?.phone || '',
       address: existingParty?.address || '',
     },
-  })
+  });
 
-  const selectedType = watch('type')
+  const selectedType = watch('type');
 
   const onSubmit = async (data: PartyFormData) => {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
       const partyData = {
@@ -67,21 +83,21 @@ export function PartyForm({ partyId, onSuccess, onCancel }: PartyFormProps) {
         email: data.email || undefined,
         phone: data.phone || undefined,
         address: data.address || undefined,
-      }
+      };
 
       if (isEdit && partyId) {
-        await updateParty(partyId, partyData)
+        await updateParty(partyId, partyData);
       } else {
-        const newParty = await createParty(partyData)
-        onSuccess?.(newParty.id)
+        const newParty = await createParty(partyData);
+        onSuccess?.(newParty.id);
       }
     } catch (error) {
-      console.error('当事者保存エラー:', error)
-      alert(error instanceof Error ? error.message : 'エラーが発生しました')
+      console.error('当事者保存エラー:', error);
+      alert(error instanceof Error ? error.message : 'エラーが発生しました');
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -123,7 +139,9 @@ export function PartyForm({ partyId, onSuccess, onCancel }: PartyFormProps) {
               <Label>タイプ *</Label>
               <RadioGroup
                 value={selectedType}
-                onValueChange={(value) => setValue('type', value as 'Individual' | 'Corporate')}
+                onValueChange={value =>
+                  setValue('type', value as 'Individual' | 'Corporate')
+                }
                 disabled={isSubmitting}
                 className="flex gap-6"
               >
@@ -218,5 +236,5 @@ export function PartyForm({ partyId, onSuccess, onCancel }: PartyFormProps) {
         </div>
       </form>
     </div>
-  )
+  );
 }

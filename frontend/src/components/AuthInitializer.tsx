@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import { useAuthStore } from "@/store/auth";
-import { useEffect } from "react";
+import { useAuthStore } from '@/store/auth';
+import { useEffect } from 'react';
 
 // このコンポーネントは、アプリケーションの起動時に認証状態を確認し、
 // ストアを初期化する役割のみを担います。UIはレンダリングしません。

@@ -1,10 +1,16 @@
-'use client'
+'use client';
 
-import { useCase } from '@/hooks/use-cases'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
+import { useCase } from '@/hooks/use-cases';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import {
   Calendar,
   User,
@@ -15,25 +21,25 @@ import {
   Clock,
   FileText,
   Edit,
-  ArrowLeft
-} from 'lucide-react'
-import Link from 'next/link'
+  ArrowLeft,
+} from 'lucide-react';
+import Link from 'next/link';
 
 interface CaseDetailProps {
-  caseId: string
-  onBack?: () => void
-  onEdit?: () => void
+  caseId: string;
+  onBack?: () => void;
+  onEdit?: () => void;
 }
 
 export function CaseDetail({ caseId, onBack, onEdit }: CaseDetailProps) {
-  const { case: case_, loading, error } = useCase(caseId)
+  const { case: case_, loading, error } = useCase(caseId);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -42,7 +48,7 @@ export function CaseDetail({ caseId, onBack, onEdit }: CaseDetailProps) {
         <p className="text-red-500 mb-4">{error}</p>
         <Button onClick={() => window.location.reload()}>再読み込み</Button>
       </div>
-    )
+    );
   }
 
   if (!case_) {
@@ -56,36 +62,36 @@ export function CaseDetail({ caseId, onBack, onEdit }: CaseDetailProps) {
           </Button>
         )}
       </div>
-    )
+    );
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case '進行中':
-        return 'bg-blue-100 text-blue-800'
+        return 'bg-blue-100 text-blue-800';
       case '完了':
-        return 'bg-green-100 text-green-800'
+        return 'bg-green-100 text-green-800';
       case '保留':
-        return 'bg-yellow-100 text-yellow-800'
+        return 'bg-yellow-100 text-yellow-800';
       case 'キャンセル':
-        return 'bg-red-100 text-red-800'
+        return 'bg-red-100 text-red-800';
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-gray-100 text-gray-800';
     }
-  }
+  };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case '高':
-        return 'bg-red-100 text-red-800'
+        return 'bg-red-100 text-red-800';
       case '中':
-        return 'bg-yellow-100 text-yellow-800'
+        return 'bg-yellow-100 text-yellow-800';
       case '低':
-        return 'bg-green-100 text-green-800'
+        return 'bg-green-100 text-green-800';
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-gray-100 text-gray-800';
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -101,7 +107,9 @@ export function CaseDetail({ caseId, onBack, onEdit }: CaseDetailProps) {
             )}
             <h1 className="text-3xl font-bold">{case_.title}</h1>
           </div>
-          <p className="text-lg text-gray-600">ケース番号: {case_.caseNumber}</p>
+          <p className="text-lg text-gray-600">
+            ケース番号: {case_.caseNumber}
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Badge className={getStatusColor(case_.status?.name || '')}>
@@ -131,7 +139,9 @@ export function CaseDetail({ caseId, onBack, onEdit }: CaseDetailProps) {
             <CardContent className="space-y-4">
               <div>
                 <h4 className="font-medium text-gray-900">カテゴリ</h4>
-                <p className="text-gray-600">{case_.category?.name || '未設定'}</p>
+                <p className="text-gray-600">
+                  {case_.category?.name || '未設定'}
+                </p>
               </div>
 
               <div>
@@ -142,7 +152,9 @@ export function CaseDetail({ caseId, onBack, onEdit }: CaseDetailProps) {
               {case_.description && (
                 <div>
                   <h4 className="font-medium text-gray-900">説明</h4>
-                  <p className="text-gray-600 whitespace-pre-wrap">{case_.description}</p>
+                  <p className="text-gray-600 whitespace-pre-wrap">
+                    {case_.description}
+                  </p>
                 </div>
               )}
 
@@ -165,7 +177,9 @@ export function CaseDetail({ caseId, onBack, onEdit }: CaseDetailProps) {
                   <div>
                     <h4 className="font-medium text-gray-900">予定終了日</h4>
                     <p className="text-gray-600">
-                      {new Date(case_.estimatedEndDate).toLocaleDateString('ja-JP')}
+                      {new Date(case_.estimatedEndDate).toLocaleDateString(
+                        'ja-JP'
+                      )}
                     </p>
                   </div>
                 )}
@@ -212,7 +226,9 @@ export function CaseDetail({ caseId, onBack, onEdit }: CaseDetailProps) {
                   <div className="mt-2 p-3 bg-gray-50 rounded-lg">
                     <p className="font-medium">{case_.opposingParty.name}</p>
                     <p className="text-sm text-gray-600">
-                      {case_.opposingParty.type === 'Individual' ? '個人' : '法人'}
+                      {case_.opposingParty.type === 'Individual'
+                        ? '個人'
+                        : '法人'}
                     </p>
                     {case_.opposingParty.email && (
                       <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
@@ -269,7 +285,9 @@ export function CaseDetail({ caseId, onBack, onEdit }: CaseDetailProps) {
                   </div>
                 </div>
               ) : (
-                <p className="text-gray-500">担当弁護士が割り当てられていません</p>
+                <p className="text-gray-500">
+                  担当弁護士が割り当てられていません
+                </p>
               )}
 
               {case_.lawFirm && (
@@ -356,5 +374,5 @@ export function CaseDetail({ caseId, onBack, onEdit }: CaseDetailProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,13 +1,25 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useNotificationSettings } from '@/hooks/use-notifications'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Switch } from '@/components/ui/switch'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useState, useEffect } from 'react';
+import { useNotificationSettings } from '@/hooks/use-notifications';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Bell,
   Mail,
@@ -15,12 +27,13 @@ import {
   Smartphone,
   Clock,
   Save,
-  RefreshCw
-} from 'lucide-react'
+  RefreshCw,
+} from 'lucide-react';
 
 export function NotificationSettings() {
-  const { settings, loading, error, updateSettings } = useNotificationSettings()
-  const [isSaving, setIsSaving] = useState(false)
+  const { settings, loading, error, updateSettings } =
+    useNotificationSettings();
+  const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     emailEnabled: false,
     smsEnabled: false,
@@ -34,7 +47,7 @@ export function NotificationSettings() {
     quietHoursEnd: '',
     timezone: 'Asia/Tokyo',
     language: 'ja',
-  })
+  });
 
   useEffect(() => {
     if (settings) {
@@ -51,23 +64,23 @@ export function NotificationSettings() {
         quietHoursEnd: settings.quietHoursEnd || '',
         timezone: settings.timezone,
         language: settings.language,
-      })
+      });
     }
-  }, [settings])
+  }, [settings]);
 
   const handleSave = async () => {
-    setIsSaving(true)
+    setIsSaving(true);
 
     try {
-      await updateSettings(formData)
-      alert('設定を保存しました')
+      await updateSettings(formData);
+      alert('設定を保存しました');
     } catch (error) {
-      console.error('設定保存エラー:', error)
-      alert('設定の保存に失敗しました')
+      console.error('設定保存エラー:', error);
+      alert('設定の保存に失敗しました');
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   const handleReset = () => {
     if (settings) {
@@ -84,16 +97,16 @@ export function NotificationSettings() {
         quietHoursEnd: settings.quietHoursEnd || '',
         timezone: settings.timezone,
         language: settings.language,
-      })
+      });
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -102,7 +115,7 @@ export function NotificationSettings() {
         <p className="text-red-500 mb-4">{error}</p>
         <Button onClick={() => window.location.reload()}>再読み込み</Button>
       </div>
-    )
+    );
   }
 
   return (
@@ -150,12 +163,14 @@ export function NotificationSettings() {
                   <Mail className="h-5 w-5 text-gray-600" />
                   <div>
                     <Label className="text-base font-medium">メール通知</Label>
-                    <p className="text-sm text-gray-600">メールで通知を受け取る</p>
+                    <p className="text-sm text-gray-600">
+                      メールで通知を受け取る
+                    </p>
                   </div>
                 </div>
                 <Switch
                   checked={formData.emailEnabled}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     setFormData(prev => ({ ...prev, emailEnabled: checked }))
                   }
                 />
@@ -168,8 +183,11 @@ export function NotificationSettings() {
                     type="email"
                     placeholder="example@example.com"
                     value={formData.emailAddress}
-                    onChange={(e) =>
-                      setFormData(prev => ({ ...prev, emailAddress: e.target.value }))
+                    onChange={e =>
+                      setFormData(prev => ({
+                        ...prev,
+                        emailAddress: e.target.value,
+                      }))
                     }
                   />
                 </div>
@@ -188,7 +206,7 @@ export function NotificationSettings() {
                 </div>
                 <Switch
                   checked={formData.smsEnabled}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     setFormData(prev => ({ ...prev, smsEnabled: checked }))
                   }
                 />
@@ -201,8 +219,11 @@ export function NotificationSettings() {
                     type="tel"
                     placeholder="090-1234-5678"
                     value={formData.phoneNumber}
-                    onChange={(e) =>
-                      setFormData(prev => ({ ...prev, phoneNumber: e.target.value }))
+                    onChange={e =>
+                      setFormData(prev => ({
+                        ...prev,
+                        phoneNumber: e.target.value,
+                      }))
                     }
                   />
                 </div>
@@ -215,13 +236,17 @@ export function NotificationSettings() {
                 <div className="flex items-center gap-3">
                   <Smartphone className="h-5 w-5 text-gray-600" />
                   <div>
-                    <Label className="text-base font-medium">プッシュ通知</Label>
-                    <p className="text-sm text-gray-600">アプリでプッシュ通知を受け取る</p>
+                    <Label className="text-base font-medium">
+                      プッシュ通知
+                    </Label>
+                    <p className="text-sm text-gray-600">
+                      アプリでプッシュ通知を受け取る
+                    </p>
                   </div>
                 </div>
                 <Switch
                   checked={formData.pushEnabled}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     setFormData(prev => ({ ...prev, pushEnabled: checked }))
                   }
                 />
@@ -235,12 +260,14 @@ export function NotificationSettings() {
                   <MessageSquare className="h-5 w-5 text-gray-600" />
                   <div>
                     <Label className="text-base font-medium">LINE通知</Label>
-                    <p className="text-sm text-gray-600">LINEで通知を受け取る</p>
+                    <p className="text-sm text-gray-600">
+                      LINEで通知を受け取る
+                    </p>
                   </div>
                 </div>
                 <Switch
                   checked={formData.lineEnabled}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     setFormData(prev => ({ ...prev, lineEnabled: checked }))
                   }
                 />
@@ -252,8 +279,11 @@ export function NotificationSettings() {
                     id="lineUserId"
                     placeholder="LINEユーザーIDを入力"
                     value={formData.lineUserId}
-                    onChange={(e) =>
-                      setFormData(prev => ({ ...prev, lineUserId: e.target.value }))
+                    onChange={e =>
+                      setFormData(prev => ({
+                        ...prev,
+                        lineUserId: e.target.value,
+                      }))
                     }
                   />
                 </div>
@@ -267,12 +297,14 @@ export function NotificationSettings() {
               <Bell className="h-5 w-5 text-gray-600" />
               <div>
                 <Label className="text-base font-medium">アプリ内通知</Label>
-                <p className="text-sm text-gray-600">アプリ内で通知を表示する</p>
+                <p className="text-sm text-gray-600">
+                  アプリ内で通知を表示する
+                </p>
               </div>
             </div>
             <Switch
               checked={formData.inAppEnabled}
-              onCheckedChange={(checked) =>
+              onCheckedChange={checked =>
                 setFormData(prev => ({ ...prev, inAppEnabled: checked }))
               }
             />
@@ -299,8 +331,11 @@ export function NotificationSettings() {
                 id="quietHoursStart"
                 type="time"
                 value={formData.quietHoursStart}
-                onChange={(e) =>
-                  setFormData(prev => ({ ...prev, quietHoursStart: e.target.value }))
+                onChange={e =>
+                  setFormData(prev => ({
+                    ...prev,
+                    quietHoursStart: e.target.value,
+                  }))
                 }
               />
             </div>
@@ -310,8 +345,11 @@ export function NotificationSettings() {
                 id="quietHoursEnd"
                 type="time"
                 value={formData.quietHoursEnd}
-                onChange={(e) =>
-                  setFormData(prev => ({ ...prev, quietHoursEnd: e.target.value }))
+                onChange={e =>
+                  setFormData(prev => ({
+                    ...prev,
+                    quietHoursEnd: e.target.value,
+                  }))
                 }
               />
             </div>
@@ -333,7 +371,7 @@ export function NotificationSettings() {
               <Label htmlFor="timezone">タイムゾーン</Label>
               <Select
                 value={formData.timezone}
-                onValueChange={(value) =>
+                onValueChange={value =>
                   setFormData(prev => ({ ...prev, timezone: value }))
                 }
               >
@@ -343,8 +381,12 @@ export function NotificationSettings() {
                 <SelectContent>
                   <SelectItem value="Asia/Tokyo">Asia/Tokyo (JST)</SelectItem>
                   <SelectItem value="UTC">UTC</SelectItem>
-                  <SelectItem value="America/New_York">America/New_York (EST)</SelectItem>
-                  <SelectItem value="Europe/London">Europe/London (GMT)</SelectItem>
+                  <SelectItem value="America/New_York">
+                    America/New_York (EST)
+                  </SelectItem>
+                  <SelectItem value="Europe/London">
+                    Europe/London (GMT)
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -353,7 +395,7 @@ export function NotificationSettings() {
               <Label htmlFor="language">言語</Label>
               <Select
                 value={formData.language}
-                onValueChange={(value) =>
+                onValueChange={value =>
                   setFormData(prev => ({ ...prev, language: value }))
                 }
               >
@@ -370,5 +412,5 @@ export function NotificationSettings() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

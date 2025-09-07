@@ -1,38 +1,38 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { ProtectedRoute } from '@/components/auth/protected-route'
-import { TimesheetList } from '@/components/timesheet/timesheet-list'
-import { TimerWidget } from '@/components/timesheet/timer-widget'
+import { useState } from 'react';
+import { ProtectedRoute } from '@/components/auth/protected-route';
+import { TimesheetList } from '@/components/timesheet/timesheet-list';
+import { TimerWidget } from '@/components/timesheet/timer-widget';
 
 export default function TimesheetPage() {
-  const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null)
+  const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
 
   const handleEntrySelect = (entryId: string) => {
-    setSelectedEntryId(entryId)
+    setSelectedEntryId(entryId);
     // TODO: エントリ詳細ページに遷移
-    console.log('Entry selected:', entryId)
-  }
+    console.log('Entry selected:', entryId);
+  };
 
   const handleCreateEntry = () => {
     // TODO: エントリ作成ページに遷移
-    console.log('Create entry')
-  }
+    console.log('Create entry');
+  };
 
   const handleEditEntry = (entryId: string) => {
     // TODO: エントリ編集ページに遷移
-    console.log('Edit entry:', entryId)
-  }
+    console.log('Edit entry:', entryId);
+  };
 
   const handleDeleteEntry = (entryId: string) => {
     // TODO: エントリ削除後の処理
-    console.log('Delete entry:', entryId)
-  }
+    console.log('Delete entry:', entryId);
+  };
 
   const handleTimerStop = (timerId: string) => {
     // TODO: タイマー停止後の処理（エントリ作成など）
-    console.log('Timer stopped:', timerId)
-  }
+    console.log('Timer stopped:', timerId);
+  };
 
   return (
     <ProtectedRoute>
@@ -67,5 +67,5 @@ export default function TimesheetPage() {
         </main>
       </div>
     </ProtectedRoute>
-  )
+  );
 }

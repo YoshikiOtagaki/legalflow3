@@ -1,30 +1,36 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { useAuthStore } from '@/store/auth'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useAuthStore } from '@/store/auth';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 const loginSchema = z.object({
   email: z.string().email('有効なメールアドレスを入力してください'),
   password: z.string().min(6, 'パスワードは6文字以上で入力してください'),
-})
+});
 
-type LoginFormData = z.infer<typeof loginSchema>
+type LoginFormData = z.infer<typeof loginSchema>;
 
 interface LoginFormProps {
-  onSuccess?: () => void
-  onSwitchToRegister?: () => void
+  onSuccess?: () => void;
+  onSwitchToRegister?: () => void;
 }
 
 export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
-  const { login, isLoading, error, clearError } = useAuthStore()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { login, isLoading, error, clearError } = useAuthStore();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -32,21 +38,21 @@ export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
-  })
+  });
 
   const onSubmit = async (data: LoginFormData) => {
-    setIsSubmitting(true)
-    clearError()
+    setIsSubmitting(true);
+    clearError();
 
     try {
-      await login(data)
-      onSuccess?.()
+      await login(data);
+      onSuccess?.();
     } catch (error) {
       // エラーはstoreで管理される
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -114,5 +120,5 @@ export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }

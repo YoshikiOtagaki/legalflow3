@@ -1,10 +1,10 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { useAuthStore } from '@/store/auth'
-import { Button } from '@/components/ui/button'
+import { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useAuthStore } from '@/store/auth';
+import { Button } from '@/components/ui/button';
 import {
   Menu,
   X,
@@ -16,8 +16,8 @@ import {
   Bell,
   Settings,
   LogOut,
-  User
-} from 'lucide-react'
+  User,
+} from 'lucide-react';
 
 const navigation = [
   { name: 'ダッシュボード', href: '/dashboard', icon: Home },
@@ -26,21 +26,21 @@ const navigation = [
   { name: 'ドキュメント', href: '/documents', icon: FolderOpen },
   { name: 'タイムシート', href: '/timesheet', icon: Clock },
   { name: '通知', href: '/notifications', icon: Bell },
-]
+];
 
 export function Navigation() {
-  const [isOpen, setIsOpen] = useState(false)
-  const pathname = usePathname()
-  const { user, logout } = useAuthStore()
+  const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+  const { user, logout } = useAuthStore();
 
   const handleLogout = () => {
-    logout()
-    setIsOpen(false)
-  }
+    logout();
+    setIsOpen(false);
+  };
 
   const isActive = (href: string) => {
-    return pathname === href || pathname.startsWith(href + '/')
-  }
+    return pathname === href || pathname.startsWith(href + '/');
+  };
 
   return (
     <>
@@ -65,10 +65,12 @@ export function Navigation() {
       )}
 
       {/* サイドバー */}
-      <div className={`
+      <div
+        className={`
         fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
+      `}
+      >
         <div className="flex flex-col h-full">
           {/* ロゴ */}
           <div className="flex items-center justify-between h-16 px-6 border-b">
@@ -85,8 +87,8 @@ export function Navigation() {
 
           {/* ナビゲーション */}
           <nav className="flex-1 px-4 py-6 space-y-2">
-            {navigation.map((item) => {
-              const Icon = item.icon
+            {navigation.map(item => {
+              const Icon = item.icon;
               return (
                 <Link
                   key={item.name}
@@ -94,16 +96,17 @@ export function Navigation() {
                   onClick={() => setIsOpen(false)}
                   className={`
                     flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors
-                    ${isActive(item.href)
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    ${
+                      isActive(item.href)
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                     }
                   `}
                 >
                   <Icon className="h-5 w-5 mr-3" />
                   {item.name}
                 </Link>
-              )
+              );
             })}
           </nav>
 
@@ -135,5 +138,5 @@ export function Navigation() {
         </div>
       </div>
     </>
-  )
+  );
 }

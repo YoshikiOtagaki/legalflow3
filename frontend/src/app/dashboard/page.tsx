@@ -1,14 +1,20 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react'
-import { ProtectedRoute } from '@/components/auth/protected-route'
-import { useAuthStore } from '@/store/auth'
-import { useDashboard } from '@/hooks/use-dashboard'
-import { StatsCards } from '@/components/dashboard/stats-cards'
-import { Charts } from '@/components/dashboard/charts'
-import { ActivityFeed } from '@/components/dashboard/activity-feed'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useEffect, useState } from 'react';
+import { ProtectedRoute } from '@/components/auth/protected-route';
+import { useAuthStore } from '@/store/auth';
+import { useDashboard } from '@/hooks/use-dashboard';
+import { StatsCards } from '@/components/dashboard/stats-cards';
+import { Charts } from '@/components/dashboard/charts';
+import { ActivityFeed } from '@/components/dashboard/activity-feed';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import {
   FileText,
   Users,
@@ -17,11 +23,11 @@ import {
   TrendingUp,
   Activity,
   Calendar,
-  Bell
-} from 'lucide-react'
+  Bell,
+} from 'lucide-react';
 
 export default function Dashboard() {
-  const { user, logout } = useAuthStore()
+  const { user, logout } = useAuthStore();
   const {
     stats,
     caseStatusDistribution,
@@ -31,12 +37,12 @@ export default function Dashboard() {
     recentActivities,
     upcomingDeadlines,
     isLoading,
-    error
-  } = useDashboard()
+    error,
+  } = useDashboard();
 
   const handleLogout = () => {
-    logout()
-  }
+    logout();
+  };
 
   if (isLoading) {
     return (
@@ -48,7 +54,7 @@ export default function Dashboard() {
           </div>
         </div>
       </ProtectedRoute>
-    )
+    );
   }
 
   if (error) {
@@ -57,18 +63,23 @@ export default function Dashboard() {
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <Card className="w-full max-w-md">
             <CardHeader>
-              <CardTitle className="text-red-600">エラーが発生しました</CardTitle>
+              <CardTitle className="text-red-600">
+                エラーが発生しました
+              </CardTitle>
               <CardDescription>{error}</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button onClick={() => window.location.reload()} className="w-full">
+              <Button
+                onClick={() => window.location.reload()}
+                className="w-full"
+              >
                 再読み込み
               </Button>
             </CardContent>
           </Card>
         </div>
       </ProtectedRoute>
-    )
+    );
   }
 
   return (
@@ -122,7 +133,7 @@ export default function Dashboard() {
                   <Button
                     variant="outline"
                     className="h-20 flex flex-col items-center justify-center space-y-2"
-                    onClick={() => window.location.href = '/cases'}
+                    onClick={() => (window.location.href = '/cases')}
                   >
                     <FileText className="h-6 w-6" />
                     <span className="text-sm">ケース管理</span>
@@ -131,7 +142,7 @@ export default function Dashboard() {
                   <Button
                     variant="outline"
                     className="h-20 flex flex-col items-center justify-center space-y-2"
-                    onClick={() => window.location.href = '/parties'}
+                    onClick={() => (window.location.href = '/parties')}
                   >
                     <Users className="h-6 w-6" />
                     <span className="text-sm">当事者管理</span>
@@ -140,7 +151,7 @@ export default function Dashboard() {
                   <Button
                     variant="outline"
                     className="h-20 flex flex-col items-center justify-center space-y-2"
-                    onClick={() => window.location.href = '/timesheet'}
+                    onClick={() => (window.location.href = '/timesheet')}
                   >
                     <Clock className="h-6 w-6" />
                     <span className="text-sm">タイムシート</span>
@@ -149,7 +160,7 @@ export default function Dashboard() {
                   <Button
                     variant="outline"
                     className="h-20 flex flex-col items-center justify-center space-y-2"
-                    onClick={() => window.location.href = '/documents'}
+                    onClick={() => (window.location.href = '/documents')}
                   >
                     <FileText className="h-6 w-6" />
                     <span className="text-sm">ドキュメント</span>
@@ -161,5 +172,5 @@ export default function Dashboard() {
         </main>
       </div>
     </ProtectedRoute>
-  )
+  );
 }

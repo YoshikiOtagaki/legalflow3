@@ -1,12 +1,18 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useNotifications } from '@/hooks/use-notifications'
-import { NotificationFilters } from '@/types/notification'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
+import { useState } from 'react';
+import { useNotifications } from '@/hooks/use-notifications';
+import { NotificationFilters } from '@/types/notification';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import {
   Search,
   Filter,
@@ -18,23 +24,26 @@ import {
   Trash2,
   Check,
   X,
-  MoreVertical
-} from 'lucide-react'
+  MoreVertical,
+} from 'lucide-react';
 
 interface NotificationListProps {
-  onNotificationSelect?: (notificationId: string) => void
-  onMarkAllRead?: () => void
+  onNotificationSelect?: (notificationId: string) => void;
+  onMarkAllRead?: () => void;
 }
 
-export function NotificationList({ onNotificationSelect, onMarkAllRead }: NotificationListProps) {
+export function NotificationList({
+  onNotificationSelect,
+  onMarkAllRead,
+}: NotificationListProps) {
   const [filters, setFilters] = useState<NotificationFilters>({
     isArchived: false,
     page: 1,
     limit: 10,
     sortBy: 'createdAt',
     sortOrder: 'desc',
-  })
-  const [searchTerm, setSearchTerm] = useState('')
+  });
+  const [searchTerm, setSearchTerm] = useState('');
 
   const {
     notifications,
@@ -47,128 +56,134 @@ export function NotificationList({ onNotificationSelect, onMarkAllRead }: Notifi
     markAsUnread,
     archiveNotification,
     deleteNotification,
-    markAllAsRead
-  } = useNotifications(filters)
+    markAllAsRead,
+  } = useNotifications(filters);
 
   const handleSearch = (value: string) => {
-    setSearchTerm(value)
-    const newFilters = { ...filters, search: value, page: 1 }
-    setFilters(newFilters)
-    fetchNotifications(newFilters)
-  }
+    setSearchTerm(value);
+    const newFilters = { ...filters, search: value, page: 1 };
+    setFilters(newFilters);
+    fetchNotifications(newFilters);
+  };
 
-  const handleFilterChange = (key: keyof NotificationFilters, value: string | boolean) => {
-    const newFilters = { ...filters, [key]: value, page: 1 }
-    setFilters(newFilters)
-    fetchNotifications(newFilters)
-  }
+  const handleFilterChange = (
+    key: keyof NotificationFilters,
+    value: string | boolean
+  ) => {
+    const newFilters = { ...filters, [key]: value, page: 1 };
+    setFilters(newFilters);
+    fetchNotifications(newFilters);
+  };
 
   const handlePageChange = (page: number) => {
-    const newFilters = { ...filters, page }
-    setFilters(newFilters)
-    fetchNotifications(newFilters)
-  }
+    const newFilters = { ...filters, page };
+    setFilters(newFilters);
+    fetchNotifications(newFilters);
+  };
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {
-      await markAsRead(notificationId)
+      await markAsRead(notificationId);
     } catch (error) {
-      console.error('既読化エラー:', error)
-      alert('既読化に失敗しました')
+      console.error('既読化エラー:', error);
+      alert('既読化に失敗しました');
     }
-  }
+  };
 
   const handleMarkAsUnread = async (notificationId: string) => {
     try {
-      await markAsUnread(notificationId)
+      await markAsUnread(notificationId);
     } catch (error) {
-      console.error('未読化エラー:', error)
-      alert('未読化に失敗しました')
+      console.error('未読化エラー:', error);
+      alert('未読化に失敗しました');
     }
-  }
+  };
 
   const handleArchive = async (notificationId: string) => {
     try {
-      await archiveNotification(notificationId)
+      await archiveNotification(notificationId);
     } catch (error) {
-      console.error('アーカイブエラー:', error)
-      alert('アーカイブに失敗しました')
+      console.error('アーカイブエラー:', error);
+      alert('アーカイブに失敗しました');
     }
-  }
+  };
 
   const handleDelete = async (notificationId: string) => {
     if (window.confirm('この通知を削除しますか？')) {
       try {
-        await deleteNotification(notificationId)
+        await deleteNotification(notificationId);
       } catch (error) {
-        console.error('削除エラー:', error)
-        alert('削除に失敗しました')
+        console.error('削除エラー:', error);
+        alert('削除に失敗しました');
       }
     }
-  }
+  };
 
   const handleMarkAllRead = async () => {
     try {
-      await markAllAsRead()
-      onMarkAllRead?.()
+      await markAllAsRead();
+      onMarkAllRead?.();
     } catch (error) {
-      console.error('一括既読化エラー:', error)
-      alert('一括既読化に失敗しました')
+      console.error('一括既読化エラー:', error);
+      alert('一括既読化に失敗しました');
     }
-  }
+  };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case '高':
-        return 'bg-red-100 text-red-800'
+        return 'bg-red-100 text-red-800';
       case '中':
-        return 'bg-yellow-100 text-yellow-800'
+        return 'bg-yellow-100 text-yellow-800';
       case '低':
-        return 'bg-green-100 text-green-800'
+        return 'bg-green-100 text-green-800';
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-gray-100 text-gray-800';
     }
-  }
+  };
 
   const getChannelIcon = (channel: string) => {
     switch (channel) {
       case 'email':
-        return <Mail className="h-4 w-4" />
+        return <Mail className="h-4 w-4" />;
       case 'sms':
-        return <MessageSquare className="h-4 w-4" />
+        return <MessageSquare className="h-4 w-4" />;
       case 'push':
-        return <Smartphone className="h-4 w-4" />
+        return <Smartphone className="h-4 w-4" />;
       case 'line':
-        return <MessageSquare className="h-4 w-4" />
+        return <MessageSquare className="h-4 w-4" />;
       case 'in_app':
-        return <Bell className="h-4 w-4" />
+        return <Bell className="h-4 w-4" />;
       default:
-        return <Bell className="h-4 w-4" />
+        return <Bell className="h-4 w-4" />;
     }
-  }
+  };
 
   const formatTime = (timeString: string) => {
-    const date = new Date(timeString)
-    const now = new Date()
-    const diff = now.getTime() - date.getTime()
+    const date = new Date(timeString);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
 
-    if (diff < 60000) { // 1分未満
-      return 'たった今'
-    } else if (diff < 3600000) { // 1時間未満
-      return `${Math.floor(diff / 60000)}分前`
-    } else if (diff < 86400000) { // 1日未満
-      return `${Math.floor(diff / 3600000)}時間前`
+    if (diff < 60000) {
+      // 1分未満
+      return 'たった今';
+    } else if (diff < 3600000) {
+      // 1時間未満
+      return `${Math.floor(diff / 60000)}分前`;
+    } else if (diff < 86400000) {
+      // 1日未満
+      return `${Math.floor(diff / 3600000)}時間前`;
     } else {
-      return date.toLocaleDateString('ja-JP')
+      return date.toLocaleDateString('ja-JP');
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -177,7 +192,7 @@ export function NotificationList({ onNotificationSelect, onMarkAllRead }: Notifi
         <p className="text-red-500 mb-4">{error}</p>
         <Button onClick={() => fetchNotifications()}>再試行</Button>
       </div>
-    )
+    );
   }
 
   return (
@@ -217,7 +232,7 @@ export function NotificationList({ onNotificationSelect, onMarkAllRead }: Notifi
                 <Input
                   placeholder="タイトル、メッセージで検索..."
                   value={searchTerm}
-                  onChange={(e) => handleSearch(e.target.value)}
+                  onChange={e => handleSearch(e.target.value)}
                   className="pl-10"
                 />
               </div>
@@ -226,10 +241,15 @@ export function NotificationList({ onNotificationSelect, onMarkAllRead }: Notifi
             <div className="space-y-2">
               <label className="text-sm font-medium">ステータス</label>
               <select
-                value={filters.isRead === undefined ? '' : filters.isRead.toString()}
-                onChange={(e) => {
-                  const value = e.target.value
-                  handleFilterChange('isRead', value === '' ? undefined : value === 'true')
+                value={
+                  filters.isRead === undefined ? '' : filters.isRead.toString()
+                }
+                onChange={e => {
+                  const value = e.target.value;
+                  handleFilterChange(
+                    'isRead',
+                    value === '' ? undefined : value === 'true'
+                  );
                 }}
                 className="w-full p-2 border border-gray-300 rounded-md"
               >
@@ -242,10 +262,17 @@ export function NotificationList({ onNotificationSelect, onMarkAllRead }: Notifi
             <div className="space-y-2">
               <label className="text-sm font-medium">アーカイブ</label>
               <select
-                value={filters.isArchived === undefined ? '' : filters.isArchived.toString()}
-                onChange={(e) => {
-                  const value = e.target.value
-                  handleFilterChange('isArchived', value === '' ? undefined : value === 'true')
+                value={
+                  filters.isArchived === undefined
+                    ? ''
+                    : filters.isArchived.toString()
+                }
+                onChange={e => {
+                  const value = e.target.value;
+                  handleFilterChange(
+                    'isArchived',
+                    value === '' ? undefined : value === 'true'
+                  );
                 }}
                 className="w-full p-2 border border-gray-300 rounded-md"
               >
@@ -259,10 +286,10 @@ export function NotificationList({ onNotificationSelect, onMarkAllRead }: Notifi
               <label className="text-sm font-medium">並び順</label>
               <select
                 value={`${filters.sortBy}-${filters.sortOrder}`}
-                onChange={(e) => {
-                  const [sortBy, sortOrder] = e.target.value.split('-')
-                  handleFilterChange('sortBy', sortBy)
-                  handleFilterChange('sortOrder', sortOrder as 'asc' | 'desc')
+                onChange={e => {
+                  const [sortBy, sortOrder] = e.target.value.split('-');
+                  handleFilterChange('sortBy', sortBy);
+                  handleFilterChange('sortOrder', sortOrder as 'asc' | 'desc');
                 }}
                 className="w-full p-2 border border-gray-300 rounded-md"
               >
@@ -286,11 +313,13 @@ export function NotificationList({ onNotificationSelect, onMarkAllRead }: Notifi
             </CardContent>
           </Card>
         ) : (
-          notifications.map((notification) => (
+          notifications.map(notification => (
             <Card
               key={notification.id}
               className={`hover:shadow-md transition-shadow ${
-                !notification.isRead ? 'border-l-4 border-l-blue-500 bg-blue-50' : ''
+                !notification.isRead
+                  ? 'border-l-4 border-l-blue-500 bg-blue-50'
+                  : ''
               }`}
             >
               <CardHeader>
@@ -300,14 +329,20 @@ export function NotificationList({ onNotificationSelect, onMarkAllRead }: Notifi
                       <Bell className="h-4 w-4 text-gray-600" />
                     </div>
                     <div className="flex-1">
-                      <CardTitle className="text-lg">{notification.title}</CardTitle>
+                      <CardTitle className="text-lg">
+                        {notification.title}
+                      </CardTitle>
                       <CardDescription className="mt-1">
                         {notification.message}
                       </CardDescription>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge className={getPriorityColor(notification.priority?.name || '')}>
+                    <Badge
+                      className={getPriorityColor(
+                        notification.priority?.name || ''
+                      )}
+                    >
                       {notification.priority?.name || '未設定'}
                     </Badge>
                     {!notification.isRead && (
@@ -408,5 +443,5 @@ export function NotificationList({ onNotificationSelect, onMarkAllRead }: Notifi
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -1,16 +1,17 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useAuthStore } from '@/store/auth'
-import { DashboardData } from '@/types/dashboard'
+import { useState, useEffect } from 'react';
+import { useAuthStore } from '@/store/auth';
+import { DashboardData } from '@/types/dashboard';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
 export function useDashboard() {
-  const { isAuthenticated } = useAuthStore()
-  const [data, setData] = useState<DashboardData | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { isAuthenticated } = useAuthStore();
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // モックデータを生成
   const generateMockData = (): DashboardData => {
@@ -54,9 +55,24 @@ export function useDashboard() {
         nonBillableHours: 25.3,
         averageDailyHours: 6.0,
         topCases: [
-          { caseId: '1', caseTitle: 'A社との契約紛争', hours: 25.5, percentage: 21.2 },
-          { caseId: '2', caseTitle: 'B氏の離婚調停', hours: 18.3, percentage: 15.2 },
-          { caseId: '3', caseTitle: 'C社の労働問題', hours: 15.8, percentage: 13.1 },
+          {
+            caseId: '1',
+            caseTitle: 'A社との契約紛争',
+            hours: 25.5,
+            percentage: 21.2,
+          },
+          {
+            caseId: '2',
+            caseTitle: 'B氏の離婚調停',
+            hours: 18.3,
+            percentage: 15.2,
+          },
+          {
+            caseId: '3',
+            caseTitle: 'C社の労働問題',
+            hours: 15.8,
+            percentage: 13.1,
+          },
         ],
       },
       recentActivities: [
@@ -105,12 +121,12 @@ export function useDashboard() {
           isOverdue: false,
         },
       ],
-    }
-  }
+    };
+  };
 
   const fetchDashboardData = async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
 
     try {
       // 現在はモックデータを使用
@@ -132,26 +148,26 @@ export function useDashboard() {
       */
 
       // モックデータを使用
-      const mockData = generateMockData()
-      setData(mockData)
+      const mockData = generateMockData();
+      setData(mockData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'エラーが発生しました')
+      setError(err instanceof Error ? err.message : 'エラーが発生しました');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const refreshData = () => {
-    fetchDashboardData()
-  }
+    fetchDashboardData();
+  };
 
   useEffect(() => {
     if (isAuthenticated) {
-      fetchDashboardData()
+      fetchDashboardData();
     } else {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [isAuthenticated])
+  }, [isAuthenticated]);
 
   return {
     stats: data?.stats || {
@@ -185,5 +201,5 @@ export function useDashboard() {
     isLoading: loading,
     error,
     refreshData,
-  }
+  };
 }

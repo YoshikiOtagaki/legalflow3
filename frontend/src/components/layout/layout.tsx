@@ -1,10 +1,10 @@
-'use client'
+'use client';
 
-import { Navigation } from './navigation'
-import { ProtectedRoute } from '@/components/auth/protected-route'
+import { Navigation } from './navigation';
+import { ProtectedRoute } from '@/components/auth/protected-route';
 
 interface LayoutProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 export function Layout({ children }: LayoutProps) {
@@ -21,5 +21,5 @@ export function Layout({ children }: LayoutProps) {
         </div>
       </div>
     </ProtectedRoute>
-  )
+  );
 }

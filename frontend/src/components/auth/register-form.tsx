@@ -1,39 +1,63 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { useAuthStore } from '@/store/auth'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useAuthStore } from '@/store/auth';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
-const registerSchema = z.object({
-  email: z.string().email('有効なメールアドレスを入力してください'),
-  password: z.string().min(6, 'パスワードは6文字以上で入力してください'),
-  confirmPassword: z.string().min(6, 'パスワードは6文字以上で入力してください'),
-  name: z.string().min(1, '名前を入力してください'),
-  role: z.enum(['Lawyer', 'Client', 'Staff'], {
-    required_error: '役割を選択してください',
-  }),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'パスワードが一致しません',
-  path: ['confirmPassword'],
-})
+const registerSchema = z
+  .object({
+    email: z.string().email('有効なメールアドレスを入力してください'),
+    password: z.string().min(6, 'パスワードは6文字以上で入力してください'),
+    confirmPassword: z
+      .string()
+      .min(6, 'パスワードは6文字以上で入力してください'),
+    name: z.string().min(1, '名前を入力してください'),
+    role: z.enum(['Lawyer', 'Client', 'Staff'], {
+      required_error: '役割を選択してください',
+    }),
+  })
+  .refine(data => data.password === data.confirmPassword, {
+    message: 'パスワードが一致しません',
+    path: ['confirmPassword'],
+  });
 
-type RegisterFormData = z.infer<typeof registerSchema>
+type RegisterFormData = z.infer<typeof registerSchema>;
 
 interface RegisterFormProps {
-  onSuccess?: () => void
-  onSwitchToLogin?: () => void
+  onSuccess?: () => void;
+  onSwitchToLogin?: () => void;
 }
 
-export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) {
-  const { register: registerUser, isLoading, error, clearError } = useAuthStore()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+export function RegisterForm({
+  onSuccess,
+  onSwitchToLogin,
+}: RegisterFormProps) {
+  const {
+    register: registerUser,
+    isLoading,
+    error,
+    clearError,
+  } = useAuthStore();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -46,24 +70,24 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
     defaultValues: {
       role: 'Client',
     },
-  })
+  });
 
-  const selectedRole = watch('role')
+  const selectedRole = watch('role');
 
   const onSubmit = async (data: RegisterFormData) => {
-    setIsSubmitting(true)
-    clearError()
+    setIsSubmitting(true);
+    clearError();
 
     try {
-      const { confirmPassword, ...registerData } = data
-      await registerUser(registerData)
-      onSuccess?.()
+      const { confirmPassword, ...registerData } = data;
+      await registerUser(registerData);
+      onSuccess?.();
     } catch (error) {
       // エラーはstoreで管理される
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -107,7 +131,9 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
             <Label htmlFor="role">役割</Label>
             <Select
               value={selectedRole}
-              onValueChange={(value) => setValue('role', value as 'Lawyer' | 'Client' | 'Staff')}
+              onValueChange={value =>
+                setValue('role', value as 'Lawyer' | 'Client' | 'Staff')
+              }
               disabled={isSubmitting}
             >
               <SelectTrigger>
@@ -148,7 +174,9 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
               disabled={isSubmitting}
             />
             {errors.confirmPassword && (
-              <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
+              <p className="text-sm text-red-500">
+                {errors.confirmPassword.message}
+              </p>
             )}
           </div>
 
@@ -180,5 +208,5 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }

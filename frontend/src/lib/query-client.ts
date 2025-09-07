@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { QueryClient } from '@tanstack/react-query'
+import { QueryClient } from '@tanstack/react-query';
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -8,12 +8,12 @@ export const queryClient = new QueryClient({
       retry: (failureCount, error: any) => {
         // 認証エラーの場合はリトライしない
         if (error?.status === 401 || error?.status === 403) {
-          return false
+          return false;
         }
         // その他のエラーは最大3回リトライ
-        return failureCount < 3
+        return failureCount < 3;
       },
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
       staleTime: 5 * 60 * 1000, // 5分
       cacheTime: 10 * 60 * 1000, // 10分
       refetchOnWindowFocus: false,
@@ -23,7 +23,7 @@ export const queryClient = new QueryClient({
       retry: false,
     },
   },
-})
+});
 
 // クエリキーの定数
 export const QUERY_KEYS = {
@@ -72,4 +72,4 @@ export const QUERY_KEYS = {
     DATA: ['dashboard', 'data'] as const,
     STATS: ['dashboard', 'stats'] as const,
   },
-} as const
+} as const;

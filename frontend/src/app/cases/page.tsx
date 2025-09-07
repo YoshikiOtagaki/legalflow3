@@ -1,29 +1,29 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { ProtectedRoute } from '@/components/auth/protected-route'
-import { CaseList } from '@/components/cases/case-list'
-import { CaseDetail } from '@/components/cases/case-detail'
+import { useState } from 'react';
+import { ProtectedRoute } from '@/components/auth/protected-route';
+import { CaseList } from '@/components/cases/case-list';
+import { CaseDetail } from '@/components/cases/case-detail';
 
 export default function CasesPage() {
-  const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null)
-  const [showCreateForm, setShowCreateForm] = useState(false)
+  const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
+  const [showCreateForm, setShowCreateForm] = useState(false);
 
   const handleCaseSelect = (caseId: string) => {
-    setSelectedCaseId(caseId)
-  }
+    setSelectedCaseId(caseId);
+  };
 
   const handleBackToList = () => {
-    setSelectedCaseId(null)
-  }
+    setSelectedCaseId(null);
+  };
 
   const handleCreateCase = () => {
-    setShowCreateForm(true)
-  }
+    setShowCreateForm(true);
+  };
 
   const handleCloseCreateForm = () => {
-    setShowCreateForm(false)
-  }
+    setShowCreateForm(false);
+  };
 
   return (
     <ProtectedRoute>
@@ -44,7 +44,7 @@ export default function CasesPage() {
                 onBack={handleBackToList}
                 onEdit={() => {
                   // TODO: 編集フォームを開く
-                  console.log('Edit case:', selectedCaseId)
+                  console.log('Edit case:', selectedCaseId);
                 }}
               />
             ) : (
@@ -57,5 +57,5 @@ export default function CasesPage() {
         </main>
       </div>
     </ProtectedRoute>
-  )
+  );
 }

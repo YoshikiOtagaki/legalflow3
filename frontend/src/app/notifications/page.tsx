@@ -1,24 +1,24 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { ProtectedRoute } from '@/components/auth/protected-route'
-import { NotificationList } from '@/components/notifications/notification-list'
-import { NotificationSettings } from '@/components/notifications/notification-settings'
-import { NotificationPreferences } from '@/components/notifications/notification-preferences'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useState } from 'react';
+import { ProtectedRoute } from '@/components/auth/protected-route';
+import { NotificationList } from '@/components/notifications/notification-list';
+import { NotificationSettings } from '@/components/notifications/notification-settings';
+import { NotificationPreferences } from '@/components/notifications/notification-preferences';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function NotificationsPage() {
-  const [activeTab, setActiveTab] = useState('list')
+  const [activeTab, setActiveTab] = useState('list');
 
   const handleNotificationSelect = (notificationId: string) => {
     // TODO: 通知詳細ページに遷移
-    console.log('Notification selected:', notificationId)
-  }
+    console.log('Notification selected:', notificationId);
+  };
 
   const handleMarkAllRead = () => {
     // TODO: 一括既読化後の処理
-    console.log('All notifications marked as read')
-  }
+    console.log('All notifications marked as read');
+  };
 
   return (
     <ProtectedRoute>
@@ -33,7 +33,11 @@ export default function NotificationsPage() {
 
         <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
           <div className="px-4 py-6 sm:px-0">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="space-y-6"
+            >
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="list">通知一覧</TabsTrigger>
                 <TabsTrigger value="settings">設定</TabsTrigger>
@@ -59,5 +63,5 @@ export default function NotificationsPage() {
         </main>
       </div>
     </ProtectedRoute>
-  )
+  );
 }

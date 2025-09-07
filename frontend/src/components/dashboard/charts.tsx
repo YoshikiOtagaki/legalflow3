@@ -1,12 +1,18 @@
-'use client'
+'use client';
 
 import {
   CaseStatusDistribution,
   CaseCategoryDistribution,
   RevenueByMonth,
-  TimeTrackingStats
-} from '@/types/dashboard'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+  TimeTrackingStats,
+} from '@/types/dashboard';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import {
   PieChart,
   Pie,
@@ -20,23 +26,30 @@ import {
   Legend,
   ResponsiveContainer,
   LineChart,
-  Line
-} from 'recharts'
+  Line,
+} from 'recharts';
 
 interface ChartsProps {
-  caseStatusDistribution: CaseStatusDistribution[]
-  caseCategoryDistribution: CaseCategoryDistribution[]
-  revenueByMonth: RevenueByMonth[]
-  timeTrackingStats: TimeTrackingStats
+  caseStatusDistribution: CaseStatusDistribution[];
+  caseCategoryDistribution: CaseCategoryDistribution[];
+  revenueByMonth: RevenueByMonth[];
+  timeTrackingStats: TimeTrackingStats;
 }
 
 export function Charts({
   caseStatusDistribution,
   caseCategoryDistribution,
   revenueByMonth,
-  timeTrackingStats
+  timeTrackingStats,
 }: ChartsProps) {
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D']
+  const COLORS = [
+    '#0088FE',
+    '#00C49F',
+    '#FFBB28',
+    '#FF8042',
+    '#8884D8',
+    '#82CA9D',
+  ];
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -44,9 +57,7 @@ export function Charts({
       <Card>
         <CardHeader>
           <CardTitle>ケースステータス分布</CardTitle>
-          <CardDescription>
-            現在のケースのステータス別分布
-          </CardDescription>
+          <CardDescription>現在のケースのステータス別分布</CardDescription>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
@@ -62,7 +73,10 @@ export function Charts({
                 dataKey="count"
               >
                 {caseStatusDistribution.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={entry.color || COLORS[index % COLORS.length]}
+                  />
                 ))}
               </Pie>
               <Tooltip />
@@ -76,9 +90,7 @@ export function Charts({
       <Card>
         <CardHeader>
           <CardTitle>ケースカテゴリ分布</CardTitle>
-          <CardDescription>
-            ケースのカテゴリ別分布
-          </CardDescription>
+          <CardDescription>ケースのカテゴリ別分布</CardDescription>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
@@ -94,7 +106,10 @@ export function Charts({
                 dataKey="count"
               >
                 {caseCategoryDistribution.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={entry.color || COLORS[index % COLORS.length]}
+                  />
                 ))}
               </Pie>
               <Tooltip />
@@ -108,9 +123,7 @@ export function Charts({
       <Card>
         <CardHeader>
           <CardTitle>月別収益推移</CardTitle>
-          <CardDescription>
-            過去12ヶ月の収益とケース数の推移
-          </CardDescription>
+          <CardDescription>過去12ヶ月の収益とケース数の推移</CardDescription>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
@@ -122,12 +135,22 @@ export function Charts({
               <Tooltip
                 formatter={(value, name) => [
                   name === 'revenue' ? `¥${value.toLocaleString()}` : value,
-                  name === 'revenue' ? '収益' : 'ケース数'
+                  name === 'revenue' ? '収益' : 'ケース数',
                 ]}
               />
               <Legend />
-              <Bar yAxisId="left" dataKey="revenue" fill="#8884d8" name="revenue" />
-              <Bar yAxisId="right" dataKey="cases" fill="#82ca9d" name="cases" />
+              <Bar
+                yAxisId="left"
+                dataKey="revenue"
+                fill="#8884d8"
+                name="revenue"
+              />
+              <Bar
+                yAxisId="right"
+                dataKey="cases"
+                fill="#82ca9d"
+                name="cases"
+              />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
@@ -137,9 +160,7 @@ export function Charts({
       <Card>
         <CardHeader>
           <CardTitle>時間追跡統計</CardTitle>
-          <CardDescription>
-            ケース別の作業時間分布
-          </CardDescription>
+          <CardDescription>ケース別の作業時間分布</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -161,9 +182,14 @@ export function Charts({
             <div className="space-y-2">
               <h4 className="font-medium">上位ケース（作業時間）</h4>
               {timeTrackingStats.topCases.map((case_, index) => (
-                <div key={case_.caseId} className="flex items-center justify-between">
+                <div
+                  key={case_.caseId}
+                  className="flex items-center justify-between"
+                >
                   <div className="flex-1">
-                    <div className="text-sm font-medium truncate">{case_.caseTitle}</div>
+                    <div className="text-sm font-medium truncate">
+                      {case_.caseTitle}
+                    </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
                         className="bg-blue-600 h-2 rounded-full"
@@ -181,5 +207,5 @@ export function Charts({
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

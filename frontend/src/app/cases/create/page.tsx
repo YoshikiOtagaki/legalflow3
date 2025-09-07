@@ -1,19 +1,19 @@
-'use client'
+'use client';
 
-import { useRouter } from 'next/navigation'
-import { ProtectedRoute } from '@/components/auth/protected-route'
-import { CaseCreateForm } from '@/components/cases/case-create-form'
+import { useRouter } from 'next/navigation';
+import { ProtectedRoute } from '@/components/auth/protected-route';
+import { CaseCreateForm } from '@/components/cases/case-create-form';
 
 export default function CaseCreatePage() {
-  const router = useRouter()
+  const router = useRouter();
 
   const handleSuccess = (caseId: string) => {
-    router.push(`/cases/${caseId}`)
-  }
+    router.push(`/cases/${caseId}`);
+  };
 
   const handleCancel = () => {
-    router.push('/cases')
-  }
+    router.push('/cases');
+  };
 
   return (
     <ProtectedRoute>
@@ -28,13 +28,10 @@ export default function CaseCreatePage() {
 
         <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
           <div className="px-4 py-6 sm:px-0">
-            <CaseCreateForm
-              onSuccess={handleSuccess}
-              onCancel={handleCancel}
-            />
+            <CaseCreateForm onSuccess={handleSuccess} onCancel={handleCancel} />
           </div>
         </main>
       </div>
     </ProtectedRoute>
-  )
+  );
 }
