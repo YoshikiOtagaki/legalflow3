@@ -2,24 +2,29 @@
 
 import { useState, useEffect } from "react";
 import { useAuthStore } from "@/store/auth";
+import { fetchAuthSession } from "aws-amplify/auth";
 import { Party } from "@/types/case";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
 export function useParties() {
-  const { accessToken } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const [parties, setParties] = useState<Party[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchParties = async () => {
-    if (!accessToken) return;
+    if (!isAuthenticated) return;
 
     setLoading(true);
     setError(null);
 
     try {
+      // 認証セッションからトークンを取得
+      const session = await fetchAuthSession();
+      const accessToken = session.tokens?.accessToken?.toString();
+
       const response = await fetch(`${API_BASE_URL}/parties`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -44,9 +49,13 @@ export function useParties() {
   const createParty = async (
     partyData: Omit<Party, "id" | "createdAt" | "updatedAt">,
   ) => {
-    if (!accessToken) return;
+    if (!isAuthenticated) return;
 
     try {
+      // 認証セッションからトークンを取得
+      const session = await fetchAuthSession();
+      const accessToken = session.tokens?.accessToken?.toString();
+
       const response = await fetch(`${API_BASE_URL}/parties`, {
         method: "POST",
         headers: {
@@ -75,9 +84,13 @@ export function useParties() {
     id: string,
     partyData: Partial<Omit<Party, "id" | "createdAt" | "updatedAt">>,
   ) => {
-    if (!accessToken) return;
+    if (!isAuthenticated) return;
 
     try {
+      // 認証セッションからトークンを取得
+      const session = await fetchAuthSession();
+      const accessToken = session.tokens?.accessToken?.toString();
+
       const response = await fetch(`${API_BASE_URL}/parties/${id}`, {
         method: "PUT",
         headers: {
@@ -105,9 +118,13 @@ export function useParties() {
   };
 
   const deleteParty = async (id: string) => {
-    if (!accessToken) return;
+    if (!isAuthenticated) return;
 
     try {
+      // 認証セッションからトークンを取得
+      const session = await fetchAuthSession();
+      const accessToken = session.tokens?.accessToken?.toString();
+
       const response = await fetch(`${API_BASE_URL}/parties/${id}`, {
         method: "DELETE",
         headers: {
@@ -131,7 +148,7 @@ export function useParties() {
 
   useEffect(() => {
     fetchParties();
-  }, [accessToken]);
+  }, [isAuthenticated]);
 
   return {
     parties,

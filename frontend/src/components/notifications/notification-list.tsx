@@ -248,7 +248,7 @@ export function NotificationList({
                   const value = e.target.value;
                   handleFilterChange(
                     "isRead",
-                    value === "" ? undefined : value === "true",
+                    value === "" ? false : value === "true",
                   );
                 }}
                 className="w-full p-2 border border-gray-300 rounded-md"
@@ -271,7 +271,7 @@ export function NotificationList({
                   const value = e.target.value;
                   handleFilterChange(
                     "isArchived",
-                    value === "" ? undefined : value === "true",
+                    value === "" ? false : value === "true",
                   );
                 }}
                 className="w-full p-2 border border-gray-300 rounded-md"

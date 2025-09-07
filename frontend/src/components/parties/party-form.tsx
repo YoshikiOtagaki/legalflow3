@@ -29,7 +29,7 @@ import { Save, ArrowLeft } from "lucide-react";
 const partyFormSchema = z.object({
   name: z.string().min(1, "名前を入力してください"),
   type: z.enum(["Individual", "Corporate"], {
-    required_error: "タイプを選択してください",
+    message: "タイプを選択してください",
   }),
   email: z
     .string()

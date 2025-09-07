@@ -1,3 +1,5 @@
+import { User } from "./user";
+
 export interface Notification {
   id: string;
   userId: string;
@@ -46,12 +48,6 @@ export interface NotificationChannel {
   config?: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
 }
 
 export interface NotificationSettings {

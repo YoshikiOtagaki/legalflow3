@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuthStore } from "@/store/auth";
+import { fetchAuthSession } from "aws-amplify/auth";
 import {
   Notification,
   NotificationListResponse,
@@ -13,7 +14,7 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
 export function useNotifications(filters: NotificationFilters = {}) {
-  const { accessToken } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +27,7 @@ export function useNotifications(filters: NotificationFilters = {}) {
   });
 
   const fetchNotifications = async (newFilters: NotificationFilters = {}) => {
-    if (!accessToken) return;
+    if (!isAuthenticated) return;
 
     setLoading(true);
     setError(null);
@@ -39,6 +40,10 @@ export function useNotifications(filters: NotificationFilters = {}) {
           queryParams.append(key, value.toString());
         }
       });
+
+      // 認証セッションからトークンを取得
+      const session = await fetchAuthSession();
+      const accessToken = session.tokens?.accessToken?.toString();
 
       const response = await fetch(
         `${API_BASE_URL}/notifications?${queryParams}`,
@@ -72,9 +77,13 @@ export function useNotifications(filters: NotificationFilters = {}) {
   };
 
   const markAsRead = async (notificationId: string) => {
-    if (!accessToken) return;
+    if (!isAuthenticated) return;
 
     try {
+      // 認証セッションからトークンを取得
+      const session = await fetchAuthSession();
+      const accessToken = session.tokens?.accessToken?.toString();
+
       const response = await fetch(
         `${API_BASE_URL}/notifications/${notificationId}/read`,
         {
@@ -110,9 +119,13 @@ export function useNotifications(filters: NotificationFilters = {}) {
   };
 
   const markAsUnread = async (notificationId: string) => {
-    if (!accessToken) return;
+    if (!isAuthenticated) return;
 
     try {
+      // 認証セッションからトークンを取得
+      const session = await fetchAuthSession();
+      const accessToken = session.tokens?.accessToken?.toString();
+
       const response = await fetch(
         `${API_BASE_URL}/notifications/${notificationId}/unread`,
         {
@@ -144,9 +157,13 @@ export function useNotifications(filters: NotificationFilters = {}) {
   };
 
   const archiveNotification = async (notificationId: string) => {
-    if (!accessToken) return;
+    if (!isAuthenticated) return;
 
     try {
+      // 認証セッションからトークンを取得
+      const session = await fetchAuthSession();
+      const accessToken = session.tokens?.accessToken?.toString();
+
       const response = await fetch(
         `${API_BASE_URL}/notifications/${notificationId}/archive`,
         {
@@ -181,9 +198,13 @@ export function useNotifications(filters: NotificationFilters = {}) {
   };
 
   const deleteNotification = async (notificationId: string) => {
-    if (!accessToken) return;
+    if (!isAuthenticated) return;
 
     try {
+      // 認証セッションからトークンを取得
+      const session = await fetchAuthSession();
+      const accessToken = session.tokens?.accessToken?.toString();
+
       const response = await fetch(
         `${API_BASE_URL}/notifications/${notificationId}`,
         {
@@ -210,9 +231,13 @@ export function useNotifications(filters: NotificationFilters = {}) {
   };
 
   const markAllAsRead = async () => {
-    if (!accessToken) return;
+    if (!isAuthenticated) return;
 
     try {
+      // 認証セッションからトークンを取得
+      const session = await fetchAuthSession();
+      const accessToken = session.tokens?.accessToken?.toString();
+
       const response = await fetch(
         `${API_BASE_URL}/notifications/mark-all-read`,
         {
@@ -249,7 +274,7 @@ export function useNotifications(filters: NotificationFilters = {}) {
 
   useEffect(() => {
     fetchNotifications();
-  }, [accessToken]);
+  }, [isAuthenticated]);
 
   return {
     notifications,
@@ -267,18 +292,22 @@ export function useNotifications(filters: NotificationFilters = {}) {
 }
 
 export function useNotificationSettings() {
-  const { accessToken } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const [settings, setSettings] = useState<NotificationSettings | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchSettings = async () => {
-    if (!accessToken) return;
+    if (!isAuthenticated) return;
 
     setLoading(true);
     setError(null);
 
     try {
+      // 認証セッションからトークンを取得
+      const session = await fetchAuthSession();
+      const accessToken = session.tokens?.accessToken?.toString();
+
       const response = await fetch(`${API_BASE_URL}/notification-settings`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -301,9 +330,13 @@ export function useNotificationSettings() {
   };
 
   const updateSettings = async (newSettings: Partial<NotificationSettings>) => {
-    if (!accessToken) return;
+    if (!isAuthenticated) return;
 
     try {
+      // 認証セッションからトークンを取得
+      const session = await fetchAuthSession();
+      const accessToken = session.tokens?.accessToken?.toString();
+
       const response = await fetch(`${API_BASE_URL}/notification-settings`, {
         method: "PUT",
         headers: {
@@ -329,7 +362,7 @@ export function useNotificationSettings() {
 
   useEffect(() => {
     fetchSettings();
-  }, [accessToken]);
+  }, [isAuthenticated]);
 
   return {
     settings,

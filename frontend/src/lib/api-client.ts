@@ -1,11 +1,13 @@
 "use client";
 
-import { Case, Party } from "@/types/case";
+import { Case, Party, Option } from "@/types/case";
 import { Document } from "@/types/document";
 import { TimesheetEntry } from "@/types/timesheet";
 import { Notification } from "@/types/notification";
 import { DashboardData } from "@/types/dashboard";
 import { User } from "@/types/user";
+
+export type { Option };
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";

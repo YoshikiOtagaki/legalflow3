@@ -1,3 +1,6 @@
+import { User } from "./user";
+import { Case } from "./case";
+
 export interface Document {
   id: string;
   title: string;
@@ -62,18 +65,6 @@ export interface DocumentTemplate {
   updatedAt: string;
   createdById: string;
   createdBy?: User;
-}
-
-export interface Case {
-  id: string;
-  caseNumber: string;
-  title: string;
-}
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
 }
 
 export interface DocumentListResponse {

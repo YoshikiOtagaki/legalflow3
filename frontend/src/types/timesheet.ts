@@ -1,3 +1,6 @@
+import { User } from "./user";
+import { Case } from "./case";
+
 export interface TimesheetEntry {
   id: string;
   userId: string;
@@ -25,18 +28,6 @@ export interface TimesheetStatus {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface Case {
-  id: string;
-  caseNumber: string;
-  title: string;
-}
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
 }
 
 export interface Timer {

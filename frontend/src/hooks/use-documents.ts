@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuthStore } from "@/store/auth";
+import { fetchAuthSession } from "aws-amplify/auth";
 import {
   Document,
   DocumentListResponse,
@@ -14,7 +15,7 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
 export function useDocuments(filters: DocumentFilters = {}) {
-  const { accessToken } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +27,7 @@ export function useDocuments(filters: DocumentFilters = {}) {
   });
 
   const fetchDocuments = async (newFilters: DocumentFilters = {}) => {
-    if (!accessToken) return;
+    if (!isAuthenticated) return;
 
     setLoading(true);
     setError(null);
@@ -43,6 +44,10 @@ export function useDocuments(filters: DocumentFilters = {}) {
           }
         }
       });
+
+      // 認証セッションからトークンを取得
+      const session = await fetchAuthSession();
+      const accessToken = session.tokens?.accessToken?.toString();
 
       const response = await fetch(`${API_BASE_URL}/documents?${queryParams}`, {
         headers: {
@@ -77,7 +82,7 @@ export function useDocuments(filters: DocumentFilters = {}) {
 
   useEffect(() => {
     fetchDocuments();
-  }, [accessToken]);
+  }, [isAuthenticated]);
 
   return {
     documents,
@@ -90,18 +95,22 @@ export function useDocuments(filters: DocumentFilters = {}) {
 }
 
 export function useDocument(id: string) {
-  const { accessToken } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const [document, setDocument] = useState<Document | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchDocument = async () => {
-    if (!accessToken || !id) return;
+    if (!isAuthenticated || !id) return;
 
     setLoading(true);
     setError(null);
 
     try {
+      // 認証セッションからトークンを取得
+      const session = await fetchAuthSession();
+      const accessToken = session.tokens?.accessToken?.toString();
+
       const response = await fetch(`${API_BASE_URL}/documents/${id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -127,7 +136,7 @@ export function useDocument(id: string) {
     if (id) {
       fetchDocument();
     }
-  }, [accessToken, id]);
+  }, [isAuthenticated, id]);
 
   return {
     document,
@@ -138,19 +147,23 @@ export function useDocument(id: string) {
 }
 
 export function useDocumentGeneration() {
-  const { accessToken } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const generateDocument = async (
     request: DocumentGenerationRequest,
   ): Promise<DocumentGenerationResponse> => {
-    if (!accessToken) throw new Error("認証が必要です");
+    if (!isAuthenticated) throw new Error("認証が必要です");
 
     setIsGenerating(true);
     setError(null);
 
     try {
+      // 認証セッションからトークンを取得
+      const session = await fetchAuthSession();
+      const accessToken = session.tokens?.accessToken?.toString();
+
       const response = await fetch(`${API_BASE_URL}/documents/generate`, {
         method: "POST",
         headers: {

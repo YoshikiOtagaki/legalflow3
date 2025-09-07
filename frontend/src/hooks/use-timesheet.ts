@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuthStore } from "@/store/auth";
+import { fetchAuthSession } from "aws-amplify/auth";
 import {
   TimesheetEntry,
   TimesheetListResponse,
@@ -14,7 +15,7 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
 export function useTimesheet(filters: TimesheetFilters = {}) {
-  const { accessToken, user } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const [entries, setEntries] = useState<TimesheetEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +27,7 @@ export function useTimesheet(filters: TimesheetFilters = {}) {
   });
 
   const fetchEntries = async (newFilters: TimesheetFilters = {}) => {
-    if (!accessToken) return;
+    if (!isAuthenticated) return;
 
     setLoading(true);
     setError(null);
@@ -39,6 +40,10 @@ export function useTimesheet(filters: TimesheetFilters = {}) {
           queryParams.append(key, value.toString());
         }
       });
+
+      // 認証セッションからトークンを取得
+      const session = await fetchAuthSession();
+      const accessToken = session.tokens?.accessToken?.toString();
 
       const response = await fetch(
         `${API_BASE_URL}/timesheet-entries?${queryParams}`,
@@ -76,9 +81,13 @@ export function useTimesheet(filters: TimesheetFilters = {}) {
       "id" | "createdAt" | "updatedAt" | "userId"
     >,
   ) => {
-    if (!accessToken) return;
+    if (!isAuthenticated) return;
 
     try {
+      // 認証セッションからトークンを取得
+      const session = await fetchAuthSession();
+      const accessToken = session.tokens?.accessToken?.toString();
+
       const response = await fetch(`${API_BASE_URL}/timesheet-entries`, {
         method: "POST",
         headers: {
@@ -111,9 +120,13 @@ export function useTimesheet(filters: TimesheetFilters = {}) {
       Omit<TimesheetEntry, "id" | "createdAt" | "updatedAt" | "userId">
     >,
   ) => {
-    if (!accessToken) return;
+    if (!isAuthenticated) return;
 
     try {
+      // 認証セッションからトークンを取得
+      const session = await fetchAuthSession();
+      const accessToken = session.tokens?.accessToken?.toString();
+
       const response = await fetch(`${API_BASE_URL}/timesheet-entries/${id}`, {
         method: "PUT",
         headers: {
@@ -143,9 +156,13 @@ export function useTimesheet(filters: TimesheetFilters = {}) {
   };
 
   const deleteEntry = async (id: string) => {
-    if (!accessToken) return;
+    if (!isAuthenticated) return;
 
     try {
+      // 認証セッションからトークンを取得
+      const session = await fetchAuthSession();
+      const accessToken = session.tokens?.accessToken?.toString();
+
       const response = await fetch(`${API_BASE_URL}/timesheet-entries/${id}`, {
         method: "DELETE",
         headers: {
@@ -171,7 +188,7 @@ export function useTimesheet(filters: TimesheetFilters = {}) {
 
   useEffect(() => {
     fetchEntries();
-  }, [accessToken]);
+  }, [isAuthenticated]);
 
   return {
     entries,
@@ -186,7 +203,7 @@ export function useTimesheet(filters: TimesheetFilters = {}) {
 }
 
 export function useTimer() {
-  const { accessToken } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const [timers, setTimers] = useState<Timer[]>([]);
   const [currentTimer, setCurrentTimer] = useState<Timer | null>(null);
   const [isRunning, setIsRunning] = useState(false);
@@ -194,12 +211,16 @@ export function useTimer() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchTimers = async () => {
-    if (!accessToken) return;
+    if (!isAuthenticated) return;
 
     setLoading(true);
     setError(null);
 
     try {
+      // 認証セッションからトークンを取得
+      const session = await fetchAuthSession();
+      const accessToken = session.tokens?.accessToken?.toString();
+
       const response = await fetch(`${API_BASE_URL}/timers`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -233,9 +254,13 @@ export function useTimer() {
     description: string,
     tags: string[] = [],
   ) => {
-    if (!accessToken) return;
+    if (!isAuthenticated) return;
 
     try {
+      // 認証セッションからトークンを取得
+      const session = await fetchAuthSession();
+      const accessToken = session.tokens?.accessToken?.toString();
+
       const response = await fetch(`${API_BASE_URL}/timers/start`, {
         method: "POST",
         headers: {
@@ -267,9 +292,13 @@ export function useTimer() {
   };
 
   const stopTimer = async (timerId: string) => {
-    if (!accessToken) return;
+    if (!isAuthenticated) return;
 
     try {
+      // 認証セッションからトークンを取得
+      const session = await fetchAuthSession();
+      const accessToken = session.tokens?.accessToken?.toString();
+
       const response = await fetch(`${API_BASE_URL}/timers/${timerId}/stop`, {
         method: "POST",
         headers: {
@@ -298,9 +327,13 @@ export function useTimer() {
   };
 
   const pauseTimer = async (timerId: string) => {
-    if (!accessToken) return;
+    if (!isAuthenticated) return;
 
     try {
+      // 認証セッションからトークンを取得
+      const session = await fetchAuthSession();
+      const accessToken = session.tokens?.accessToken?.toString();
+
       const response = await fetch(`${API_BASE_URL}/timers/${timerId}/pause`, {
         method: "POST",
         headers: {
@@ -331,9 +364,13 @@ export function useTimer() {
   };
 
   const resumeTimer = async (timerId: string) => {
-    if (!accessToken) return;
+    if (!isAuthenticated) return;
 
     try {
+      // 認証セッションからトークンを取得
+      const session = await fetchAuthSession();
+      const accessToken = session.tokens?.accessToken?.toString();
+
       const response = await fetch(`${API_BASE_URL}/timers/${timerId}/resume`, {
         method: "POST",
         headers: {
@@ -363,7 +400,7 @@ export function useTimer() {
 
   useEffect(() => {
     fetchTimers();
-  }, [accessToken]);
+  }, [isAuthenticated]);
 
   return {
     timers,

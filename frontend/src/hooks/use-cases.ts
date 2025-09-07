@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useAuthStore } from "@/store/auth";
+import { fetchAuthSession } from "aws-amplify/auth";
 import { Case, CaseListResponse, CaseFilters } from "@/types/case";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
 export function useCases(filters: CaseFilters = {}) {
-  const { accessToken } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const [cases, setCases] = useState<Case[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +21,7 @@ export function useCases(filters: CaseFilters = {}) {
   });
 
   const fetchCases = async (newFilters: CaseFilters = {}) => {
-    if (!accessToken) return;
+    if (!isAuthenticated) return;
 
     setLoading(true);
     setError(null);
@@ -33,6 +34,10 @@ export function useCases(filters: CaseFilters = {}) {
           queryParams.append(key, value.toString());
         }
       });
+
+      // 認証セッションからトークンを取得
+      const session = await fetchAuthSession();
+      const accessToken = session.tokens?.accessToken?.toString();
 
       const response = await fetch(`${API_BASE_URL}/cases?${queryParams}`, {
         headers: {
@@ -67,7 +72,7 @@ export function useCases(filters: CaseFilters = {}) {
 
   useEffect(() => {
     fetchCases();
-  }, [accessToken]);
+  }, [isAuthenticated]);
 
   return {
     cases,
@@ -80,18 +85,22 @@ export function useCases(filters: CaseFilters = {}) {
 }
 
 export function useCase(id: string) {
-  const { accessToken } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const [case_, setCase] = useState<Case | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchCase = async () => {
-    if (!accessToken || !id) return;
+    if (!isAuthenticated || !id) return;
 
     setLoading(true);
     setError(null);
 
     try {
+      // 認証セッションからトークンを取得
+      const session = await fetchAuthSession();
+      const accessToken = session.tokens?.accessToken?.toString();
+
       const response = await fetch(`${API_BASE_URL}/cases/${id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -117,7 +126,7 @@ export function useCase(id: string) {
     if (id) {
       fetchCase();
     }
-  }, [accessToken, id]);
+  }, [isAuthenticated, id]);
 
   return {
     case: case_,

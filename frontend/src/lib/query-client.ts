@@ -20,7 +20,7 @@ export const queryClient = new QueryClient({
       },
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
       staleTime: 5 * 60 * 1000, // 5分
-      cacheTime: 10 * 60 * 1000, // 10分
+      gcTime: 10 * 60 * 1000, // 10分
       refetchOnWindowFocus: false,
       refetchOnReconnect: true,
     },

@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Calendar, ArrowLeft, Save } from "lucide-react";
-import { apiClient } from "@/lib/api-client";
+import { apiClient, Option } from "@/lib/api-client";
 
 const caseCreateSchema = z.object({
   title: z.string().min(1, "タイトルを入力してください"),
@@ -46,11 +46,6 @@ type CaseCreateFormData = z.infer<typeof caseCreateSchema>;
 interface CaseCreateFormProps {
   onSuccess?: (caseId: string) => void;
   onCancel?: () => void;
-}
-
-interface Option {
-  id: string;
-  name: string;
 }
 
 export function CaseCreateForm({ onSuccess, onCancel }: CaseCreateFormProps) {
