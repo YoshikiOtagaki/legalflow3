@@ -1,0 +1,73 @@
+{
+  "name": "legalflow3",
+  "version": "1.0.0",
+  "description": "法律事務所向けケース管理システム",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:backend": "cd backend/api_service && npm run test",
+    "test:frontend": "cd frontend && npm run test",
+    "test:integration": "echo \"Integration tests not implemented yet\"",
+    "test:all": "npm run test:backend && npm run test:frontend && npm run test:integration",
+    "test:coverage": "npm run test:backend:coverage && npm run test:frontend:coverage",
+    "test:backend:coverage": "cd backend/api_service && npm run test:coverage",
+    "test:frontend:coverage": "cd frontend && npm run test:coverage",
+    "test:performance": "npm run test:backend:performance && npm run test:frontend:performance",
+    "test:backend:performance": "cd backend/api_service && npm run test:performance",
+    "test:frontend:performance": "cd frontend && npm run test:performance",
+    "test:cleanup": "npm run test:backend:cleanup && npm run test:frontend:cleanup",
+    "test:backend:cleanup": "cd backend/api_service && npm run test:cleanup",
+    "test:frontend:cleanup": "cd frontend && npm run test:cleanup",
+    "install:all": "npm install && cd backend/api_service && npm install && cd ../../frontend && npm install",
+    "build:all": "cd backend/api_service && npm run build && cd ../../frontend && npm run build",
+    "start:all": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:backend": "cd backend/api_service && npm run start",
+    "start:frontend": "cd frontend && npm run dev",
+    "dev:all": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend/api_service && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "lint:all": "npm run lint:backend && npm run lint:frontend",
+    "lint:backend": "cd backend/api_service && npm run lint",
+    "lint:frontend": "cd frontend && npm run lint",
+    "format:all": "npm run format:backend && npm run format:frontend",
+    "format:backend": "cd backend/api_service && npm run format",
+    "format:frontend": "cd frontend && npm run format",
+    "type-check:all": "npm run type-check:backend && npm run type-check:frontend",
+    "type-check:backend": "cd backend/api_service && npm run type-check",
+    "type-check:frontend": "cd frontend && npm run type-check",
+    "clean:all": "npm run clean:backend && npm run clean:frontend",
+    "clean:backend": "cd backend/api_service && npm run clean",
+    "clean:frontend": "cd frontend && npm run clean",
+    "setup": "npm run install:all && npm run build:all",
+    "postinstall": "npm run install:all",
+    "amplify:build": "npx @aws-amplify/backend-cli pipeline-deploy --branch $AWS_BRANCH --app-id $AWS_APP_ID",
+    "amplify:deploy": "npx @aws-amplify/backend-cli sandbox deploy",
+    "amplify:delete": "npx @aws-amplify/backend-cli sandbox delete",
+    "build": "npm run amplify:build"
+  },
+  "devDependencies": {
+    "@aws-amplify/backend": "^1.16.1",
+    "@aws-amplify/backend-cli": "^1.8.0",
+    "@aws-amplify/cli": "^12.0.0",
+    "aws-cdk-lib": "^2.204.0",
+    "concurrently": "^8.2.2",
+    "constructs": "^10.4.2",
+    "esbuild": "^0.25.9",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "workspaces": [
+    "backend/api_service",
+    "frontend"
+  ],
+  "dependencies": {
+    "aws-amplify": "^6.15.5"
+  },
+  "bin": {
+    "ampx": "./node_modules/.bin/ampx"
+  }
+}

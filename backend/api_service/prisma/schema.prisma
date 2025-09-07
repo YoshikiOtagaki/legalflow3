@@ -1,0 +1,470 @@
+// Prisma Schema - Final Version (v3.0)
+// Generated on 2025-09-06
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./test.db"
+}
+
+// --- Enums ---
+
+enum Role {
+  Lawyer
+  Paralegal
+}
+
+enum Plan {
+  Free
+  Lawyer
+  Paralegal
+}
+
+enum CaseRole {
+  Lead
+  Collaborator
+}
+
+enum DocumentStatus {
+  Submitted
+  Provisional
+  Withheld
+}
+
+enum CourtDivisionType {
+  COURT
+  DIVISION
+  SECTION
+}
+
+enum CourtPersonnelRole {
+  JUDGE
+  CLERK
+}
+
+// --- Core User & Team Models ---
+
+model User {
+  id              String           @id @default(cuid())
+  email           String           @unique
+  name            String?
+  role            Role             @default(Lawyer)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  subscription    Subscription?
+  caseAssignments CaseAssignment[]
+  tasks           Task[]           @relation("AssignedTasks")
+  notifications   Notification[]
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  plan      Plan     @default(Free)
+  status    String
+  caseCount Int      @default(0)
+}
+
+// --- Party (Case Parties) Models ---
+
+model Party {
+  id              String    @id @default(cuid())
+  isCorporation   Boolean   @default(false)
+  isFormerClient  Boolean   @default(false)
+
+  individual      IndividualProfile?
+  corporation     CorporateProfile?
+  caseLinks       CaseParty[]
+}
+
+model IndividualProfile {
+  id              String    @id @default(cuid())
+  partyId         String    @unique
+  party           Party     @relation(fields: [partyId], references: [id])
+
+  lastName        String?
+  firstName       String?
+  lastNameKana    String?
+  firstNameKana   String?
+  honorific       String?
+  formerName      String?
+  dateOfBirth     DateTime?
+  legalDomicile   String?
+
+  email           String?
+  phone           String?
+  mobilePhone     String?
+  fax             String?
+  postalCode      String?
+  address1        String?
+  address2        String?
+
+  companyName     String?
+  companyNameKana String?
+  companyPostalCode String?
+  companyAddress1 String?
+  companyAddress2 String?
+  companyPhone    String?
+  companyFax      String?
+  department      String?
+  position        String?
+  companyEmail    String?
+
+  itemsInCustody  String?
+  cautions        String?
+  remarks         String?
+}
+
+model CorporateProfile {
+  id                      String    @id @default(cuid())
+  partyId                 String    @unique
+  party                   Party     @relation(fields: [partyId], references: [id])
+
+  name                    String?
+  nameKana                String?
+  postalCode              String?
+  address1                String?
+  address2                String?
+  phone                   String?
+  mobilePhone             String?
+  fax                     String?
+  email                   String?
+  websiteURL              String?
+
+  representativeTitle     String?
+  representativeLastName  String?
+  representativeFirstName String?
+
+  contactLastName         String?
+  contactFirstName        String?
+  contactLastNameKana     String?
+  contactFirstNameKana    String?
+  contactDepartment       String?
+  contactPosition         String?
+  contactDirectPhone      String?
+  contactEmail            String?
+  contactMobilePhone      String?
+  contactPostalCode       String?
+  contactAddress1         String?
+  contactAddress2         String?
+
+  itemsInCustody          String?
+  cautions                String?
+  remarks                 String?
+}
+
+// --- Lawyer & Law Firm Models ---
+
+model Lawyer {
+  id                  String    @id @default(cuid())
+
+  lastName            String?
+  firstName           String?
+  lastNameKana        String?
+  firstNameKana       String?
+  honorific           String?
+
+  registrationNumber  String?   @unique
+
+  homePhone           String?
+  homePostalCode      String?
+  homeAddress1        String?
+  homeAddress2        String?
+
+  itemsInCustody      String?
+  cautions            String?
+  remarks             String?
+
+  officeId            String?
+  office              LawFirmOffice? @relation(fields: [officeId], references: [id])
+}
+
+model LawFirm {
+  id      String    @id @default(cuid())
+  name    String
+  offices LawFirmOffice[]
+}
+
+model LawFirmOffice {
+  id          String    @id @default(cuid())
+  lawFirmId   String
+  lawFirm     LawFirm   @relation(fields: [lawFirmId], references: [id])
+  isPrimary   Boolean   @default(false)
+  officeName  String?
+  postalCode  String?
+  address1    String?
+  address2    String?
+  phone       String?
+  fax         String?
+  lawyers     Lawyer[]
+}
+
+// --- Court Models ---
+
+model Courthouse {
+  id          String    @id @default(cuid())
+  name        String
+  postalCode  String?
+  address1    String?
+  address2    String?
+  phone       String?
+
+  divisions   CourtDivision[]
+  superiorTo  JurisdictionRule[] @relation("SuperiorCourt")
+  inferiorTo  JurisdictionRule[] @relation("InferiorCourt")
+}
+
+model CourtDivision {
+  id          String    @id @default(cuid())
+  name        String
+  type        CourtDivisionType
+  phone       String?
+  fax         String?
+
+  courthouseId String
+  courthouse  Courthouse @relation(fields: [courthouseId], references: [id])
+
+  parentId    String?
+  parent      CourtDivision?  @relation("Hierarchy", fields: [parentId], references: [id])
+  children    CourtDivision[] @relation("Hierarchy")
+
+  personnel   CourtPersonnel[]
+  cases       Case[]
+}
+
+model CourtPersonnel {
+  id              String    @id @default(cuid())
+  name            String
+  email           String?
+  role            CourtPersonnelRole
+
+  courtDivisionId String
+  courtDivision   CourtDivision @relation(fields: [courtDivisionId], references: [id])
+}
+
+model JurisdictionRule {
+  id                  String @id @default(cuid())
+  lowerCourthouseId   String
+  lowerCourthouse     Courthouse @relation("InferiorCourt", fields: [lowerCourthouseId], references: [id])
+  superiorCourthouseId String
+  superiorCourthouse  Courthouse @relation("SuperiorCourt", fields: [superiorCourthouseId], references: [id])
+  caseCategoryId      String?
+  caseCategory        CaseCategory? @relation(fields: [caseCategoryId], references: [id])
+}
+
+// --- Case Models ---
+
+model Case {
+  id                      String    @id @default(cuid())
+  name                    String
+  caseNumber              String?
+  status                  String?   // e.g., Active, Closed
+  trialLevel              String?   // e.g., First, Second, Third Instance
+  hourlyRate              Float?
+
+  firstConsultationDate   DateTime?
+  engagementDate          DateTime?
+  caseClosedDate          DateTime?
+  litigationStartDate     DateTime?
+  oralArgumentEndDate     DateTime?
+  judgmentDate            DateTime?
+  judgmentReceivedDate    DateTime?
+
+  hasEngagementLetter     Boolean @default(false)
+  engagementLetterPath    String?
+
+  remarks                 String?
+  customProperties        Json?
+
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  categoryId              String
+  category                CaseCategory @relation(fields: [categoryId], references: [id])
+
+  currentPhaseId          String?
+  currentPhase            CasePhase? @relation(fields: [currentPhaseId], references: [id])
+
+  courtDivisionId         String?
+  courtDivision           CourtDivision? @relation(fields: [courtDivisionId], references: [id])
+
+  assignments             CaseAssignment[]
+  parties                 CaseParty[]
+  events                  CaseEvent[]
+  tasks                   Task[]
+  timesheetEntries        TimesheetEntry[]
+  expenses                Expense[]
+  deposits                Deposit[]
+  memos                   Memo[]
+}
+
+model CaseAssignment {
+  caseId   String
+  case     Case   @relation(fields: [caseId], references: [id])
+  userId   String
+  user     User   @relation(fields: [userId], references: [id])
+  role     CaseRole @default(Collaborator)
+
+  @@id([caseId, userId])
+}
+
+model CaseParty {
+  caseId   String
+  case     Case   @relation(fields: [caseId], references: [id])
+  partyId  String
+  party    Party  @relation(fields: [partyId], references: [id])
+  role     String // e.g., 'plaintiff', 'defendant', 'our_insurance'
+
+  @@id([caseId, partyId, role])
+}
+
+model CaseCategory {
+  id              String  @id @default(cuid())
+  name            String  @unique
+  parentCategoryId String?
+  parentCategory  CaseCategory? @relation("SubCategories", fields: [parentCategoryId], references: [id])
+  subCategories   CaseCategory[] @relation("SubCategories")
+
+  cases           Case[]
+  phases          CasePhase[]
+  roleDefinitions Json
+  jurisdictionRules JurisdictionRule[]
+}
+
+model CasePhase {
+  id           String @id @default(cuid())
+  name         String
+  order        Int
+  categoryId   String
+  category     CaseCategory @relation(fields: [categoryId], references: [id])
+
+  cases        Case[]
+  transitionsFrom PhaseTransitionRule[] @relation("FromPhase")
+  transitionsTo   PhaseTransitionRule[] @relation("ToPhase")
+}
+
+// --- Other Supporting Models ---
+
+model Task {
+  id              String   @id @default(cuid())
+  caseId          String
+  case            Case     @relation(fields: [caseId], references: [id])
+  description     String
+  dueDate         DateTime?
+  isCompleted     Boolean  @default(false)
+  isAutoGenerated Boolean  @default(false)
+
+  assignedToId    String?
+  assignedTo      User?    @relation("AssignedTasks", fields: [assignedToId], references: [id])
+}
+
+model CaseEvent {
+  id          String   @id @default(cuid())
+  caseId      String
+  case        Case     @relation(fields: [caseId], references: [id])
+  eventType   String
+  dateTime    DateTime
+  location    String?
+  report      HearingReport?
+}
+
+model Memo {
+  id        String   @id @default(cuid())
+  caseId    String
+  case      Case     @relation(fields: [caseId], references: [id])
+  content   String
+  authorId  String
+  createdAt DateTime @default(now())
+}
+
+model HearingReport {
+  id        String    @id @default(cuid())
+  caseEventId String    @unique
+  caseEvent   CaseEvent @relation(fields: [caseEventId], references: [id])
+  attendees   Json
+  notes       String?
+  documents   SubmittedDocument[]
+}
+
+model SubmittedDocument {
+  id              String   @id @default(cuid())
+  hearingReportId String
+  hearingReport   HearingReport @relation(fields: [hearingReportId], references: [id])
+  documentName    String
+  status          DocumentStatus @default(Submitted)
+}
+
+model TimesheetEntry {
+  id          String   @id @default(cuid())
+  caseId      String
+  case        Case     @relation(fields: [caseId], references: [id])
+  userId      String
+  startTime   DateTime
+  endTime     DateTime
+  description String?
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+  caseId      String
+  case        Case     @relation(fields: [caseId], references: [id])
+  date        DateTime
+  amount      Float
+  description String
+}
+
+model Deposit {
+  id          String   @id @default(cuid())
+  caseId      String
+  case        Case     @relation(fields: [caseId], references: [id])
+  date        DateTime
+  amount      Float
+  description String
+}
+
+model PhaseTransitionRule {
+  id             String @id @default(cuid())
+  fromPhaseId    String
+  fromPhase      CasePhase @relation("FromPhase", fields: [fromPhaseId], references: [id])
+  toPhaseId      String
+  toPhase        CasePhase @relation("ToPhase", fields: [toPhaseId], references: [id])
+  taskTemplateId String
+  taskTemplate   TaskTemplate @relation(fields: [taskTemplateId], references: [id])
+}
+
+model TaskTemplate {
+  id    String             @id @default(cuid())
+  name  String
+  items TaskTemplateItem[]
+  rules PhaseTransitionRule[]
+}
+
+model TaskTemplateItem {
+  id              String       @id @default(cuid())
+  taskTemplateId  String
+  taskTemplate    TaskTemplate @relation(fields: [taskTemplateId], references: [id])
+  description     String
+  dueDateOffsetDays Int
+}
+
+model DocumentTemplate {
+  id           String @id @default(cuid())
+  name         String
+  filePath     String
+  placeholders Json
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  eventType String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

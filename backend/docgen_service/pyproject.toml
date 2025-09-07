@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "docgen-service"
+version = "1.0.0"
+description = "LegalFlow Document Generation Service"
+authors = [{name = "LegalFlow Team"}]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "python-docx>=1.1.0",
+    "python-multipart>=0.0.6",
+    "pydantic>=2.0.0",
+    "httpx>=0.25.0",
+    "pillow>=10.0.0",
+    "pytesseract>=0.3.10",
+    "pdf2image>=1.16.0",
+    "google-generativeai>=0.3.0",
+    "python-jose[cryptography]>=3.3.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.5.0",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "W503"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[project.scripts]
+lint = "flake8 ."
+format = "black ."
+format-check = "black --check ."
+type-check = "mypy ."

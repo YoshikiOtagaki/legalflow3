@@ -1,0 +1,86 @@
+openapi: 3.0.0
+info:
+  title: LegalFlow API
+  version: 1.0.0
+  description: 弁護士向け案件管理システムのAPI仕様書
+
+paths:
+  # ... (existing paths for /cases, /parties, /lawyers) ...
+
+  /law-firms:
+    get:
+      summary: 弁護士法人の一覧を取得
+      # ... (etc.)
+    post:
+      summary: 新しい弁護士法人を作成
+      # ... (etc.)
+
+  /law-firms/{firmId}:
+    get:
+      summary: 特定の弁護士法人を取得
+      # ... (etc.)
+    put:
+      summary: 弁護士法人を更新
+      # ... (etc.)
+    delete:
+      summary: 弁護士法人を削除
+      # ... (etc.)
+
+  /courthouses:
+    get:
+      summary: 裁判所（場所）の一覧を取得
+      # ... (etc.)
+    post:
+      summary: 新しい裁判所（場所）を作成
+      # ... (etc.)
+
+  /courthouses/{courthouseId}:
+    get:
+      summary: 特定の裁判所（場所）を取得
+      # ... (etc.)
+    put:
+      summary: 裁判所（場所）を更新
+      # ... (etc.)
+    delete:
+      summary: 裁判所（場所）を削除
+      # ... (etc.)
+
+components:
+  schemas:
+    # ... (existing schemas for Case, Party, Lawyer) ...
+
+    LawFirm:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        offices:
+          type: array
+          items:
+            $ref: '#/components/schemas/LawFirmOffice'
+
+    LawFirmCreate:
+      type: object
+      properties:
+        name:
+          type: string
+
+    Courthouse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        address:
+          type: string
+
+    CourthouseCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        address:
+          type: string
