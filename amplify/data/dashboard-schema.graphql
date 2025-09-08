@@ -1,0 +1,481 @@
+# Dashboard Management GraphQL Schema
+
+# Dashboard Types
+type DashboardMetric {
+  id: ID!
+  userId: ID
+  caseId: ID
+  metricType: String!
+  metricName: String!
+  value: Float!
+  unit: String!
+  period: String!
+  date: AWSDateTime!
+  metadata: AWSJSON
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  # Relations
+  user: User
+  case: Case
+}
+
+type Report {
+  id: ID!
+  userId: ID!
+  reportType: String!
+  reportName: String!
+  reportFormat: String!
+  status: String!
+  parameters: AWSJSON
+  filePath: String
+  fileSize: Int
+  generatedAt: AWSDateTime
+  expiresAt: AWSDateTime
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  # Relations
+  user: User
+}
+
+type DashboardWidget {
+  id: ID!
+  userId: ID!
+  widgetType: String!
+  widgetName: String!
+  widgetConfig: AWSJSON!
+  position: Int!
+  size: String!
+  isVisible: Boolean!
+  refreshInterval: Int
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  # Relations
+  user: User
+}
+
+type DashboardLayout {
+  id: ID!
+  userId: ID!
+  layoutName: String!
+  layoutConfig: AWSJSON!
+  isDefault: Boolean!
+  isActive: Boolean!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  # Relations
+  user: User
+}
+
+type SystemMetric {
+  id: ID!
+  serviceName: String!
+  metricType: String!
+  metricName: String!
+  value: Float!
+  unit: String!
+  tags: AWSJSON
+  timestamp: AWSDateTime!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# Dashboard Statistics Types
+type DashboardStats {
+  timesheet: TimesheetDashboardStats
+  cases: CaseDashboardStats
+  documents: DocumentDashboardStats
+  notifications: NotificationDashboardStats
+  system: SystemDashboardStats
+}
+
+type TimesheetDashboardStats {
+  totalHours: Float!
+  dailyHours: Float!
+  weeklyHours: Float!
+  monthlyHours: Float!
+  averageSessionLength: Float!
+  totalSessions: Int!
+  caseBreakdown: [CaseHours!]!
+  taskBreakdown: [TaskHours!]!
+  dailyTrend: [DailyTrend!]!
+  weeklyTrend: [WeeklyTrend!]!
+  monthlyTrend: [MonthlyTrend!]!
+}
+
+type CaseDashboardStats {
+  totalCases: Int!
+  activeCases: Int!
+  completedCases: Int!
+  newCases: Int!
+  averageCaseDuration: Float!
+  caseStatusDistribution: [StatusCount!]!
+  casePriorityDistribution: [PriorityCount!]!
+  caseTypeDistribution: [TypeCount!]!
+  recentCases: [Case!]!
+}
+
+type DocumentDashboardStats {
+  totalDocuments: Int!
+  documentsByType: [DocumentTypeCount!]!
+  documentsByStatus: [DocumentStatusCount!]!
+  storageUsed: Float!
+  recentDocuments: [Document!]!
+  generationStats: DocumentGenerationStats!
+}
+
+type NotificationDashboardStats {
+  totalNotifications: Int!
+  unreadNotifications: Int!
+  notificationTypes: [NotificationTypeCount!]!
+  deliveryStats: NotificationDeliveryStats!
+  recentNotifications: [Notification!]!
+}
+
+type SystemDashboardStats {
+  apiResponseTime: Float!
+  errorRate: Float!
+  activeUsers: Int!
+  totalUsers: Int!
+  systemHealth: String!
+  resourceUtilization: ResourceUtilization!
+}
+
+# Breakdown Types
+type CaseHours {
+  caseId: ID!
+  caseName: String!
+  hours: Float!
+}
+
+type TaskHours {
+  taskId: ID!
+  taskTitle: String!
+  hours: Float!
+}
+
+type DailyTrend {
+  date: AWSDate!
+  hours: Float!
+}
+
+type WeeklyTrend {
+  week: String!
+  hours: Float!
+}
+
+type MonthlyTrend {
+  month: String!
+  hours: Float!
+}
+
+type StatusCount {
+  status: String!
+  count: Int!
+}
+
+type PriorityCount {
+  priority: String!
+  count: Int!
+}
+
+type TypeCount {
+  type: String!
+  count: Int!
+}
+
+type DocumentTypeCount {
+  type: String!
+  count: Int!
+}
+
+type DocumentStatusCount {
+  status: String!
+  count: Int!
+}
+
+type DocumentGenerationStats {
+  totalGenerated: Int!
+  successRate: Float!
+  averageGenerationTime: Float!
+}
+
+type NotificationTypeCount {
+  type: String!
+  count: Int!
+}
+
+type NotificationDeliveryStats {
+  totalSent: Int!
+  deliveryRate: Float!
+  channelBreakdown: [ChannelCount!]!
+}
+
+type ChannelCount {
+  channel: String!
+  count: Int!
+}
+
+type ResourceUtilization {
+  cpu: Float!
+  memory: Float!
+  storage: Float!
+  network: Float!
+}
+
+# Input Types
+input CreateDashboardMetricInput {
+  userId: ID
+  caseId: ID
+  metricType: String!
+  metricName: String!
+  value: Float!
+  unit: String!
+  period: String!
+  date: AWSDateTime!
+  metadata: AWSJSON
+}
+
+input UpdateDashboardMetricInput {
+  id: ID!
+  metricName: String
+  value: Float
+  unit: String
+  period: String
+  date: AWSDateTime
+  metadata: AWSJSON
+}
+
+input CreateReportInput {
+  userId: ID!
+  reportType: String!
+  reportName: String!
+  reportFormat: String!
+  parameters: AWSJSON
+}
+
+input UpdateReportInput {
+  id: ID!
+  reportName: String
+  status: String
+  filePath: String
+  fileSize: Int
+  generatedAt: AWSDateTime
+  expiresAt: AWSDateTime
+}
+
+input CreateDashboardWidgetInput {
+  userId: ID!
+  widgetType: String!
+  widgetName: String!
+  widgetConfig: AWSJSON!
+  position: Int!
+  size: String!
+  isVisible: Boolean
+  refreshInterval: Int
+}
+
+input UpdateDashboardWidgetInput {
+  id: ID!
+  widgetName: String
+  widgetConfig: AWSJSON
+  position: Int
+  size: String
+  isVisible: Boolean
+  refreshInterval: Int
+}
+
+input CreateDashboardLayoutInput {
+  userId: ID!
+  layoutName: String!
+  layoutConfig: AWSJSON!
+  isDefault: Boolean
+  isActive: Boolean
+}
+
+input UpdateDashboardLayoutInput {
+  id: ID!
+  layoutName: String
+  layoutConfig: AWSJSON
+  isDefault: Boolean
+  isActive: Boolean
+}
+
+input CreateSystemMetricInput {
+  serviceName: String!
+  metricType: String!
+  metricName: String!
+  value: Float!
+  unit: String!
+  tags: AWSJSON
+  timestamp: AWSDateTime!
+}
+
+input DashboardFilters {
+  userId: ID
+  caseId: ID
+  metricType: String
+  period: String
+  startDate: AWSDateTime
+  endDate: AWSDateTime
+  limit: Int
+  offset: Int
+}
+
+input ReportFilters {
+  userId: ID
+  reportType: String
+  status: String
+  startDate: AWSDateTime
+  endDate: AWSDateTime
+  limit: Int
+  offset: Int
+}
+
+input WidgetFilters {
+  userId: ID
+  widgetType: String
+  isVisible: Boolean
+  limit: Int
+  offset: Int
+}
+
+input LayoutFilters {
+  userId: ID
+  isActive: Boolean
+  limit: Int
+  offset: Int
+}
+
+input SystemMetricFilters {
+  serviceName: String
+  metricType: String
+  startDate: AWSDateTime
+  endDate: AWSDateTime
+  limit: Int
+  offset: Int
+}
+
+# Response Types
+type DashboardMetricListResponse {
+  items: [DashboardMetric!]!
+  totalCount: Int!
+  hasMore: Boolean!
+}
+
+type ReportListResponse {
+  items: [Report!]!
+  totalCount: Int!
+  hasMore: Boolean!
+}
+
+type DashboardWidgetListResponse {
+  items: [DashboardWidget!]!
+  totalCount: Int!
+  hasMore: Boolean!
+}
+
+type DashboardLayoutListResponse {
+  items: [DashboardLayout!]!
+  totalCount: Int!
+  hasMore: Boolean!
+}
+
+type SystemMetricListResponse {
+  items: [SystemMetric!]!
+  totalCount: Int!
+  hasMore: Boolean!
+}
+
+# Queries
+type Query {
+  # Dashboard Metrics
+  getDashboardMetric(id: ID!): DashboardMetric
+  listDashboardMetrics(filters: DashboardFilters): DashboardMetricListResponse
+  listUserMetrics(userId: ID!, filters: DashboardFilters): DashboardMetricListResponse
+  listCaseMetrics(caseId: ID!, filters: DashboardFilters): DashboardMetricListResponse
+  listMetricsByType(metricType: String!, filters: DashboardFilters): DashboardMetricListResponse
+  getDashboardStats(userId: ID!): DashboardStats
+
+  # Reports
+  getReport(id: ID!): Report
+  listReports(filters: ReportFilters): ReportListResponse
+  listUserReports(userId: ID!, filters: ReportFilters): ReportListResponse
+  listReportsByType(reportType: String!, filters: ReportFilters): ReportListResponse
+
+  # Dashboard Widgets
+  getDashboardWidget(id: ID!): DashboardWidget
+  listDashboardWidgets(filters: WidgetFilters): DashboardWidgetListResponse
+  listUserWidgets(userId: ID!, filters: WidgetFilters): DashboardWidgetListResponse
+  listVisibleWidgets(userId: ID!): DashboardWidgetListResponse
+
+  # Dashboard Layouts
+  getDashboardLayout(id: ID!): DashboardLayout
+  listDashboardLayouts(filters: LayoutFilters): DashboardLayoutListResponse
+  listUserLayouts(userId: ID!, filters: LayoutFilters): DashboardLayoutListResponse
+  getActiveLayout(userId: ID!): DashboardLayout
+
+  # System Metrics
+  getSystemMetric(id: ID!): SystemMetric
+  listSystemMetrics(filters: SystemMetricFilters): SystemMetricListResponse
+  listServiceMetrics(serviceName: String!, filters: SystemMetricFilters): SystemMetricListResponse
+  listMetricsByType(metricType: String!, filters: SystemMetricFilters): SystemMetricListResponse
+}
+
+# Mutations
+type Mutation {
+  # Dashboard Metrics
+  createDashboardMetric(input: CreateDashboardMetricInput!): DashboardMetric
+  updateDashboardMetric(input: UpdateDashboardMetricInput!): DashboardMetric
+  deleteDashboardMetric(id: ID!): Boolean
+  bulkCreateMetrics(inputs: [CreateDashboardMetricInput!]!): [DashboardMetric!]
+
+  # Reports
+  createReport(input: CreateReportInput!): Report
+  updateReport(input: UpdateReportInput!): Report
+  deleteReport(id: ID!): Boolean
+  generateReport(input: CreateReportInput!): Report
+  downloadReport(id: ID!): String
+
+  # Dashboard Widgets
+  createDashboardWidget(input: CreateDashboardWidgetInput!): DashboardWidget
+  updateDashboardWidget(input: UpdateDashboardWidgetInput!): DashboardWidget
+  deleteDashboardWidget(id: ID!): Boolean
+  reorderWidgets(userId: ID!, widgetIds: [ID!]!): [DashboardWidget!]
+
+  # Dashboard Layouts
+  createDashboardLayout(input: CreateDashboardLayoutInput!): DashboardLayout
+  updateDashboardLayout(input: UpdateDashboardLayoutInput!): DashboardLayout
+  deleteDashboardLayout(id: ID!): Boolean
+  setActiveLayout(userId: ID!, layoutId: ID!): DashboardLayout
+
+  # System Metrics
+  createSystemMetric(input: CreateSystemMetricInput!): SystemMetric
+  bulkCreateSystemMetrics(inputs: [CreateSystemMetricInput!]!): [SystemMetric!]
+}
+
+# Subscriptions
+type Subscription {
+  # Dashboard Metrics
+  onMetricUpdated(userId: ID!): DashboardMetric
+  onMetricCreated(userId: ID!): DashboardMetric
+  onMetricDeleted(userId: ID!): DashboardMetric
+
+  # Reports
+  onReportGenerated(userId: ID!): Report
+  onReportStatusChanged(userId: ID!): Report
+
+  # Dashboard Widgets
+  onWidgetUpdated(userId: ID!): DashboardWidget
+  onWidgetCreated(userId: ID!): DashboardWidget
+  onWidgetDeleted(userId: ID!): DashboardWidget
+
+  # Dashboard Layouts
+  onLayoutUpdated(userId: ID!): DashboardLayout
+  onLayoutCreated(userId: ID!): DashboardLayout
+  onLayoutDeleted(userId: ID!): DashboardLayout
+  onActiveLayoutChanged(userId: ID!): DashboardLayout
+
+  # System Metrics
+  onSystemMetricUpdated: SystemMetric
+  onSystemMetricCreated: SystemMetric
+}

@@ -1,0 +1,10 @@
+## On Case Deleted Request Mapping Template
+## VTL template for onCaseDeleted subscription
+
+{
+  "version": "2017-02-28",
+  "operation": "DeleteItem",
+  "key": {
+    "id": $util.dynamodb.toDynamoDBJson($context.source.id)
+  }
+}

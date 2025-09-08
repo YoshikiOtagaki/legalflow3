@@ -1,0 +1,8 @@
+## Delete Case Response Mapping Template
+## VTL template for deleteCase mutation response
+
+#if($ctx.error)
+  $util.error($ctx.error.message, $ctx.error.type)
+#end
+
+$util.toJson($ctx.result)

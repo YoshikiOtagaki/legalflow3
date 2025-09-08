@@ -1,0 +1,545 @@
+# 当事者管理用GraphQLスキーマ
+
+# 当事者種別
+enum PartyType {
+  INDIVIDUAL
+  CORPORATION
+}
+
+# 性別
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  UNKNOWN
+}
+
+# 国籍
+enum Nationality {
+  JP
+  US
+  CN
+  KR
+  OTHER
+}
+
+# 婚姻状況
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+  UNKNOWN
+}
+
+# 住所種別
+enum AddressType {
+  HOME
+  WORK
+  MAILING
+  REGISTERED
+  OTHER
+}
+
+# 連絡先種別
+enum ContactType {
+  PHONE
+  MOBILE
+  EMAIL
+  FAX
+  WEBSITE
+  OTHER
+}
+
+# 関係種別
+enum RelationType {
+  SPOUSE
+  CHILD
+  PARENT
+  SIBLING
+  BUSINESS_PARTNER
+  EMPLOYEE
+  EMPLOYER
+  OTHER
+}
+
+# 当事者役割
+enum PartyRole {
+  PLAINTIFF
+  DEFENDANT
+  THIRD_PARTY
+  WITNESS
+  EXPERT
+  OTHER
+}
+
+# 個人プロフィール
+type IndividualProfile {
+  firstName: String!
+  lastName: String!
+  firstNameKana: String
+  lastNameKana: String
+  dateOfBirth: AWSDate
+  gender: Gender
+  nationality: Nationality
+  occupation: String
+  maritalStatus: MaritalStatus
+  spouseName: String
+  children: [Child!]
+}
+
+# 子供情報
+type Child {
+  name: String!
+  dateOfBirth: AWSDate
+}
+
+# 法人プロフィール
+type CorporateProfile {
+  companyName: String!
+  companyNameKana: String
+  representativeName: String
+  establishmentDate: AWSDate
+  capital: Int
+  employees: Int
+  industry: String
+  businessDescription: String
+  registrationNumber: String
+  taxId: String
+}
+
+# 住所情報
+type Address {
+  postalCode: String
+  prefecture: String!
+  city: String!
+  address1: String!
+  address2: String
+  country: String!
+  isValid: Boolean!
+  validationDate: AWSDate
+}
+
+# 連絡先情報
+type Contact {
+  phone: String
+  mobile: String
+  email: String
+  fax: String
+  website: String
+  isValid: Boolean!
+  validationDate: AWSDate
+}
+
+# 当事者
+type Party {
+  id: ID!
+  isCorporation: Boolean!
+  isFormerClient: Boolean!
+  individualProfile: IndividualProfile
+  corporateProfile: CorporateProfile
+  addresses: [PartyAddress!]
+  contacts: [PartyContact!]
+  relations: [PartyRelation!]
+  cases: [CaseParty!]
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  createdBy: String!
+  updatedBy: String!
+}
+
+# 当事者住所
+type PartyAddress {
+  id: ID!
+  partyId: ID!
+  addressType: AddressType!
+  isPrimary: Boolean!
+  address: Address!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# 当事者連絡先
+type PartyContact {
+  id: ID!
+  partyId: ID!
+  contactType: ContactType!
+  isPrimary: Boolean!
+  contact: Contact!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# 当事者関係
+type PartyRelation {
+  id: ID!
+  partyId1: ID!
+  partyId2: ID!
+  relationType: RelationType!
+  description: String
+  isActive: Boolean!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# ケース当事者
+type CaseParty {
+  id: ID!
+  caseId: ID!
+  partyId: ID!
+  partyRole: PartyRole!
+  isPrimary: Boolean!
+  assignedAt: AWSDateTime!
+  assignedBy: String!
+  isActive: Boolean!
+  party: Party
+  case: Case
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# 入力型定義
+
+# 個人プロフィール入力
+input IndividualProfileInput {
+  firstName: String!
+  lastName: String!
+  firstNameKana: String
+  lastNameKana: String
+  dateOfBirth: AWSDate
+  gender: Gender
+  nationality: Nationality
+  occupation: String
+  maritalStatus: MaritalStatus
+  spouseName: String
+  children: [ChildInput!]
+}
+
+# 子供情報入力
+input ChildInput {
+  name: String!
+  dateOfBirth: AWSDate
+}
+
+# 法人プロフィール入力
+input CorporateProfileInput {
+  companyName: String!
+  companyNameKana: String
+  representativeName: String
+  establishmentDate: AWSDate
+  capital: Int
+  employees: Int
+  industry: String
+  businessDescription: String
+  registrationNumber: String
+  taxId: String
+}
+
+# 住所情報入力
+input AddressInput {
+  postalCode: String
+  prefecture: String!
+  city: String!
+  address1: String!
+  address2: String
+  country: String!
+  isValid: Boolean!
+  validationDate: AWSDate
+}
+
+# 連絡先情報入力
+input ContactInput {
+  phone: String
+  mobile: String
+  email: String
+  fax: String
+  website: String
+  isValid: Boolean!
+  validationDate: AWSDate
+}
+
+# 当事者作成入力
+input CreatePartyInput {
+  isCorporation: Boolean!
+  isFormerClient: Boolean
+  individualProfile: IndividualProfileInput
+  corporateProfile: CorporateProfileInput
+  addresses: [AddressInput!]
+  contacts: [ContactInput!]
+}
+
+# 当事者更新入力
+input UpdatePartyInput {
+  id: ID!
+  isCorporation: Boolean
+  isFormerClient: Boolean
+  individualProfile: IndividualProfileInput
+  corporateProfile: CorporateProfileInput
+}
+
+# 住所追加入力
+input AddAddressInput {
+  partyId: ID!
+  addressType: AddressType!
+  isPrimary: Boolean
+  address: AddressInput!
+}
+
+# 連絡先追加入力
+input AddContactInput {
+  partyId: ID!
+  contactType: ContactType!
+  isPrimary: Boolean
+  contact: ContactInput!
+}
+
+# 関係追加入力
+input AddRelationInput {
+  partyId1: ID!
+  partyId2: ID!
+  relationType: RelationType!
+  description: String
+}
+
+# ケース当事者追加入力
+input AddCasePartyInput {
+  caseId: ID!
+  partyId: ID!
+  partyRole: PartyRole!
+  isPrimary: Boolean
+}
+
+# 検索フィルタ
+input PartySearchFilter {
+  isCorporation: Boolean
+  isFormerClient: Boolean
+  name: String
+  email: String
+  phone: String
+  address: String
+  industry: String
+  createdBy: String
+  dateRange: DateRange
+}
+
+# 日付範囲
+input DateRange {
+  startDate: AWSDate!
+  endDate: AWSDate!
+}
+
+# レスポンス型定義
+
+# 当事者作成レスポンス
+type CreatePartyResponse {
+  success: Boolean!
+  party: Party
+  error: Error
+}
+
+# 当事者更新レスポンス
+type UpdatePartyResponse {
+  success: Boolean!
+  party: Party
+  error: Error
+}
+
+# 当事者削除レスポンス
+type DeletePartyResponse {
+  success: Boolean!
+  party: Party
+  message: String
+  error: Error
+}
+
+# 当事者取得レスポンス
+type GetPartyResponse {
+  success: Boolean!
+  party: Party
+  error: Error
+}
+
+# 当事者一覧レスポンス
+type ListPartiesResponse {
+  success: Boolean!
+  parties: [Party!]!
+  nextToken: String
+  totalCount: Int
+  error: Error
+}
+
+# 当事者検索レスポンス
+type SearchPartiesResponse {
+  success: Boolean!
+  parties: [Party!]!
+  nextToken: String
+  totalCount: Int
+  error: Error
+}
+
+# 住所追加レスポンス
+type AddAddressResponse {
+  success: Boolean!
+  address: PartyAddress
+  error: Error
+}
+
+# 連絡先追加レスポンス
+type AddContactResponse {
+  success: Boolean!
+  contact: PartyContact
+  error: Error
+}
+
+# 関係追加レスポンス
+type AddRelationResponse {
+  success: Boolean!
+  relation: PartyRelation
+  error: Error
+}
+
+# ケース当事者追加レスポンス
+type AddCasePartyResponse {
+  success: Boolean!
+  caseParty: CaseParty
+  error: Error
+}
+
+# エラー型
+type Error {
+  message: String!
+  code: String
+  details: AWSJSON
+}
+
+# クエリ定義
+extend type Query {
+  # 当事者取得
+  getParty(id: ID!): GetPartyResponse!
+
+  # 当事者一覧取得
+  listParties(
+    limit: Int
+    nextToken: String
+    isCorporation: Boolean
+    isFormerClient: Boolean
+  ): ListPartiesResponse!
+
+  # 当事者検索
+  searchParties(
+    filter: PartySearchFilter!
+    limit: Int
+    nextToken: String
+  ): SearchPartiesResponse!
+
+  # ケースの当事者一覧取得
+  getCaseParties(
+    caseId: ID!
+    limit: Int
+    nextToken: String
+  ): ListPartiesResponse!
+
+  # 当事者の住所一覧取得
+  getPartyAddresses(
+    partyId: ID!
+    limit: Int
+    nextToken: String
+  ): [PartyAddress!]!
+
+  # 当事者の連絡先一覧取得
+  getPartyContacts(
+    partyId: ID!
+    limit: Int
+    nextToken: String
+  ): [PartyContact!]!
+
+  # 当事者の関係一覧取得
+  getPartyRelations(
+    partyId: ID!
+    limit: Int
+    nextToken: String
+  ): [PartyRelation!]!
+}
+
+# ミューテーション定義
+extend type Mutation {
+  # 当事者作成
+  createParty(input: CreatePartyInput!): CreatePartyResponse!
+
+  # 当事者更新
+  updateParty(input: UpdatePartyInput!): UpdatePartyResponse!
+
+  # 当事者削除
+  deleteParty(id: ID!): DeletePartyResponse!
+
+  # 住所追加
+  addAddress(input: AddAddressInput!): AddAddressResponse!
+
+  # 住所更新
+  updateAddress(
+    id: ID!
+    addressType: AddressType
+    isPrimary: Boolean
+    address: AddressInput
+  ): AddAddressResponse!
+
+  # 住所削除
+  deleteAddress(id: ID!): DeletePartyResponse!
+
+  # 連絡先追加
+  addContact(input: AddContactInput!): AddContactResponse!
+
+  # 連絡先更新
+  updateContact(
+    id: ID!
+    contactType: ContactType
+    isPrimary: Boolean
+    contact: ContactInput
+  ): AddContactResponse!
+
+  # 連絡先削除
+  deleteContact(id: ID!): DeletePartyResponse!
+
+  # 関係追加
+  addRelation(input: AddRelationInput!): AddRelationResponse!
+
+  # 関係削除
+  deleteRelation(id: ID!): DeletePartyResponse!
+
+  # ケース当事者追加
+  addCaseParty(input: AddCasePartyInput!): AddCasePartyResponse!
+
+  # ケース当事者更新
+  updateCaseParty(
+    id: ID!
+    partyRole: PartyRole
+    isPrimary: Boolean
+    isActive: Boolean
+  ): AddCasePartyResponse!
+
+  # ケース当事者削除
+  deleteCaseParty(id: ID!): DeletePartyResponse!
+}
+
+# サブスクリプション定義
+extend type Subscription {
+  # 当事者作成通知
+  onPartyCreated: Party
+    @aws_subscribe(mutations: ["createParty"])
+
+  # 当事者更新通知
+  onPartyUpdated: Party
+    @aws_subscribe(mutations: ["updateParty"])
+
+  # 当事者削除通知
+  onPartyDeleted: Party
+    @aws_subscribe(mutations: ["deleteParty"])
+
+  # ケース当事者追加通知
+  onCasePartyAdded: CaseParty
+    @aws_subscribe(mutations: ["addCaseParty"])
+
+  # ケース当事者削除通知
+  onCasePartyDeleted: CaseParty
+    @aws_subscribe(mutations: ["deleteCaseParty"])
+}

@@ -1,362 +1,176 @@
-"use client";
+// LegalFlow3 - API Client
+// Centralized API client for all backend operations
 
-import { Case, Party, Option } from "@/types/case";
-import { Document } from "@/types/document";
-import { TimesheetEntry } from "@/types/timesheet";
-import { Notification } from "@/types/notification";
-import { DashboardData } from "@/types/dashboard";
-import { User } from "@/types/user";
+import {
+  apiClient,
+  type Case,
+  type CreateCaseInput,
+  type UpdateCaseInput,
+  type ListCasesParams,
+  type SearchCasesParams,
+  type CaseSearchFilter,
+} from "./amplify-config";
 
-export type { Option };
+// API Client class with error handling and retry logic
+export class LegalFlowAPIClient {
+  private maxRetries = 3;
+  private retryDelay = 1000; // 1 second
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
+  // Generic request method with retry logic
+  private async requestWithRetry<T>(
+    operation: () => Promise<T>,
+    operationName: string,
+  ): Promise<T> {
+    let lastError: Error | null = null;
 
-export interface ApiResponse<T = unknown> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-}
+    for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
+      try {
+        return await operation();
+      } catch (error) {
+        lastError = error as Error;
+        console.warn(`${operationName} attempt ${attempt} failed:`, error);
 
-export interface PaginatedResponse<T> {
-  data: T[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-}
+        if (attempt < this.maxRetries) {
+          // Wait before retrying
+          await new Promise((resolve) =>
+            setTimeout(resolve, this.retryDelay * attempt),
+          );
+        }
+      }
+    }
 
-class ApiClient {
-  private baseURL: string;
-  private defaultHeaders: HeadersInit;
-
-  constructor() {
-    this.baseURL = API_BASE_URL;
-    this.defaultHeaders = {
-      "Content-Type": "application/json",
-    };
+    throw new Error(
+      `${operationName} failed after ${this.maxRetries} attempts: ${lastError?.message}`,
+    );
   }
 
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {},
-  ): Promise<ApiResponse<T>> {
-    const url = `${this.baseURL}${endpoint}`;
+  // Case operations
+  async createCase(input: CreateCaseInput): Promise<Case> {
+    return this.requestWithRetry(async () => {
+      const response = await apiClient.createCase(input);
 
-    // 認証トークンを取得
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("accessToken")
-        : null;
-
-    const config: RequestInit = {
-      ...options,
-      headers: {
-        ...this.defaultHeaders,
-        ...(token && { Authorization: `Bearer ${token}` }),
-        ...options.headers,
-      },
-      credentials: "include",
-    };
-
-    try {
-      const response = await fetch(url, config);
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-          errorData.message ||
-            `HTTP ${response.status}: ${response.statusText}`,
-        );
+      if (!response.success) {
+        throw new Error(response.error?.message || "Failed to create case");
       }
 
-      const data = await response.json();
-      return {
-        success: true,
-        data,
-      };
-    } catch (error) {
-      console.error("API request failed:", error);
-      return {
-        success: false,
-        error:
-          error instanceof Error ? error.message : "Unknown error occurred",
-      };
-    }
+      return response.case!;
+    }, "createCase");
   }
 
-  // 認証関連
-  async login(
-    email: string,
-    password: string,
-  ): Promise<
-    ApiResponse<{ accessToken: string; refreshToken: string; user: User }>
-  > {
-    return this.request("/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    });
+  async updateCase(input: UpdateCaseInput): Promise<Case> {
+    return this.requestWithRetry(async () => {
+      const response = await apiClient.updateCase(input);
+
+      if (!response.success) {
+        throw new Error(response.error?.message || "Failed to update case");
+      }
+
+      return response.case!;
+    }, "updateCase");
   }
 
-  async register(
-    userData: Partial<User>,
-  ): Promise<
-    ApiResponse<{ accessToken: string; refreshToken: string; user: User }>
-  > {
-    return this.request("/auth/register", {
-      method: "POST",
-      body: JSON.stringify(userData),
-    });
-  }
-
-  async logout(): Promise<ApiResponse> {
-    return this.request("/auth/logout", {
-      method: "POST",
-    });
-  }
-
-  async refreshToken(): Promise<ApiResponse<{ accessToken: string }>> {
-    return this.request("/auth/refresh", {
-      method: "POST",
-    });
-  }
-
-  // ケース関連
-  async getCases(params?: {
-    page?: number;
-    limit?: number;
-    search?: string;
+  async deleteCase(id: string): Promise<{
+    id: string;
+    name: string;
+    caseNumber?: string;
     status?: string;
-  }): Promise<ApiResponse<PaginatedResponse<Case>>> {
-    const searchParams = new URLSearchParams();
-    if (params?.page) searchParams.set("page", params.page.toString());
-    if (params?.limit) searchParams.set("limit", params.limit.toString());
-    if (params?.search) searchParams.set("search", params.search);
-    if (params?.status) searchParams.set("status", params.status);
+  }> {
+    return this.requestWithRetry(async () => {
+      const response = await apiClient.deleteCase(id);
 
-    const query = searchParams.toString();
-    return this.request(`/cases${query ? `?${query}` : ""}`);
+      if (!response.success) {
+        throw new Error(response.error?.message || "Failed to delete case");
+      }
+
+      return response.case!;
+    }, "deleteCase");
   }
 
-  async getCase(id: string): Promise<ApiResponse<Case>> {
-    return this.request(`/cases/${id}`);
+  async getCase(id: string): Promise<Case> {
+    return this.requestWithRetry(async () => {
+      const response = await apiClient.getCase(id);
+
+      if (!response.success) {
+        throw new Error(response.error?.message || "Failed to get case");
+      }
+
+      return response.case!;
+    }, "getCase");
   }
 
-  async createCase(caseData: Partial<Case>): Promise<ApiResponse<Case>> {
-    return this.request("/cases", {
-      method: "POST",
-      body: JSON.stringify(caseData),
-    });
+  async listCases(params: ListCasesParams = {}): Promise<{
+    cases: Case[];
+    nextToken?: string;
+    totalCount: number;
+  }> {
+    return this.requestWithRetry(async () => {
+      const response = await apiClient.listCases(params);
+
+      if (!response.success) {
+        throw new Error(response.error?.message || "Failed to list cases");
+      }
+
+      return {
+        cases: response.cases || [],
+        nextToken: response.nextToken,
+        totalCount: response.totalCount || 0,
+      };
+    }, "listCases");
   }
 
-  async updateCase(
-    id: string,
-    caseData: Partial<Case>,
-  ): Promise<ApiResponse<Case>> {
-    return this.request(`/cases/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(caseData),
-    });
+  async searchCases(
+    filter: CaseSearchFilter,
+    params: SearchCasesParams = {},
+  ): Promise<{
+    cases: Case[];
+    nextToken?: string;
+    totalCount: number;
+  }> {
+    return this.requestWithRetry(async () => {
+      const response = await apiClient.searchCases(filter, params);
+
+      if (!response.success) {
+        throw new Error(response.error?.message || "Failed to search cases");
+      }
+
+      return {
+        cases: response.cases || [],
+        nextToken: response.nextToken,
+        totalCount: response.totalCount || 0,
+      };
+    }, "searchCases");
   }
 
-  async deleteCase(id: string): Promise<ApiResponse> {
-    return this.request(`/cases/${id}`, {
-      method: "DELETE",
-    });
+  // Subscription methods
+  subscribeToCaseCreated(callback: (selectedCase: Case) => void) {
+    return apiClient.subscribeToCaseCreated(callback);
   }
 
-  async getCaseCategories(): Promise<ApiResponse<{ categories: Option[] }>> {
-    return this.request("/case-categories");
+  subscribeToCaseUpdated(callback: (selectedCase: Case) => void) {
+    return apiClient.subscribeToCaseUpdated(callback);
   }
 
-  async getCaseStatuses(): Promise<ApiResponse<{ statuses: Option[] }>> {
-    return this.request("/case-statuses");
-  }
-
-  async getCasePhases(): Promise<ApiResponse<{ phases: Option[] }>> {
-    return this.request("/case-phases");
-  }
-
-  async getCasePriorities(): Promise<ApiResponse<{ priorities: Option[] }>> {
-    return this.request("/case-priorities");
-  }
-
-  async getCourts(): Promise<ApiResponse<{ courthouses: Option[] }>> {
-    return this.request("/courthouses");
-  }
-
-  async getLawyers(): Promise<ApiResponse<{ lawyers: Option[] }>> {
-    return this.request("/lawyers");
-  }
-
-  // 当事者関連
-  async getParties(params?: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    type?: string;
-  }): Promise<ApiResponse<PaginatedResponse<Party>>> {
-    const searchParams = new URLSearchParams();
-    if (params?.page) searchParams.set("page", params.page.toString());
-    if (params?.limit) searchParams.set("limit", params.limit.toString());
-    if (params?.search) searchParams.set("search", params.search);
-    if (params?.type) searchParams.set("type", params.type);
-
-    const query = searchParams.toString();
-    return this.request(`/parties${query ? `?${query}` : ""}`);
-  }
-
-  async getParty(id: string): Promise<ApiResponse<Party>> {
-    return this.request(`/parties/${id}`);
-  }
-
-  async createParty(partyData: Partial<Party>): Promise<ApiResponse<Party>> {
-    return this.request("/parties", {
-      method: "POST",
-      body: JSON.stringify(partyData),
-    });
-  }
-
-  async updateParty(
-    id: string,
-    partyData: Partial<Party>,
-  ): Promise<ApiResponse<Party>> {
-    return this.request(`/parties/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(partyData),
-    });
-  }
-
-  async deleteParty(id: string): Promise<ApiResponse> {
-    return this.request(`/parties/${id}`, {
-      method: "DELETE",
-    });
-  }
-
-  // ドキュメント関連
-  async getDocuments(params?: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    caseId?: string;
-  }): Promise<ApiResponse<PaginatedResponse<Document>>> {
-    const searchParams = new URLSearchParams();
-    if (params?.page) searchParams.set("page", params.page.toString());
-    if (params?.limit) searchParams.set("limit", params.limit.toString());
-    if (params?.search) searchParams.set("search", params.search);
-    if (params?.caseId) searchParams.set("caseId", params.caseId);
-
-    const query = searchParams.toString();
-    return this.request(`/documents${query ? `?${query}` : ""}`);
-  }
-
-  async getDocument(id: string): Promise<ApiResponse<Document>> {
-    return this.request(`/documents/${id}`);
-  }
-
-  async uploadDocument(formData: FormData): Promise<ApiResponse<Document>> {
-    return this.request("/documents/upload", {
-      method: "POST",
-      headers: {}, // FormDataの場合はContent-Typeを設定しない
-      body: formData,
-    });
-  }
-
-  async deleteDocument(id: string): Promise<ApiResponse> {
-    return this.request(`/documents/${id}`, {
-      method: "DELETE",
-    });
-  }
-
-  // タイムシート関連
-  async getTimesheets(params?: {
-    page?: number;
-    limit?: number;
-    caseId?: string;
-    userId?: string;
-  }): Promise<ApiResponse<PaginatedResponse<TimesheetEntry>>> {
-    const searchParams = new URLSearchParams();
-    if (params?.page) searchParams.set("page", params.page.toString());
-    if (params?.limit) searchParams.set("limit", params.limit.toString());
-    if (params?.caseId) searchParams.set("caseId", params.caseId);
-    if (params?.userId) searchParams.set("userId", params.userId);
-
-    const query = searchParams.toString();
-    return this.request(`/timesheets${query ? `?${query}` : ""}`);
-  }
-
-  async createTimesheet(
-    timesheetData: Partial<TimesheetEntry>,
-  ): Promise<ApiResponse<TimesheetEntry>> {
-    return this.request("/timesheets", {
-      method: "POST",
-      body: JSON.stringify(timesheetData),
-    });
-  }
-
-  async updateTimesheet(
-    id: string,
-    timesheetData: Partial<TimesheetEntry>,
-  ): Promise<ApiResponse<TimesheetEntry>> {
-    return this.request(`/timesheets/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(timesheetData),
-    });
-  }
-
-  async deleteTimesheet(id: string): Promise<ApiResponse> {
-    return this.request(`/timesheets/${id}`, {
-      method: "DELETE",
-    });
-  }
-
-  // 通知関連
-  async getNotifications(params?: {
-    page?: number;
-    limit?: number;
-    unreadOnly?: boolean;
-  }): Promise<ApiResponse<PaginatedResponse<Notification>>> {
-    const searchParams = new URLSearchParams();
-    if (params?.page) searchParams.set("page", params.page.toString());
-    if (params?.limit) searchParams.set("limit", params.limit.toString());
-    if (params?.unreadOnly)
-      searchParams.set("unreadOnly", params.unreadOnly.toString());
-
-    const query = searchParams.toString();
-    return this.request(`/notifications${query ? `?${query}` : ""}`);
-  }
-
-  async markNotificationAsRead(id: string): Promise<ApiResponse> {
-    return this.request(`/notifications/${id}/read`, {
-      method: "PUT",
-    });
-  }
-
-  async markAllNotificationsAsRead(): Promise<ApiResponse> {
-    return this.request("/notifications/read-all", {
-      method: "PUT",
-    });
-  }
-
-  // ダッシュボード関連
-  async getDashboardData(): Promise<ApiResponse<DashboardData>> {
-    return this.request("/dashboard");
-  }
-
-  // ユーザー関連
-  async getCurrentUser(): Promise<ApiResponse<User>> {
-    return this.request("/users/me");
-  }
-
-  async updateUser(userData: Partial<User>): Promise<ApiResponse<User>> {
-    return this.request("/users/me", {
-      method: "PUT",
-      body: JSON.stringify(userData),
-    });
+  subscribeToCaseDeleted(
+    callback: (deletedCase: {
+      id: string;
+      name: string;
+      caseNumber?: string;
+      status?: string;
+    }) => void,
+  ) {
+    return apiClient.subscribeToCaseDeleted(callback);
   }
 }
 
-export const apiClient = new ApiClient();
+// Export singleton instance
+export const api = new LegalFlowAPIClient();
+
+// Export types
+export type {
+  Case,
+  CreateCaseInput,
+  UpdateCaseInput,
+  ListCasesParams,
+  SearchCasesParams,
+  CaseSearchFilter,
+};

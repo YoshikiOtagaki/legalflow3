@@ -1,0 +1,8 @@
+## Get Case Response Mapping Template
+## VTL template for getCase query response
+
+#if($ctx.error)
+  $util.error($ctx.error.message, $ctx.error.type)
+#end
+
+$util.toJson($ctx.result)

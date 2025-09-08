@@ -1,0 +1,262 @@
+# LegalFlow3 - CI/CD Pipeline
+# GitHub Actions workflow for automated deployment
+
+name: Deploy LegalFlow3
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  AWS_REGION: us-east-1
+  NODE_VERSION: '18'
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: |
+        cd frontend
+        npm ci
+        cd ../amplify/backend/function/createCase
+        npm ci
+        cd ../updateCase
+        npm ci
+        cd ../deleteCase
+        npm ci
+        cd ../getCase
+        npm ci
+        cd ../listCases
+        npm ci
+        cd ../searchCases
+        npm ci
+
+    - name: Run frontend tests
+      run: |
+        cd frontend
+        npm run test:ci
+
+    - name: Run Lambda function tests
+      run: |
+        cd amplify/backend/function/createCase
+        npm test
+        cd ../updateCase
+        npm test
+        cd ../deleteCase
+        npm test
+        cd ../getCase
+        npm test
+        cd ../listCases
+        npm test
+        cd ../searchCases
+        npm test
+
+    - name: Run E2E tests
+      run: |
+        cd frontend
+        npm run test:e2e:ci
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results
+        path: |
+          frontend/coverage/
+          frontend/test-results/
+          amplify/backend/function/*/coverage/
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: [test, security-scan]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: |
+        cd frontend
+        npm ci
+        cd ../amplify/backend/function/createCase
+        npm ci
+        cd ../updateCase
+        npm ci
+        cd ../deleteCase
+        npm ci
+        cd ../getCase
+        npm ci
+        cd ../listCases
+        npm ci
+        cd ../searchCases
+        npm ci
+
+    - name: Build frontend
+      run: |
+        cd frontend
+        npm run build
+
+    - name: Build Lambda functions
+      run: |
+        cd amplify/backend/function/createCase
+        npm run build
+        cd ../updateCase
+        npm run build
+        cd ../deleteCase
+        npm run build
+        cd ../getCase
+        npm run build
+        cd ../listCases
+        npm run build
+        cd ../searchCases
+        npm run build
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts
+        path: |
+          frontend/.next/
+          amplify/backend/function/*/dist/
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-artifacts
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Deploy to staging
+      run: |
+        npx ampx sandbox deploy --profile staging
+
+    - name: Run smoke tests
+      run: |
+        cd frontend
+        npm run test:smoke:staging
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    environment: production
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-artifacts
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Deploy to production
+      run: |
+        npx ampx sandbox deploy --profile production
+
+    - name: Run smoke tests
+      run: |
+        cd frontend
+        npm run test:smoke:production
+
+    - name: Notify deployment
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+      if: always()
+
+  rollback:
+    name: Rollback Deployment
+    runs-on: ubuntu-latest
+    if: failure()
+    needs: [deploy-staging, deploy-production]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Rollback deployment
+      run: |
+        npx ampx sandbox rollback --profile ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+
+    - name: Notify rollback
+      uses: 8398a7/action-slack@v3
+      with:
+        status: 'failure'
+        channel: '#deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}

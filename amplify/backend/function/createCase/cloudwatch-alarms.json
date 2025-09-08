@@ -1,0 +1,52 @@
+{
+  "alarms": [
+    {
+      "alarmName": "LegalFlow3-CreateCase-Errors",
+      "alarmDescription": "Alarm for CreateCase function errors",
+      "metricName": "Errors",
+      "namespace": "AWS/Lambda",
+      "statistic": "Sum",
+      "period": 300,
+      "evaluationPeriods": 2,
+      "threshold": 5,
+      "comparisonOperator": "GreaterThanOrEqualToThreshold",
+      "treatMissingData": "notBreaching"
+    },
+    {
+      "alarmName": "LegalFlow3-CreateCase-Duration",
+      "alarmDescription": "Alarm for CreateCase function duration",
+      "metricName": "Duration",
+      "namespace": "AWS/Lambda",
+      "statistic": "Average",
+      "period": 300,
+      "evaluationPeriods": 2,
+      "threshold": 25000,
+      "comparisonOperator": "GreaterThanThreshold",
+      "treatMissingData": "notBreaching"
+    },
+    {
+      "alarmName": "LegalFlow3-CreateCase-Throttles",
+      "alarmDescription": "Alarm for CreateCase function throttles",
+      "metricName": "Throttles",
+      "namespace": "AWS/Lambda",
+      "statistic": "Sum",
+      "period": 300,
+      "evaluationPeriods": 2,
+      "threshold": 10,
+      "comparisonOperator": "GreaterThanOrEqualToThreshold",
+      "treatMissingData": "notBreaching"
+    },
+    {
+      "alarmName": "LegalFlow3-CreateCase-ConcurrentExecutions",
+      "alarmDescription": "Alarm for CreateCase function concurrent executions",
+      "metricName": "ConcurrentExecutions",
+      "namespace": "AWS/Lambda",
+      "statistic": "Maximum",
+      "period": 300,
+      "evaluationPeriods": 2,
+      "threshold": 80,
+      "comparisonOperator": "GreaterThanThreshold",
+      "treatMissingData": "notBreaching"
+    }
+  ]
+}

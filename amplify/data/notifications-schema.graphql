@@ -1,0 +1,368 @@
+# Notification Management GraphQL Schema
+
+# Notification Types
+type Notification {
+  id: ID!
+  userId: ID!
+  typeId: ID!
+  title: String!
+  message: String!
+  data: AWSJSON
+  isRead: Boolean!
+  isArchived: Boolean!
+  priorityId: ID!
+  channels: [String!]!
+  scheduledAt: AWSDateTime
+  sentAt: AWSDateTime
+  readAt: AWSDateTime
+  archivedAt: AWSDateTime
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  # Relations
+  type: NotificationType
+  priority: NotificationPriority
+  user: User
+}
+
+type NotificationType {
+  id: ID!
+  name: String!
+  description: String
+  category: String!
+  template: String!
+  isActive: Boolean!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type NotificationPriority {
+  id: ID!
+  name: String!
+  level: Int!
+  color: String!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type NotificationChannel {
+  id: ID!
+  name: String!
+  type: String!
+  isEnabled: Boolean!
+  config: AWSJSON
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type NotificationSettings {
+  id: ID!
+  userId: ID!
+  emailEnabled: Boolean!
+  smsEnabled: Boolean!
+  pushEnabled: Boolean!
+  lineEnabled: Boolean!
+  inAppEnabled: Boolean!
+  emailAddress: String
+  phoneNumber: String
+  lineUserId: String
+  quietHoursStart: String
+  quietHoursEnd: String
+  timezone: String
+  language: String
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  # Relations
+  user: User
+}
+
+# Input Types
+input CreateNotificationInput {
+  userId: ID!
+  typeId: ID!
+  title: String!
+  message: String!
+  data: AWSJSON
+  priorityId: ID!
+  channels: [String!]!
+  scheduledAt: AWSDateTime
+}
+
+input UpdateNotificationInput {
+  id: ID!
+  title: String
+  message: String
+  data: AWSJSON
+  priorityId: ID
+  channels: [String!]
+  scheduledAt: AWSDateTime
+}
+
+input CreateNotificationTypeInput {
+  name: String!
+  description: String
+  category: String!
+  template: String!
+  isActive: Boolean
+}
+
+input UpdateNotificationTypeInput {
+  id: ID!
+  name: String
+  description: String
+  category: String
+  template: String
+  isActive: Boolean
+}
+
+input CreateNotificationPriorityInput {
+  name: String!
+  level: Int!
+  color: String!
+}
+
+input UpdateNotificationPriorityInput {
+  id: ID!
+  name: String
+  level: Int
+  color: String
+}
+
+input CreateNotificationChannelInput {
+  name: String!
+  type: String!
+  isEnabled: Boolean
+  config: AWSJSON
+}
+
+input UpdateNotificationChannelInput {
+  id: ID!
+  name: String
+  type: String
+  isEnabled: Boolean
+  config: AWSJSON
+}
+
+input CreateNotificationSettingsInput {
+  userId: ID!
+  emailEnabled: Boolean
+  smsEnabled: Boolean
+  pushEnabled: Boolean
+  lineEnabled: Boolean
+  inAppEnabled: Boolean
+  emailAddress: String
+  phoneNumber: String
+  lineUserId: String
+  quietHoursStart: String
+  quietHoursEnd: String
+  timezone: String
+  language: String
+}
+
+input UpdateNotificationSettingsInput {
+  id: ID!
+  emailEnabled: Boolean
+  smsEnabled: Boolean
+  pushEnabled: Boolean
+  lineEnabled: Boolean
+  inAppEnabled: Boolean
+  emailAddress: String
+  phoneNumber: String
+  lineUserId: String
+  quietHoursStart: String
+  quietHoursEnd: String
+  timezone: String
+  language: String
+}
+
+input NotificationFilters {
+  userId: ID
+  typeId: ID
+  priorityId: ID
+  isRead: Boolean
+  isArchived: Boolean
+  channels: [String!]
+  startDate: AWSDateTime
+  endDate: AWSDateTime
+  searchTerm: String
+  limit: Int
+  offset: Int
+}
+
+input NotificationTypeFilters {
+  category: String
+  isActive: Boolean
+  searchTerm: String
+  limit: Int
+  offset: Int
+}
+
+input NotificationPriorityFilters {
+  level: Int
+  searchTerm: String
+  limit: Int
+  offset: Int
+}
+
+input NotificationChannelFilters {
+  type: String
+  isEnabled: Boolean
+  searchTerm: String
+  limit: Int
+  offset: Int
+}
+
+# Response Types
+type NotificationListResponse {
+  items: [Notification!]!
+  totalCount: Int!
+  hasMore: Boolean!
+}
+
+type NotificationTypeListResponse {
+  items: [NotificationType!]!
+  totalCount: Int!
+  hasMore: Boolean!
+}
+
+type NotificationPriorityListResponse {
+  items: [NotificationPriority!]!
+  totalCount: Int!
+  hasMore: Boolean!
+}
+
+type NotificationChannelListResponse {
+  items: [NotificationChannel!]!
+  totalCount: Int!
+  hasMore: Boolean!
+}
+
+type NotificationStats {
+  total: Int!
+  unread: Int!
+  read: Int!
+  archived: Int!
+  byType: [NotificationTypeCount!]!
+  byPriority: [NotificationPriorityCount!]!
+  byChannel: [NotificationChannelCount!]!
+}
+
+type NotificationTypeCount {
+  typeId: ID!
+  typeName: String!
+  count: Int!
+}
+
+type NotificationPriorityCount {
+  priorityId: ID!
+  priorityName: String!
+  count: Int!
+}
+
+type NotificationChannelCount {
+  channel: String!
+  count: Int!
+}
+
+# Queries
+type Query {
+  # Notification Queries
+  getNotification(id: ID!): Notification
+  listNotifications(filters: NotificationFilters): NotificationListResponse
+  listUserNotifications(userId: ID!, filters: NotificationFilters): NotificationListResponse
+  listUnreadNotifications(userId: ID!, filters: NotificationFilters): NotificationListResponse
+  listArchivedNotifications(userId: ID!, filters: NotificationFilters): NotificationListResponse
+  searchNotifications(searchTerm: String!, filters: NotificationFilters): NotificationListResponse
+  getNotificationStats(userId: ID!): NotificationStats
+
+  # Notification Type Queries
+  getNotificationType(id: ID!): NotificationType
+  listNotificationTypes(filters: NotificationTypeFilters): NotificationTypeListResponse
+  listNotificationTypesByCategory(category: String!, filters: NotificationTypeFilters): NotificationTypeListResponse
+  searchNotificationTypes(searchTerm: String!, filters: NotificationTypeFilters): NotificationTypeListResponse
+
+  # Notification Priority Queries
+  getNotificationPriority(id: ID!): NotificationPriority
+  listNotificationPriorities(filters: NotificationPriorityFilters): NotificationPriorityListResponse
+  listNotificationPrioritiesByLevel(level: Int!, filters: NotificationPriorityFilters): NotificationPriorityListResponse
+  searchNotificationPriorities(searchTerm: String!, filters: NotificationPriorityFilters): NotificationPriorityListResponse
+
+  # Notification Channel Queries
+  getNotificationChannel(id: ID!): NotificationChannel
+  listNotificationChannels(filters: NotificationChannelFilters): NotificationChannelListResponse
+  listNotificationChannelsByType(type: String!, filters: NotificationChannelFilters): NotificationChannelListResponse
+  searchNotificationChannels(searchTerm: String!, filters: NotificationChannelFilters): NotificationChannelListResponse
+
+  # Notification Settings Queries
+  getNotificationSettings(userId: ID!): NotificationSettings
+  getUserNotificationSettings(userId: ID!): NotificationSettings
+}
+
+# Mutations
+type Mutation {
+  # Notification Mutations
+  createNotification(input: CreateNotificationInput!): Notification
+  updateNotification(input: UpdateNotificationInput!): Notification
+  deleteNotification(id: ID!): Boolean
+  markNotificationAsRead(id: ID!): Notification
+  markNotificationAsUnread(id: ID!): Notification
+  markAllNotificationsAsRead(userId: ID!): Boolean
+  archiveNotification(id: ID!): Notification
+  unarchiveNotification(id: ID!): Notification
+  archiveAllNotifications(userId: ID!): Boolean
+  sendNotification(input: CreateNotificationInput!): Notification
+  scheduleNotification(input: CreateNotificationInput!): Notification
+
+  # Notification Type Mutations
+  createNotificationType(input: CreateNotificationTypeInput!): NotificationType
+  updateNotificationType(input: UpdateNotificationTypeInput!): NotificationType
+  deleteNotificationType(id: ID!): Boolean
+  activateNotificationType(id: ID!): NotificationType
+  deactivateNotificationType(id: ID!): NotificationType
+
+  # Notification Priority Mutations
+  createNotificationPriority(input: CreateNotificationPriorityInput!): NotificationPriority
+  updateNotificationPriority(input: UpdateNotificationPriorityInput!): NotificationPriority
+  deleteNotificationPriority(id: ID!): Boolean
+
+  # Notification Channel Mutations
+  createNotificationChannel(input: CreateNotificationChannelInput!): NotificationChannel
+  updateNotificationChannel(input: UpdateNotificationChannelInput!): NotificationChannel
+  deleteNotificationChannel(id: ID!): Boolean
+  enableNotificationChannel(id: ID!): NotificationChannel
+  disableNotificationChannel(id: ID!): NotificationChannel
+
+  # Notification Settings Mutations
+  createNotificationSettings(input: CreateNotificationSettingsInput!): NotificationSettings
+  updateNotificationSettings(input: UpdateNotificationSettingsInput!): NotificationSettings
+  deleteNotificationSettings(id: ID!): Boolean
+  updateUserNotificationSettings(userId: ID!, input: UpdateNotificationSettingsInput!): NotificationSettings
+}
+
+# Subscriptions
+type Subscription {
+  # Notification Subscriptions
+  onNotificationCreated(userId: ID!): Notification
+  onNotificationUpdated(userId: ID!): Notification
+  onNotificationDeleted(userId: ID!): Notification
+  onNotificationRead(userId: ID!): Notification
+  onNotificationArchived(userId: ID!): Notification
+  onNotificationStatsUpdated(userId: ID!): NotificationStats
+
+  # Notification Type Subscriptions
+  onNotificationTypeCreated: NotificationType
+  onNotificationTypeUpdated: NotificationType
+  onNotificationTypeDeleted: NotificationType
+
+  # Notification Priority Subscriptions
+  onNotificationPriorityCreated: NotificationPriority
+  onNotificationPriorityUpdated: NotificationPriority
+  onNotificationPriorityDeleted: NotificationPriority
+
+  # Notification Channel Subscriptions
+  onNotificationChannelCreated: NotificationChannel
+  onNotificationChannelUpdated: NotificationChannel
+  onNotificationChannelDeleted: NotificationChannel
+
+  # Notification Settings Subscriptions
+  onNotificationSettingsUpdated(userId: ID!): NotificationSettings
+}

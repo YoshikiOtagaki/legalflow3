@@ -1,0 +1,261 @@
+# LegalFlow3 - Performance Pipeline
+# GitHub Actions workflow for performance testing and monitoring
+
+name: Performance Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 3 * * 1' # Weekly on Monday at 3 AM
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  load-test:
+    name: Load Testing
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: |
+        cd frontend
+        npm ci
+
+    - name: Build application
+      run: |
+        cd frontend
+        npm run build
+
+    - name: Start application
+      run: |
+        cd frontend
+        npm start &
+        sleep 30
+
+    - name: Run K6 load tests
+      uses: grafana/k6-action@v0.3.1
+      with:
+        filename: frontend/performance/load-test.js
+
+    - name: Run Artillery load tests
+      run: |
+        cd frontend
+        npm install -g artillery
+        artillery run performance/artillery-config.yml
+
+    - name: Upload load test results
+      uses: actions/upload-artifact@v4
+      with:
+        name: load-test-results
+        path: |
+          frontend/performance/results/
+          k6-results.json
+
+  performance-test:
+    name: Performance Testing
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: |
+        cd frontend
+        npm ci
+
+    - name: Run Lighthouse CI
+      run: |
+        cd frontend
+        npm install -g @lhci/cli
+        lhci autorun
+
+    - name: Run WebPageTest
+      uses: WebPageTest/webpagetest-action@v1
+      with:
+        apiKey: ${{ secrets.WEBPAGETEST_API_KEY }}
+        url: 'https://staging.legalflow3.com'
+        location: 'Dulles:Chrome'
+        runs: 3
+
+    - name: Run Playwright performance tests
+      run: |
+        cd frontend
+        npm run test:performance:ci
+
+    - name: Upload performance results
+      uses: actions/upload-artifact@v4
+      with:
+        name: performance-results
+        path: |
+          frontend/lighthouse-results/
+          frontend/webpagetest-results/
+          frontend/playwright-results/
+
+  bundle-analysis:
+    name: Bundle Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: |
+        cd frontend
+        npm ci
+
+    - name: Build application
+      run: |
+        cd frontend
+        npm run build
+
+    - name: Run bundle analyzer
+      run: |
+        cd frontend
+        npm run analyze
+
+    - name: Upload bundle analysis
+      uses: actions/upload-artifact@v4
+      with:
+        name: bundle-analysis
+        path: frontend/bundle-analysis/
+
+  memory-test:
+    name: Memory Testing
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: |
+        cd frontend
+        npm ci
+        cd ../amplify/backend/function/createCase
+        npm ci
+        cd ../updateCase
+        npm ci
+        cd ../deleteCase
+        npm ci
+        cd ../getCase
+        npm ci
+        cd ../listCases
+        npm ci
+        cd ../searchCases
+        npm ci
+
+    - name: Run memory tests
+      run: |
+        cd frontend
+        npm run test:memory:ci
+        cd ../amplify/backend/function/createCase
+        npm run test:memory:ci
+        cd ../updateCase
+        npm run test:memory:ci
+        cd ../deleteCase
+        npm run test:memory:ci
+        cd ../getCase
+        npm run test:memory:ci
+        cd ../listCases
+        npm run test:memory:ci
+        cd ../searchCases
+        npm run test:memory:ci
+
+    - name: Upload memory test results
+      uses: actions/upload-artifact@v4
+      with:
+        name: memory-test-results
+        path: |
+          frontend/memory-results/
+          amplify/backend/function/*/memory-results/
+
+  performance-report:
+    name: Generate Performance Report
+    runs-on: ubuntu-latest
+    needs: [load-test, performance-test, bundle-analysis, memory-test]
+    if: always()
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+
+    - name: Generate performance report
+      run: |
+        echo "# Performance Test Report" > performance-report.md
+        echo "Generated on: $(date)" >> performance-report.md
+        echo "" >> performance-report.md
+        echo "## Test Results" >> performance-report.md
+        echo "- Load Test: ${{ needs.load-test.result }}" >> performance-report.md
+        echo "- Performance Test: ${{ needs.performance-test.result }}" >> performance-report.md
+        echo "- Bundle Analysis: ${{ needs.bundle-analysis.result }}" >> performance-report.md
+        echo "- Memory Test: ${{ needs.memory-test.result }}" >> performance-report.md
+        echo "" >> performance-report.md
+        echo "## Performance Metrics" >> performance-report.md
+        echo "### Frontend" >> performance-report.md
+        echo "- Bundle Size: $(cat artifacts/bundle-analysis/bundle-size.txt)" >> performance-report.md
+        echo "- First Contentful Paint: $(cat artifacts/performance-results/fcp.txt)" >> performance-report.md
+        echo "- Largest Contentful Paint: $(cat artifacts/performance-results/lcp.txt)" >> performance-report.md
+        echo "- Cumulative Layout Shift: $(cat artifacts/performance-results/cls.txt)" >> performance-report.md
+        echo "" >> performance-report.md
+        echo "### Backend" >> performance-report.md
+        echo "- Average Response Time: $(cat artifacts/load-test-results/avg-response-time.txt)" >> performance-report.md
+        echo "- 95th Percentile Response Time: $(cat artifacts/load-test-results/p95-response-time.txt)" >> performance-report.md
+        echo "- Error Rate: $(cat artifacts/load-test-results/error-rate.txt)" >> performance-report.md
+
+    - name: Upload performance report
+      uses: actions/upload-artifact@v4
+      with:
+        name: performance-report
+        path: performance-report.md
+
+    - name: Comment PR with performance report
+      uses: actions/github-script@v7
+      if: github.event_name == 'pull_request'
+      with:
+        script: |
+          const fs = require('fs');
+          const report = fs.readFileSync('performance-report.md', 'utf8');
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: report
+          });

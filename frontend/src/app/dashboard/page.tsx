@@ -1,176 +1,345 @@
+// Dashboard Page
 "use client";
 
-import { useEffect, useState } from "react";
-import { ProtectedRoute } from "@/components/auth/protected-route";
-import { useAuthStore } from "@/store/auth";
-import { useDashboard } from "@/hooks/use-dashboard";
-import { StatsCards } from "@/components/dashboard/stats-cards";
-import { Charts } from "@/components/dashboard/charts";
-import { ActivityFeed } from "@/components/dashboard/activity-feed";
-import { Button } from "@/components/ui/button";
+import React, { useState } from "react";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  FileText,
-  Users,
-  Clock,
-  DollarSign,
+  BarChart3,
   TrendingUp,
-  Activity,
-  Calendar,
+  FileText,
   Bell,
+  Settings,
+  RefreshCw,
 } from "lucide-react";
+import { useDashboardStats } from "../../hooks/use-dashboard";
+import { useAuth } from "../../hooks/use-auth";
+import {
+  StatsCard,
+  TimesheetStatsCard,
+  CaseStatsCard,
+  DocumentStatsCard,
+  NotificationStatsCard,
+  SystemStatsCard,
+} from "../../components/dashboard/StatsCard";
+import {
+  TimesheetChart,
+  CaseStatusChart,
+  DocumentTypeChart,
+  NotificationTrendChart,
+} from "../../components/dashboard/Chart";
+import {
+  ReportGenerator,
+  QuickReportButtons,
+  ReportStatusIndicator,
+} from "../../components/dashboard/ReportGenerator";
 
-export default function Dashboard() {
-  const { user, logout } = useAuthStore();
-  const {
-    stats,
-    caseStatusDistribution,
-    caseCategoryDistribution,
-    revenueByMonth,
-    timeTrackingStats,
-    recentActivities,
-    upcomingDeadlines,
-    isLoading,
-    error,
-  } = useDashboard();
+export default function DashboardPage() {
+  const { user } = useAuth();
+  const { stats, loading, error, refetch } = useDashboardStats(user?.id || "");
+  const [selectedPeriod, setSelectedPeriod] = useState<
+    "daily" | "weekly" | "monthly"
+  >("weekly");
+  const [refreshing, setRefreshing] = useState(false);
 
-  const handleLogout = () => {
-    logout();
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
   };
 
-  if (isLoading) {
+  if (!user) {
     return (
-      <ProtectedRoute>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">ダッシュボードを読み込み中...</p>
-          </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            Please log in
+          </h1>
+          <p className="text-gray-600">
+            You need to be logged in to view the dashboard.
+          </p>
         </div>
-      </ProtectedRoute>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <ProtectedRoute>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <Card className="w-full max-w-md">
-            <CardHeader>
-              <CardTitle className="text-red-600">
-                エラーが発生しました
-              </CardTitle>
-              <CardDescription>{error}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button
-                onClick={() => window.location.reload()}
-                className="w-full"
-              >
-                再読み込み
-              </Button>
-            </CardContent>
-          </Card>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            Error loading dashboard
+          </h1>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={handleRefresh}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Try Again
+          </button>
         </div>
-      </ProtectedRoute>
+      </div>
     );
   }
 
+  if (!stats) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            No data available
+          </h1>
+          <p className="text-gray-600">
+            There's no data to display on the dashboard yet.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Sample data for charts (in a real app, this would come from the API)
+  const timesheetChartData = {
+    labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    datasets: [
+      {
+        label: "Hours Worked",
+        data: [8, 7.5, 8.5, 9, 7, 4, 2],
+        backgroundColor: "rgba(59, 130, 246, 0.1)",
+        borderColor: "#3b82f6",
+      },
+    ],
+  };
+
+  const caseStatusChartData = {
+    labels: ["Active", "Completed", "On Hold", "Cancelled"],
+    datasets: [
+      {
+        data: [stats.cases.activeCases, stats.cases.completedCases, 2, 1],
+        backgroundColor: ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"],
+      },
+    ],
+  };
+
+  const documentTypeChartData = {
+    labels: ["Contracts", "Legal Briefs", "Correspondence", "Other"],
+    datasets: [
+      {
+        data: [15, 8, 12, 5],
+        backgroundColor: ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"],
+      },
+    ],
+  };
+
+  const notificationTrendData = {
+    labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
+    datasets: [
+      {
+        label: "Notifications Sent",
+        data: [25, 30, 22, 35],
+        backgroundColor: "rgba(16, 185, 129, 0.1)",
+        borderColor: "#10b981",
+      },
+    ],
+  };
+
   return (
-    <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50">
-        <header className="bg-white shadow">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center py-6">
-              <h1 className="text-3xl font-bold text-gray-900">LegalFlow3</h1>
-              <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-700">
-                  こんにちは、{user?.username}さん
-                </span>
-                <Button onClick={handleLogout} variant="outline">
-                  ログアウト
-                </Button>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-4">
+              <BarChart3 className="w-8 h-8 text-blue-600" />
+              <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              {/* Period Selector */}
+              <select
+                value={selectedPeriod}
+                onChange={(e) =>
+                  setSelectedPeriod(
+                    e.target.value as "daily" | "weekly" | "monthly",
+                  )
+                }
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+              </select>
+
+              {/* Refresh Button */}
+              <button
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              >
+                <RefreshCw
+                  className={`w-5 h-5 ${refreshing ? "animate-spin" : ""}`}
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-8">
+          {/* Quick Stats */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Timesheet Stats */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Timesheet
+                </h2>
+                <TrendingUp className="w-5 h-5 text-blue-600" />
+              </div>
+              <TimesheetStatsCard
+                totalHours={stats.timesheet.totalHours}
+                dailyHours={stats.timesheet.dailyHours}
+                weeklyHours={stats.timesheet.weeklyHours}
+                monthlyHours={stats.timesheet.monthlyHours}
+              />
+            </div>
+
+            {/* Case Stats */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">Cases</h2>
+                <FileText className="w-5 h-5 text-green-600" />
+              </div>
+              <CaseStatsCard
+                totalCases={stats.cases.totalCases}
+                activeCases={stats.cases.activeCases}
+                completedCases={stats.cases.completedCases}
+                newCases={stats.cases.newCases}
+              />
+            </div>
+          </div>
+
+          {/* Charts Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Timesheet Chart */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Weekly Hours Trend
+              </h3>
+              <div className="h-64">
+                <TimesheetChart data={timesheetChartData} />
+              </div>
+            </div>
+
+            {/* Case Status Chart */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Case Status Distribution
+              </h3>
+              <div className="h-64">
+                <CaseStatusChart data={caseStatusChartData} />
               </div>
             </div>
           </div>
-        </header>
 
-        <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          <div className="px-4 py-6 sm:px-0 space-y-8">
-            {/* 統計カード */}
-            <StatsCards stats={stats} />
+          {/* Additional Stats */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Document Stats */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Documents
+                </h2>
+                <FileText className="w-5 h-5 text-purple-600" />
+              </div>
+              <DocumentStatsCard
+                totalDocuments={stats.documents.totalDocuments}
+                storageUsed={stats.documents.storageUsed}
+              />
+            </div>
 
-            {/* チャート */}
-            <Charts
-              caseStatusDistribution={caseStatusDistribution}
-              caseCategoryDistribution={caseCategoryDistribution}
-              revenueByMonth={revenueByMonth}
-              timeTrackingStats={timeTrackingStats}
-            />
+            {/* Notification Stats */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Notifications
+                </h2>
+                <Bell className="w-5 h-5 text-yellow-600" />
+              </div>
+              <NotificationStatsCard
+                totalNotifications={stats.notifications.totalNotifications}
+                unreadNotifications={stats.notifications.unreadNotifications}
+              />
+            </div>
 
-            {/* アクティビティフィード */}
-            <ActivityFeed
-              recentActivities={recentActivities}
-              upcomingDeadlines={upcomingDeadlines}
-            />
-
-            {/* クイックアクション */}
-            <Card>
-              <CardHeader>
-                <CardTitle>クイックアクション</CardTitle>
-                <CardDescription>
-                  よく使用する機能に素早くアクセス
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <Button
-                    variant="outline"
-                    className="h-20 flex flex-col items-center justify-center space-y-2"
-                    onClick={() => (window.location.href = "/cases")}
-                  >
-                    <FileText className="h-6 w-6" />
-                    <span className="text-sm">ケース管理</span>
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    className="h-20 flex flex-col items-center justify-center space-y-2"
-                    onClick={() => (window.location.href = "/parties")}
-                  >
-                    <Users className="h-6 w-6" />
-                    <span className="text-sm">当事者管理</span>
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    className="h-20 flex flex-col items-center justify-center space-y-2"
-                    onClick={() => (window.location.href = "/timesheet")}
-                  >
-                    <Clock className="h-6 w-6" />
-                    <span className="text-sm">タイムシート</span>
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    className="h-20 flex flex-col items-center justify-center space-y-2"
-                    onClick={() => (window.location.href = "/documents")}
-                  >
-                    <FileText className="h-6 w-6" />
-                    <span className="text-sm">ドキュメント</span>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            {/* System Stats */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">System</h2>
+                <Settings className="w-5 h-5 text-gray-600" />
+              </div>
+              <SystemStatsCard
+                apiResponseTime={stats.system.apiResponseTime}
+                errorRate={stats.system.errorRate}
+                activeUsers={stats.system.activeUsers}
+                totalUsers={stats.system.totalUsers}
+              />
+            </div>
           </div>
-        </main>
+
+          {/* Additional Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Document Type Chart */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Document Types
+              </h3>
+              <div className="h-64">
+                <DocumentTypeChart data={documentTypeChartData} />
+              </div>
+            </div>
+
+            {/* Notification Trend Chart */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Notification Trends
+              </h3>
+              <div className="h-64">
+                <NotificationTrendChart data={notificationTrendData} />
+              </div>
+            </div>
+          </div>
+
+          {/* Reports Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Quick Reports */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Quick Reports
+              </h3>
+              <QuickReportButtons userId={user.id} />
+            </div>
+
+            {/* Report Generator */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Custom Report
+              </h3>
+              <ReportGenerator userId={user.id} />
+            </div>
+          </div>
+        </div>
       </div>
-    </ProtectedRoute>
+    </div>
   );
 }

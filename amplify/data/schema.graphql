@@ -1,0 +1,666 @@
+# LegalFlow3 GraphQL Schema
+# Generated for AWS AppSync with DynamoDB integration
+
+# =============================================================================
+# Enums
+# =============================================================================
+
+enum Role {
+  Lawyer
+  Paralegal
+}
+
+enum Plan {
+  Free
+  Lawyer
+  Paralegal
+}
+
+enum CaseRole {
+  Lead
+  Collaborator
+}
+
+enum DocumentStatus {
+  Submitted
+  Provisional
+  Withheld
+}
+
+enum CourtDivisionType {
+  COURT
+  DIVISION
+  SECTION
+}
+
+enum CourtPersonnelRole {
+  JUDGE
+  CLERK
+}
+
+enum CaseStatus {
+  Active
+  Closed
+  Suspended
+}
+
+enum TaskPriority {
+  Low
+  Medium
+  High
+  Urgent
+}
+
+enum NotificationPriority {
+  Low
+  Medium
+  High
+  Urgent
+}
+
+# =============================================================================
+# Core Types
+# =============================================================================
+
+type User @model @auth(rules: [
+  { allow: owner, operations: [read, update] },
+  { allow: groups, groups: ["Lawyers"], operations: [read] }
+]) {
+  id: ID!
+  email: String! @index(name: "byEmail")
+  name: String
+  role: Role! @default(value: "Lawyer")
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  lastLoginAt: AWSDateTime
+  isActive: Boolean! @default(value: true)
+  profileImageUrl: String
+
+  # Relations
+  subscription: Subscription @hasOne
+  caseAssignments: [CaseAssignment] @hasMany
+  tasks: [Task] @hasMany
+  notifications: [Notification] @hasMany
+  timesheetEntries: [TimesheetEntry] @hasMany
+}
+
+type Subscription @model @auth(rules: [
+  { allow: owner, operations: [read, update] }
+]) {
+  id: ID!
+  userId: ID! @index(name: "byUser")
+  user: User @belongsTo(fields: ["userId"])
+  plan: Plan! @default(value: "Free")
+  status: String!
+  caseCount: Int! @default(value: 0)
+  maxCases: Int!
+  usedStorage: Int! @default(value: 0)
+  maxStorage: Int!
+  billingCycle: String!
+  nextBillingDate: AWSDate
+  lastPaymentDate: AWSDate
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# =============================================================================
+# Case Management Types
+# =============================================================================
+
+type Case @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] },
+  { allow: groups, groups: ["Lawyers"], operations: [read] }
+]) {
+  id: ID!
+  name: String!
+  caseNumber: String
+  status: CaseStatus
+  trialLevel: String
+  hourlyRate: Float
+  categoryId: ID! @index(name: "byCategory")
+  currentPhaseId: ID
+  courtDivisionId: ID @index(name: "byCourtDivision")
+
+  # Dates
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  firstConsultationDate: AWSDate
+  engagementDate: AWSDate
+  caseClosedDate: AWSDate
+  litigationStartDate: AWSDate
+  oralArgumentEndDate: AWSDate
+  judgmentDate: AWSDate
+  judgmentReceivedDate: AWSDate
+
+  # Documents
+  hasEngagementLetter: Boolean! @default(value: false)
+  engagementLetterPath: String
+
+  # Additional Info
+  remarks: String
+  customProperties: AWSJSON
+  tags: [String]
+  priority: TaskPriority
+
+  # Relations
+  assignments: [CaseAssignment] @hasMany
+  parties: [CaseParty] @hasMany
+  tasks: [Task] @hasMany
+  timesheetEntries: [TimesheetEntry] @hasMany
+  events: [CaseEvent] @hasMany
+  memos: [Memo] @hasMany
+}
+
+type CaseAssignment @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] },
+  { allow: groups, groups: ["Lawyers"], operations: [read] }
+]) {
+  id: ID!
+  caseId: ID! @index(name: "byCase")
+  case: Case @belongsTo(fields: ["caseId"])
+  userId: ID! @index(name: "byUser")
+  user: User @belongsTo(fields: ["userId"])
+  role: CaseRole! @default(value: "Collaborator")
+  permissions: AWSJSON
+  assignedAt: AWSDateTime!
+  lastAccessedAt: AWSDateTime
+  isActive: Boolean! @default(value: true)
+}
+
+# =============================================================================
+# Party Management Types
+# =============================================================================
+
+type Party @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] },
+  { allow: groups, groups: ["Lawyers"], operations: [read] }
+]) {
+  id: ID!
+  isCorporation: Boolean! @default(value: false)
+  isFormerClient: Boolean! @default(value: false)
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  status: String! @default(value: "Active")
+  source: String
+  notes: String
+
+  # Relations
+  individualProfile: IndividualProfile @hasOne
+  corporateProfile: CorporateProfile @hasOne
+  caseLinks: [CaseParty] @hasMany
+}
+
+type IndividualProfile @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] },
+  { allow: groups, groups: ["Lawyers"], operations: [read] }
+]) {
+  id: ID!
+  partyId: ID! @index(name: "byParty")
+  party: Party @belongsTo(fields: ["partyId"])
+
+  # Personal Info
+  lastName: String @index(name: "byLastName")
+  firstName: String
+  lastNameKana: String
+  firstNameKana: String
+  honorific: String
+  formerName: String
+  dateOfBirth: AWSDate
+  legalDomicile: String
+
+  # Contact Info
+  email: String @index(name: "byEmail")
+  phone: String
+  mobilePhone: String
+  fax: String
+  postalCode: String
+  address1: String
+  address2: String
+
+  # Company Info
+  companyName: String @index(name: "byCompanyName")
+  companyNameKana: String
+  companyPostalCode: String
+  companyAddress1: String
+  companyAddress2: String
+  companyPhone: String
+  companyFax: String
+  department: String
+  position: String
+  companyEmail: String
+
+  # Additional Info
+  itemsInCustody: String
+  cautions: String
+  remarks: String
+  emergencyContact: AWSJSON
+}
+
+type CorporateProfile @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] },
+  { allow: groups, groups: ["Lawyers"], operations: [read] }
+]) {
+  id: ID!
+  partyId: ID! @index(name: "byParty")
+  party: Party @belongsTo(fields: ["partyId"])
+
+  # Company Info
+  name: String! @index(name: "byName")
+  nameKana: String
+  postalCode: String
+  address1: String
+  address2: String
+  phone: String
+  mobilePhone: String
+  fax: String
+  email: String @index(name: "byEmail")
+  websiteURL: String
+
+  # Representative Info
+  representativeTitle: String
+  representativeLastName: String @index(name: "byRepresentativeLastName")
+  representativeFirstName: String
+
+  # Contact Person Info
+  contactLastName: String
+  contactFirstName: String
+  contactLastNameKana: String
+  contactFirstNameKana: String
+  contactDepartment: String
+  contactPosition: String
+  contactDirectPhone: String
+  contactEmail: String
+  contactMobilePhone: String
+  contactPostalCode: String
+  contactAddress1: String
+  contactAddress2: String
+
+  # Additional Info
+  itemsInCustody: String
+  cautions: String
+  remarks: String
+  businessType: String
+  capital: Float
+  establishedDate: AWSDate
+}
+
+type CaseParty @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] },
+  { allow: groups, groups: ["Lawyers"], operations: [read] }
+]) {
+  id: ID!
+  caseId: ID! @index(name: "byCase")
+  case: Case @belongsTo(fields: ["caseId"])
+  partyId: ID! @index(name: "byParty")
+  party: Party @belongsTo(fields: ["partyId"])
+  role: String! # plaintiff, defendant, our_insurance
+  createdAt: AWSDateTime!
+}
+
+# =============================================================================
+# Task Management Types
+# =============================================================================
+
+type Task @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] },
+  { allow: groups, groups: ["Lawyers"], operations: [read] }
+]) {
+  id: ID!
+  caseId: ID! @index(name: "byCase")
+  case: Case @belongsTo(fields: ["caseId"])
+  description: String!
+  dueDate: AWSDateTime @index(name: "byDueDate")
+  isCompleted: Boolean! @default(value: false) @index(name: "byStatus")
+  isAutoGenerated: Boolean! @default(value: false)
+  assignedToId: ID @index(name: "byAssignedTo")
+  assignedTo: User @belongsTo(fields: ["assignedToId"])
+  assignedByName: String
+  assignedAt: AWSDateTime
+  priority: TaskPriority
+  category: String
+  tags: [String]
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  completedAt: AWSDateTime
+  estimatedHours: Float
+  actualHours: Float
+  notes: String
+  attachments: [AWSJSON]
+}
+
+# =============================================================================
+# Timesheet Management Types
+# =============================================================================
+
+type TimesheetEntry @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] },
+  { allow: groups, groups: ["Lawyers"], operations: [read] }
+]) {
+  id: ID!
+  caseId: ID! @index(name: "byCase")
+  case: Case @belongsTo(fields: ["caseId"])
+  userId: ID! @index(name: "byUser")
+  user: User @belongsTo(fields: ["userId"])
+  startTime: AWSDateTime! @index(name: "byStartTime")
+  endTime: AWSDateTime
+  duration: Int # in minutes
+  description: String!
+  category: String
+  subcategory: String
+  billable: Boolean! @default(value: true)
+  hourlyRate: Float
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  notes: String
+  tags: [String]
+  isApproved: Boolean! @default(value: false)
+  approvedBy: ID
+  approvedAt: AWSDateTime
+}
+
+# =============================================================================
+# Notification Types
+# =============================================================================
+
+type Notification @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] }
+]) {
+  id: ID!
+  userId: ID! @index(name: "byUser")
+  user: User @belongsTo(fields: ["userId"])
+  eventType: String! @index(name: "byEventType")
+  message: String!
+  isRead: Boolean! @default(value: false) @index(name: "byReadStatus")
+  priority: NotificationPriority
+  channels: [String]
+  scheduledAt: AWSDateTime
+  relatedEntityType: String
+  relatedEntityId: ID
+  actionUrl: String
+  createdAt: AWSDateTime! @index(name: "byCreatedAt")
+  readAt: AWSDateTime
+  expiresAt: AWSDateTime
+  metadata: AWSJSON
+  templateId: String
+  language: String
+}
+
+# =============================================================================
+# Additional Supporting Types
+# =============================================================================
+
+type CaseEvent @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] },
+  { allow: groups, groups: ["Lawyers"], operations: [read] }
+]) {
+  id: ID!
+  caseId: ID! @index(name: "byCase")
+  case: Case @belongsTo(fields: ["caseId"])
+  eventType: String!
+  dateTime: AWSDateTime!
+  location: String
+  report: HearingReport @hasOne
+}
+
+type Memo @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] },
+  { allow: groups, groups: ["Lawyers"], operations: [read] }
+]) {
+  id: ID!
+  caseId: ID! @index(name: "byCase")
+  case: Case @belongsTo(fields: ["caseId"])
+  content: String!
+  authorId: ID!
+  createdAt: AWSDateTime!
+}
+
+type HearingReport @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] },
+  { allow: groups, groups: ["Lawyers"], operations: [read] }
+]) {
+  id: ID!
+  caseEventId: ID! @index(name: "byCaseEvent")
+  caseEvent: CaseEvent @belongsTo(fields: ["caseEventId"])
+  attendees: AWSJSON!
+  notes: String
+  documents: [SubmittedDocument] @hasMany
+}
+
+type SubmittedDocument @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] },
+  { allow: groups, groups: ["Lawyers"], operations: [read] }
+]) {
+  id: ID!
+  hearingReportId: ID! @index(name: "byHearingReport")
+  hearingReport: HearingReport @belongsTo(fields: ["hearingReportId"])
+  documentName: String!
+  status: DocumentStatus! @default(value: "Submitted")
+}
+
+# =============================================================================
+# Input Types
+# =============================================================================
+
+input CreateUserInput {
+  email: String!
+  name: String
+  role: Role = Lawyer
+  profileImageUrl: String
+}
+
+input UpdateUserInput {
+  id: ID!
+  name: String
+  profileImageUrl: String
+  isActive: Boolean
+}
+
+input CreateCaseInput {
+  name: String!
+  caseNumber: String
+  status: CaseStatus
+  trialLevel: String
+  hourlyRate: Float
+  categoryId: ID!
+  currentPhaseId: ID
+  courtDivisionId: ID
+  firstConsultationDate: AWSDate
+  engagementDate: AWSDate
+  caseClosedDate: AWSDate
+  litigationStartDate: AWSDate
+  oralArgumentEndDate: AWSDate
+  judgmentDate: AWSDate
+  judgmentReceivedDate: AWSDate
+  hasEngagementLetter: Boolean = false
+  engagementLetterPath: String
+  remarks: String
+  customProperties: AWSJSON
+  tags: [String]
+  priority: TaskPriority
+}
+
+input UpdateCaseInput {
+  id: ID!
+  name: String
+  caseNumber: String
+  status: CaseStatus
+  trialLevel: String
+  hourlyRate: Float
+  categoryId: ID
+  currentPhaseId: ID
+  courtDivisionId: ID
+  firstConsultationDate: AWSDate
+  engagementDate: AWSDate
+  caseClosedDate: AWSDate
+  litigationStartDate: AWSDate
+  oralArgumentEndDate: AWSDate
+  judgmentDate: AWSDate
+  judgmentReceivedDate: AWSDate
+  hasEngagementLetter: Boolean
+  engagementLetterPath: String
+  remarks: String
+  customProperties: AWSJSON
+  tags: [String]
+  priority: TaskPriority
+}
+
+input CreateTaskInput {
+  caseId: ID!
+  description: String!
+  dueDate: AWSDateTime
+  isAutoGenerated: Boolean = false
+  assignedToId: ID
+  priority: TaskPriority
+  category: String
+  tags: [String]
+  estimatedHours: Float
+  notes: String
+}
+
+input UpdateTaskInput {
+  id: ID!
+  description: String
+  dueDate: AWSDateTime
+  isCompleted: Boolean
+  assignedToId: ID
+  priority: TaskPriority
+  category: String
+  tags: [String]
+  estimatedHours: Float
+  actualHours: Float
+  notes: String
+}
+
+input CreateTimesheetEntryInput {
+  caseId: ID!
+  startTime: AWSDateTime!
+  endTime: AWSDateTime
+  description: String!
+  category: String
+  subcategory: String
+  billable: Boolean = true
+  hourlyRate: Float
+  notes: String
+  tags: [String]
+}
+
+input UpdateTimesheetEntryInput {
+  id: ID!
+  startTime: AWSDateTime
+  endTime: AWSDateTime
+  description: String
+  category: String
+  subcategory: String
+  billable: Boolean
+  hourlyRate: Float
+  notes: String
+  tags: [String]
+  isApproved: Boolean
+}
+
+# =============================================================================
+# Custom Queries and Mutations
+# =============================================================================
+
+type Query {
+  # User queries
+  getUserByEmail(email: String!): User @index(name: "byEmail")
+  getUsersByRole(role: Role!): [User] @index(name: "byRole")
+
+  # Case queries
+  getCasesByCategory(categoryId: ID!): [Case] @index(name: "byCategory")
+  getCasesByStatus(status: CaseStatus!): [Case] @index(name: "byStatus")
+  getCasesByUser(userId: ID!): [Case] @index(name: "byUser")
+  searchCases(filter: CaseSearchFilter): [Case]
+
+  # Task queries
+  getTasksByCase(caseId: ID!): [Task] @index(name: "byCase")
+  getTasksByUser(userId: ID!): [Task] @index(name: "byAssignedTo")
+  getTasksByStatus(isCompleted: Boolean!): [Task] @index(name: "byStatus")
+  getOverdueTasks: [Task]
+
+  # Timesheet queries
+  getTimesheetByCase(caseId: ID!): [TimesheetEntry] @index(name: "byCase")
+  getTimesheetByUser(userId: ID!): [TimesheetEntry] @index(name: "byUser")
+  getTimesheetByDateRange(userId: ID!, startDate: AWSDate!, endDate: AWSDate!): [TimesheetEntry]
+
+  # Notification queries
+  getNotificationsByUser(userId: ID!): [Notification] @index(name: "byUser")
+  getUnreadNotifications(userId: ID!): [Notification] @index(name: "byReadStatus")
+
+  # Party queries
+  searchPartiesByName(name: String!): [Party]
+  searchPartiesByEmail(email: String!): [Party]
+}
+
+type Mutation {
+  # User mutations
+  createUser(input: CreateUserInput!): User
+  updateUser(input: UpdateUserInput!): User
+  deleteUser(id: ID!): User
+
+  # Case mutations
+  createCase(input: CreateCaseInput!): Case
+  updateCase(input: UpdateCaseInput!): Case
+  deleteCase(id: ID!): Case
+  assignCaseToUser(caseId: ID!, userId: ID!, role: CaseRole!): CaseAssignment
+  removeCaseFromUser(caseId: ID!, userId: ID!): CaseAssignment
+
+  # Task mutations
+  createTask(input: CreateTaskInput!): Task
+  updateTask(input: UpdateTaskInput!): Task
+  deleteTask(id: ID!): Task
+  completeTask(id: ID!): Task
+  assignTaskToUser(taskId: ID!, userId: ID!): Task
+
+  # Timesheet mutations
+  createTimesheetEntry(input: CreateTimesheetEntryInput!): TimesheetEntry
+  updateTimesheetEntry(input: UpdateTimesheetEntryInput!): TimesheetEntry
+  deleteTimesheetEntry(id: ID!): TimesheetEntry
+  startTimer(caseId: ID!, description: String!): TimesheetEntry
+  stopTimer(id: ID!): TimesheetEntry
+
+  # Notification mutations
+  markNotificationAsRead(id: ID!): Notification
+  markAllNotificationsAsRead(userId: ID!): [Notification]
+  deleteNotification(id: ID!): Notification
+}
+
+type Subscription {
+  # Case subscriptions
+  onCaseCreated: Case @aws_subscribe(mutations: ["createCase"])
+  onCaseUpdated: Case @aws_subscribe(mutations: ["updateCase"])
+  onCaseDeleted: Case @aws_subscribe(mutations: ["deleteCase"])
+
+  # Task subscriptions
+  onTaskCreated: Task @aws_subscribe(mutations: ["createTask"])
+  onTaskUpdated: Task @aws_subscribe(mutations: ["updateTask"])
+  onTaskCompleted: Task @aws_subscribe(mutations: ["completeTask"])
+
+  # Notification subscriptions
+  onNotificationCreated(userId: ID!): Notification @aws_subscribe(mutations: ["createNotification"])
+  onNotificationUpdated(userId: ID!): Notification @aws_subscribe(mutations: ["markNotificationAsRead"])
+
+  # Timesheet subscriptions
+  onTimesheetEntryCreated: TimesheetEntry @aws_subscribe(mutations: ["createTimesheetEntry"])
+  onTimesheetEntryUpdated: TimesheetEntry @aws_subscribe(mutations: ["updateTimesheetEntry"])
+}
+
+# =============================================================================
+# Filter Types
+# =============================================================================
+
+input CaseSearchFilter {
+  name: String
+  caseNumber: String
+  status: CaseStatus
+  categoryId: ID
+  priority: TaskPriority
+  tags: [String]
+  dateRange: DateRange
+}
+
+input DateRange {
+  startDate: AWSDate!
+  endDate: AWSDate!
+}

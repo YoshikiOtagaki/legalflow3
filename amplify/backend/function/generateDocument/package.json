@@ -1,0 +1,31 @@
+{
+  "name": "generate-document",
+  "version": "1.0.0",
+  "description": "Lambda function for generating documents from templates",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.450.0",
+    "@aws-sdk/lib-dynamodb": "^3.450.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.8"
+  },
+  "keywords": [
+    "aws",
+    "lambda",
+    "dynamodb",
+    "document",
+    "generation",
+    "template",
+    "legal"
+  ],
+  "author": "LegalFlow3",
+  "license": "MIT"
+}

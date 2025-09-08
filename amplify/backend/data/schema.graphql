@@ -1,0 +1,580 @@
+# LegalFlow3 - GraphQL Schema
+# Complete GraphQL schema for LegalFlow3 case management system
+
+type User @model @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  email: String!
+  firstName: String!
+  lastName: String!
+  role: Role!
+  isActive: Boolean!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  subscription: Subscription @hasOne
+}
+
+type Subscription @model @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  userId: ID! @index(name: "byUser")
+  planId: ID!
+  status: SubscriptionStatus!
+  caseCount: Int!
+  maxCases: Int!
+  startDate: AWSDateTime!
+  endDate: AWSDateTime!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  user: User @belongsTo(fields: ["userId"])
+}
+
+type Case @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  name: String!
+  caseNumber: String
+  status: CaseStatus!
+  trialLevel: String
+  hourlyRate: Float
+  categoryId: ID! @index(name: "byCategory")
+  currentPhaseId: ID
+  courtDivisionId: ID
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  firstConsultationDate: AWSDate
+  engagementDate: AWSDate
+  caseClosedDate: AWSDate
+  litigationStartDate: AWSDate
+  oralArgumentEndDate: AWSDate
+  judgmentDate: AWSDate
+  judgmentReceivedDate: AWSDate
+  hasEngagementLetter: Boolean!
+  engagementLetterPath: String
+  remarks: String
+  customProperties: AWSJSON
+  tags: [String!]!
+  priority: Priority!
+  assignments: [CaseAssignment!] @hasMany
+  parties: [CaseParty!] @hasMany
+  tasks: [Task!] @hasMany
+  timesheetEntries: [TimesheetEntry!] @hasMany
+  memos: [Memo!] @hasMany
+}
+
+type CaseAssignment @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  caseId: ID! @index(name: "byCase")
+  userId: ID! @index(name: "byUser")
+  role: CaseRole!
+  permissions: CasePermissions!
+  assignedAt: AWSDateTime!
+  lastAccessedAt: AWSDateTime!
+  isActive: Boolean!
+  case: Case @belongsTo(fields: ["caseId"])
+}
+
+type CaseParty @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  caseId: ID! @index(name: "byCase")
+  partyId: ID! @index(name: "byParty")
+  role: PartyRole!
+  case: Case @belongsTo(fields: ["caseId"])
+  party: Party @belongsTo(fields: ["partyId"])
+}
+
+type Party @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  isCorporation: Boolean!
+  isFormerClient: Boolean!
+  individualProfile: IndividualProfile
+  corporateProfile: CorporateProfile
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  cases: [CaseParty!] @hasMany
+}
+
+type IndividualProfile {
+  lastName: String!
+  firstName: String!
+  lastNameKana: String
+  firstNameKana: String
+  email: String
+  phone: String
+  address: Address
+  dateOfBirth: AWSDate
+  gender: Gender
+  occupation: String
+  companyName: String
+}
+
+type CorporateProfile {
+  name: String!
+  nameKana: String
+  email: String
+  phone: String
+  address: Address
+  representativeName: String
+  representativeNameKana: String
+  establishedDate: AWSDate
+  capital: Float
+  businessType: String
+  industry: String
+}
+
+type Address {
+  postalCode: String
+  prefecture: String
+  city: String
+  addressLine1: String
+  addressLine2: String
+}
+
+type Task @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  caseId: ID! @index(name: "byCase")
+  description: String!
+  dueDate: AWSDate
+  isCompleted: Boolean!
+  priority: Priority!
+  category: String
+  assignedToId: ID
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  case: Case @belongsTo(fields: ["caseId"])
+}
+
+type TimesheetEntry @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  caseId: ID! @index(name: "byCase")
+  userId: ID! @index(name: "byUser")
+  startTime: AWSDateTime!
+  endTime: AWSDateTime
+  duration: Int! # in minutes
+  description: String!
+  category: String
+  billable: Boolean!
+  hourlyRate: Float
+  createdAt: AWSDateTime!
+  case: Case @belongsTo(fields: ["caseId"])
+}
+
+type Memo @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  caseId: ID! @index(name: "byCase")
+  content: String!
+  authorId: ID!
+  createdAt: AWSDateTime!
+  case: Case @belongsTo(fields: ["caseId"])
+}
+
+type CaseCategory @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  name: String!
+  description: String
+  color: String
+  isActive: Boolean!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type CasePhase @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  name: String!
+  description: String
+  order: Int!
+  isActive: Boolean!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Lawyer @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  barNumber: String!
+  barAssociation: String!
+  licenseDate: AWSDate!
+  isActive: Boolean!
+  specialization: [String!]!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type LawFirm @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  name: String!
+  nameKana: String
+  email: String
+  phone: String
+  address: Address
+  isActive: Boolean!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  offices: [LawFirmOffice!] @hasMany
+}
+
+type LawFirmOffice @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  lawFirmId: ID! @index(name: "byLawFirm")
+  name: String!
+  address: Address
+  phone: String
+  email: String
+  isMainOffice: Boolean!
+  lawFirm: LawFirm @belongsTo(fields: ["lawFirmId"])
+}
+
+type Courthouse @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  name: String!
+  address: Address
+  phone: String
+  email: String
+  isActive: Boolean!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  divisions: [CourtDivision!] @hasMany
+}
+
+type CourtDivision @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  courthouseId: ID! @index(name: "byCourthouse")
+  name: String!
+  divisionType: CourtDivisionType!
+  isActive: Boolean!
+  courthouse: Courthouse @belongsTo(fields: ["courthouseId"])
+  personnel: [CourtPersonnel!] @hasMany
+}
+
+type CourtPersonnel @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  courtDivisionId: ID! @index(name: "byCourtDivision")
+  name: String!
+  role: CourtPersonnelRole!
+  email: String
+  phone: String
+  isActive: Boolean!
+  courtDivision: CourtDivision @belongsTo(fields: ["courtDivisionId"])
+}
+
+type JurisdictionRule @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  name: String!
+  description: String
+  jurisdiction: String!
+  isActive: Boolean!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type CaseEvent @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  caseId: ID! @index(name: "byCase")
+  title: String!
+  description: String
+  eventDate: AWSDateTime!
+  eventType: String!
+  location: String
+  attendees: [String!]!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  case: Case @belongsTo(fields: ["caseId"])
+}
+
+type HearingReport @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  caseId: ID! @index(name: "byCase")
+  hearingDate: AWSDateTime!
+  reportContent: String!
+  attendees: [String!]!
+  nextHearingDate: AWSDateTime
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  case: Case @belongsTo(fields: ["caseId"])
+}
+
+type SubmittedDocument @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  caseId: ID! @index(name: "byCase")
+  documentType: String!
+  title: String!
+  filePath: String!
+  submittedDate: AWSDateTime!
+  status: DocumentStatus!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  case: Case @belongsTo(fields: ["caseId"])
+}
+
+type Expense @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  caseId: ID! @index(name: "byCase")
+  amount: Float!
+  description: String!
+  category: String!
+  expenseDate: AWSDate!
+  isReimbursable: Boolean!
+  receiptPath: String
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  case: Case @belongsTo(fields: ["caseId"])
+}
+
+type Deposit @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  caseId: ID! @index(name: "byCase")
+  amount: Float!
+  description: String!
+  depositDate: AWSDate!
+  status: DepositStatus!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  case: Case @belongsTo(fields: ["caseId"])
+}
+
+type PhaseTransitionRule @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  fromPhaseId: ID!
+  toPhaseId: ID!
+  conditions: AWSJSON
+  isActive: Boolean!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type TaskTemplate @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  name: String!
+  description: String
+  categoryId: ID!
+  isActive: Boolean!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  items: [TaskTemplateItem!] @hasMany
+}
+
+type TaskTemplateItem @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  templateId: ID! @index(name: "byTemplate")
+  description: String!
+  order: Int!
+  isRequired: Boolean!
+  template: TaskTemplate @belongsTo(fields: ["templateId"])
+}
+
+type DocumentTemplate @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  name: String!
+  description: String
+  templatePath: String!
+  categoryId: ID!
+  isActive: Boolean!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Notification @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  userId: ID! @index(name: "byUser")
+  title: String!
+  message: String!
+  type: NotificationType!
+  isRead: Boolean!
+  actionUrl: String
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# Enums
+enum Role {
+  ADMIN
+  LAWYER
+  PARALEGAL
+  CLIENT
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  CANCELLED
+}
+
+enum CaseStatus {
+  ACTIVE
+  CLOSED
+  SUSPENDED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum CaseRole {
+  LEAD
+  COLLABORATOR
+}
+
+enum PartyRole {
+  PLAINTIFF
+  DEFENDANT
+  THIRD_PARTY
+  WITNESS
+  EXPERT
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum CourtDivisionType {
+  CIVIL
+  CRIMINAL
+  FAMILY
+  ADMINISTRATIVE
+  LABOR
+  INTELLECTUAL_PROPERTY
+}
+
+enum CourtPersonnelRole {
+  JUDGE
+  CLERK
+  BAILIFF
+  INTERPRETER
+}
+
+enum DocumentStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+enum DepositStatus {
+  PENDING
+  CONFIRMED
+  REFUNDED
+}
+
+enum NotificationType {
+  TASK_DUE
+  CASE_UPDATE
+  DOCUMENT_SUBMITTED
+  HEARING_SCHEDULED
+  PAYMENT_RECEIVED
+  SYSTEM_ALERT
+}
+
+# Custom Types
+type CasePermissions {
+  canEdit: Boolean!
+  canDelete: Boolean!
+  canAssign: Boolean!
+  canViewFinancials: Boolean!
+}
+
+# Queries
+type Query {
+  getCase(id: ID!): Case
+  listCases(limit: Int, nextToken: String, status: String, categoryId: ID): CaseConnection
+  searchCases(filter: CaseSearchFilter!, limit: Int, nextToken: String): CaseConnection
+}
+
+# Mutations
+type Mutation {
+  createCase(input: CreateCaseInput!): CaseResponse
+  updateCase(input: UpdateCaseInput!): CaseResponse
+  deleteCase(id: ID!): CaseResponse
+}
+
+# Subscriptions
+type Subscription {
+  onCaseCreated: Case @aws_subscribe(mutations: ["createCase"])
+  onCaseUpdated: Case @aws_subscribe(mutations: ["updateCase"])
+  onCaseDeleted: Case @aws_subscribe(mutations: ["deleteCase"])
+}
+
+# Input Types
+input CreateCaseInput {
+  name: String!
+  caseNumber: String
+  status: CaseStatus
+  trialLevel: String
+  hourlyRate: Float
+  categoryId: ID!
+  currentPhaseId: ID
+  courtDivisionId: ID
+  firstConsultationDate: AWSDate
+  engagementDate: AWSDate
+  caseClosedDate: AWSDate
+  litigationStartDate: AWSDate
+  oralArgumentEndDate: AWSDate
+  judgmentDate: AWSDate
+  judgmentReceivedDate: AWSDate
+  hasEngagementLetter: Boolean
+  engagementLetterPath: String
+  remarks: String
+  customProperties: AWSJSON
+  tags: [String!]
+  priority: Priority
+}
+
+input UpdateCaseInput {
+  id: ID!
+  name: String
+  caseNumber: String
+  status: CaseStatus
+  trialLevel: String
+  hourlyRate: Float
+  categoryId: ID
+  currentPhaseId: ID
+  courtDivisionId: ID
+  firstConsultationDate: AWSDate
+  engagementDate: AWSDate
+  caseClosedDate: AWSDate
+  litigationStartDate: AWSDate
+  oralArgumentEndDate: AWSDate
+  judgmentDate: AWSDate
+  judgmentReceivedDate: AWSDate
+  hasEngagementLetter: Boolean
+  engagementLetterPath: String
+  remarks: String
+  customProperties: AWSJSON
+  tags: [String!]
+  priority: Priority
+}
+
+input CaseSearchFilter {
+  name: String
+  caseNumber: String
+  status: String
+  categoryId: ID
+  priority: String
+  tags: [String!]
+  dateRange: DateRange
+}
+
+input DateRange {
+  startDate: AWSDate!
+  endDate: AWSDate!
+}
+
+# Response Types
+type CaseResponse {
+  success: Boolean!
+  case: Case
+  error: Error
+}
+
+type Error {
+  message: String!
+  code: String!
+}
+
+type CaseConnection {
+  items: [Case!]!
+  nextToken: String
+  totalCount: Int
+}

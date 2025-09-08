@@ -1,0 +1,568 @@
+## LegalFlow3 GraphQL VTL Templates
+## AWS AppSync with DynamoDB integration
+
+## =============================================================================
+## Request Templates
+## =============================================================================
+
+## Get User by ID Request
+#set($id = $ctx.args.id)
+{
+  "version": "2017-02-28",
+  "operation": "GetItem",
+  "key": {
+    "id": $util.dynamodb.toDynamoDBJson($id)
+  }
+}
+
+## List Users Request
+{
+  "version": "2017-02-28",
+  "operation": "Scan",
+  "filter": {
+    "expression": "isActive = :isActive",
+    "expressionValues": {
+      ":isActive": $util.dynamodb.toDynamoDBJson(true)
+    }
+  }
+}
+
+## Create User Request
+#set($id = $util.autoId())
+#set($now = $util.time.nowISO8601())
+#set($input = $ctx.args.input)
+#set($input.id = $id)
+#set($input.createdAt = $now)
+#set($input.updatedAt = $now)
+#set($input.isActive = true)
+{
+  "version": "2017-02-28",
+  "operation": "PutItem",
+  "key": {
+    "id": $util.dynamodb.toDynamoDBJson($id)
+  },
+  "attributeValues": $util.dynamodb.toMapValuesJson($input),
+  "condition": {
+    "expression": "attribute_not_exists(id)"
+  }
+}
+
+## Update User Request
+#set($id = $ctx.args.input.id)
+#set($now = $util.time.nowISO8601())
+#set($input = $ctx.args.input)
+#set($input.updatedAt = $now)
+{
+  "version": "2017-02-28",
+  "operation": "UpdateItem",
+  "key": {
+    "id": $util.dynamodb.toDynamoDBJson($id)
+  },
+  "update": {
+    "expression": "SET #name = :name, updatedAt = :updatedAt",
+    "expressionNames": {
+      "#name": "name"
+    },
+    "expressionValues": {
+      ":name": $util.dynamodb.toDynamoDBJson($input.name),
+      ":updatedAt": $util.dynamodb.toDynamoDBJson($now)
+    }
+  }
+}
+
+## Delete User Request
+#set($id = $ctx.args.id)
+{
+  "version": "2017-02-28",
+  "operation": "DeleteItem",
+  "key": {
+    "id": $util.dynamodb.toDynamoDBJson($id)
+  }
+}
+
+## Get Case by ID Request
+#set($id = $ctx.args.id)
+{
+  "version": "2017-02-28",
+  "operation": "GetItem",
+  "key": {
+    "id": $util.dynamodb.toDynamoDBJson($id)
+  }
+}
+
+## List Cases by User Request
+#set($userId = $ctx.args.userId)
+{
+  "version": "2017-02-28",
+  "operation": "Query",
+  "index": "UserCasesIndex",
+  "query": {
+    "expression": "userId = :userId",
+    "expressionValues": {
+      ":userId": $util.dynamodb.toDynamoDBJson($userId)
+    }
+  }
+}
+
+## Create Case Request
+#set($id = $util.autoId())
+#set($now = $util.time.nowISO8601())
+#set($input = $ctx.args.input)
+#set($input.id = $id)
+#set($input.createdAt = $now)
+#set($input.updatedAt = $now)
+#set($input.status = "Active")
+{
+  "version": "2017-02-28",
+  "operation": "PutItem",
+  "key": {
+    "id": $util.dynamodb.toDynamoDBJson($id)
+  },
+  "attributeValues": $util.dynamodb.toMapValuesJson($input),
+  "condition": {
+    "expression": "attribute_not_exists(id)"
+  }
+}
+
+## Update Case Request
+#set($id = $ctx.args.input.id)
+#set($now = $util.time.nowISO8601())
+#set($input = $ctx.args.input)
+#set($input.updatedAt = $now)
+{
+  "version": "2017-02-28",
+  "operation": "UpdateItem",
+  "key": {
+    "id": $util.dynamodb.toDynamoDBJson($id)
+  },
+  "update": {
+    "expression": "SET #name = :name, updatedAt = :updatedAt",
+    "expressionNames": {
+      "#name": "name"
+    },
+    "expressionValues": {
+      ":name": $util.dynamodb.toDynamoDBJson($input.name),
+      ":updatedAt": $util.dynamodb.toDynamoDBJson($now)
+    }
+  }
+}
+
+## Delete Case Request
+#set($id = $ctx.args.id)
+{
+  "version": "2017-02-28",
+  "operation": "DeleteItem",
+  "key": {
+    "id": $util.dynamodb.toDynamoDBJson($id)
+  }
+}
+
+## Get Tasks by Case Request
+#set($caseId = $ctx.args.caseId)
+{
+  "version": "2017-02-28",
+  "operation": "Query",
+  "index": "CaseTasksIndex",
+  "query": {
+    "expression": "caseId = :caseId",
+    "expressionValues": {
+      ":caseId": $util.dynamodb.toDynamoDBJson($caseId)
+    }
+  }
+}
+
+## Create Task Request
+#set($id = $util.autoId())
+#set($now = $util.time.nowISO8601())
+#set($input = $ctx.args.input)
+#set($input.id = $id)
+#set($input.createdAt = $now)
+#set($input.updatedAt = $now)
+#set($input.isCompleted = false)
+{
+  "version": "2017-02-28",
+  "operation": "PutItem",
+  "key": {
+    "id": $util.dynamodb.toDynamoDBJson($id)
+  },
+  "attributeValues": $util.dynamodb.toMapValuesJson($input),
+  "condition": {
+    "expression": "attribute_not_exists(id)"
+  }
+}
+
+## Update Task Request
+#set($id = $ctx.args.input.id)
+#set($now = $util.time.nowISO8601())
+#set($input = $ctx.args.input)
+#set($input.updatedAt = $now)
+{
+  "version": "2017-02-28",
+  "operation": "UpdateItem",
+  "key": {
+    "id": $util.dynamodb.toDynamoDBJson($id)
+  },
+  "update": {
+    "expression": "SET #description = :description, updatedAt = :updatedAt",
+    "expressionNames": {
+      "#description": "description"
+    },
+    "expressionValues": {
+      ":description": $util.dynamodb.toDynamoDBJson($input.description),
+      ":updatedAt": $util.dynamodb.toDynamoDBJson($now)
+    }
+  }
+}
+
+## Delete Task Request
+#set($id = $ctx.args.id)
+{
+  "version": "2017-02-28",
+  "operation": "DeleteItem",
+  "key": {
+    "id": $util.dynamodb.toDynamoDBJson($id)
+  }
+}
+
+## Get Timesheet Entries by User Request
+#set($userId = $ctx.args.userId)
+{
+  "version": "2017-02-28",
+  "operation": "Query",
+  "index": "UserTimesheetIndex",
+  "query": {
+    "expression": "userId = :userId",
+    "expressionValues": {
+      ":userId": $util.dynamodb.toDynamoDBJson($userId)
+    }
+  }
+}
+
+## Create Timesheet Entry Request
+#set($id = $util.autoId())
+#set($now = $util.time.nowISO8601())
+#set($input = $ctx.args.input)
+#set($input.id = $id)
+#set($input.createdAt = $now)
+#set($input.updatedAt = $now)
+#set($input.userId = $ctx.identity.sub)
+#set($input.isApproved = false)
+{
+  "version": "2017-02-28",
+  "operation": "PutItem",
+  "key": {
+    "id": $util.dynamodb.toDynamoDBJson($id)
+  },
+  "attributeValues": $util.dynamodb.toMapValuesJson($input),
+  "condition": {
+    "expression": "attribute_not_exists(id)"
+  }
+}
+
+## Update Timesheet Entry Request
+#set($id = $ctx.args.input.id)
+#set($now = $util.time.nowISO8601())
+#set($input = $ctx.args.input)
+#set($input.updatedAt = $now)
+{
+  "version": "2017-02-28",
+  "operation": "UpdateItem",
+  "key": {
+    "id": $util.dynamodb.toDynamoDBJson($id)
+  },
+  "update": {
+    "expression": "SET #description = :description, updatedAt = :updatedAt",
+    "expressionNames": {
+      "#description": "description"
+    },
+    "expressionValues": {
+      ":description": $util.dynamodb.toDynamoDBJson($input.description),
+      ":updatedAt": $util.dynamodb.toDynamoDBJson($now)
+    }
+  }
+}
+
+## Delete Timesheet Entry Request
+#set($id = $ctx.args.id)
+{
+  "version": "2017-02-28",
+  "operation": "DeleteItem",
+  "key": {
+    "id": $util.dynamodb.toDynamoDBJson($id)
+  }
+}
+
+## Get Notifications by User Request
+#set($userId = $ctx.args.userId)
+{
+  "version": "2017-02-28",
+  "operation": "Query",
+  "index": "UserNotificationsIndex",
+  "query": {
+    "expression": "userId = :userId",
+    "expressionValues": {
+      ":userId": $util.dynamodb.toDynamoDBJson($userId)
+    }
+  }
+}
+
+## Create Notification Request
+#set($id = $util.autoId())
+#set($now = $util.time.nowISO8601())
+#set($input = $ctx.args.input)
+#set($input.id = $id)
+#set($input.createdAt = $now)
+#set($input.isRead = false)
+{
+  "version": "2017-02-28",
+  "operation": "PutItem",
+  "key": {
+    "id": $util.dynamodb.toDynamoDBJson($id)
+  },
+  "attributeValues": $util.dynamodb.toMapValuesJson($input),
+  "condition": {
+    "expression": "attribute_not_exists(id)"
+  }
+}
+
+## Update Notification Request
+#set($id = $ctx.args.input.id)
+#set($now = $util.time.nowISO8601())
+#set($input = $ctx.args.input)
+#set($input.readAt = $now)
+{
+  "version": "2017-02-28",
+  "operation": "UpdateItem",
+  "key": {
+    "id": $util.dynamodb.toDynamoDBJson($id)
+  },
+  "update": {
+    "expression": "SET isRead = :isRead, readAt = :readAt",
+    "expressionValues": {
+      ":isRead": $util.dynamodb.toDynamoDBJson($input.isRead),
+      ":readAt": $util.dynamodb.toDynamoDBJson($now)
+    }
+  }
+}
+
+## Delete Notification Request
+#set($id = $ctx.args.id)
+{
+  "version": "2017-02-28",
+  "operation": "DeleteItem",
+  "key": {
+    "id": $util.dynamodb.toDynamoDBJson($id)
+  }
+}
+
+## =============================================================================
+## Response Templates
+## =============================================================================
+
+## Generic Response Template
+#if($ctx.error)
+  $util.error($ctx.error.message, $ctx.error.type)
+#end
+$util.toJson($ctx.result)
+
+## List Response Template
+#if($ctx.error)
+  $util.error($ctx.error.message, $ctx.error.type)
+#end
+$util.toJson($ctx.result.items)
+
+## Single Item Response Template
+#if($ctx.error)
+  $util.error($ctx.error.message, $ctx.error.type)
+#end
+$util.toJson($ctx.result)
+
+## =============================================================================
+## Custom Query Templates
+## =============================================================================
+
+## Search Cases Request
+#set($filter = $ctx.args.filter)
+#set($conditions = [])
+#set($expressionNames = {})
+#set($expressionValues = {})
+
+#if($filter.name)
+  #set($conditions.add("contains(#name, :name)"))
+  #set($expressionNames["#name"] = "name")
+  #set($expressionValues[":name"] = $util.dynamodb.toDynamoDBJson($filter.name))
+#end
+
+#if($filter.status)
+  #set($conditions.add("#status = :status"))
+  #set($expressionNames["#status"] = "status")
+  #set($expressionValues[":status"] = $util.dynamodb.toDynamoDBJson($filter.status))
+#end
+
+#if($filter.categoryId)
+  #set($conditions.add("categoryId = :categoryId"))
+  #set($expressionValues[":categoryId"] = $util.dynamodb.toDynamoDBJson($filter.categoryId))
+#end
+
+{
+  "version": "2017-02-28",
+  "operation": "Scan",
+  "filter": {
+    "expression": "$util.join($conditions, " AND ")",
+    "expressionNames": $util.toJson($expressionNames),
+    "expressionValues": $util.toJson($expressionValues)
+  }
+}
+
+## Search Cases Response
+#if($ctx.error)
+  $util.error($ctx.error.message, $ctx.error.type)
+#end
+$util.toJson($ctx.result.items)
+
+## Get User by Email Request
+#set($email = $ctx.args.email)
+{
+  "version": "2017-02-28",
+  "operation": "Query",
+  "index": "EmailIndex",
+  "query": {
+    "expression": "email = :email",
+    "expressionValues": {
+      ":email": $util.dynamodb.toDynamoDBJson($email)
+    }
+  }
+}
+
+## Get User by Email Response
+#if($ctx.error)
+  $util.error($ctx.error.message, $ctx.error.type)
+#end
+#if($ctx.result.items && $ctx.result.items.size() > 0)
+  $util.toJson($ctx.result.items[0])
+#else
+  null
+#end
+
+## Get Overdue Tasks Request
+#set($now = $util.time.nowISO8601())
+{
+  "version": "2017-02-28",
+  "operation": "Query",
+  "index": "StatusIndex",
+  "query": {
+    "expression": "isCompleted = :isCompleted",
+    "expressionValues": {
+      ":isCompleted": $util.dynamodb.toDynamoDBJson(false)
+    }
+  },
+  "filter": {
+    "expression": "dueDate < :now",
+    "expressionValues": {
+      ":now": $util.dynamodb.toDynamoDBJson($now)
+    }
+  }
+}
+
+## Get Overdue Tasks Response
+#if($ctx.error)
+  $util.error($ctx.error.message, $ctx.error.type)
+#end
+$util.toJson($ctx.result.items)
+
+## =============================================================================
+## Subscription Templates
+## =============================================================================
+
+## Case Created Subscription Request
+#set($id = $ctx.source.id)
+{
+  "version": "2017-02-28",
+  "operation": "GetItem",
+  "key": {
+    "id": $util.dynamodb.toDynamoDBJson($id)
+  }
+}
+
+## Case Created Subscription Response
+$util.toJson($ctx.result)
+
+## Task Updated Subscription Request
+#set($id = $ctx.source.id)
+{
+  "version": "2017-02-28",
+  "operation": "GetItem",
+  "key": {
+    "id": $util.dynamodb.toDynamoDBJson($id)
+  }
+}
+
+## Task Updated Subscription Response
+$util.toJson($ctx.result)
+
+## Notification Created Subscription Request
+#set($id = $ctx.source.id)
+{
+  "version": "2017-02-28",
+  "operation": "GetItem",
+  "key": {
+    "id": $util.dynamodb.toDynamoDBJson($id)
+  }
+}
+
+## Notification Created Subscription Response
+$util.toJson($ctx.result)
+
+## =============================================================================
+## Error Handling Templates
+## =============================================================================
+
+## Validation Error Template
+{
+  "error": {
+    "message": "Validation failed",
+    "type": "ValidationError",
+    "details": $util.toJson($ctx.error.validationErrors)
+  }
+}
+
+## Authorization Error Template
+{
+  "error": {
+    "message": "Access denied",
+    "type": "AuthorizationError"
+  }
+}
+
+## Database Error Template
+{
+  "error": {
+    "message": "Database operation failed",
+    "type": "DatabaseError",
+    "details": $util.toJson($ctx.error)
+  }
+}
+
+## =============================================================================
+## Utility Templates
+## =============================================================================
+
+## Add Timestamps Template
+#set($now = $util.time.nowISO8601())
+#set($input = $ctx.args.input)
+#set($input.createdAt = $now)
+#set($input.updatedAt = $now)
+$util.toJson($input)
+
+## Generate ID Template
+#set($id = $util.autoId())
+#set($input = $ctx.args.input)
+#set($input.id = $id)
+$util.toJson($input)
+
+## Format Response Template
+{
+  "data": $util.toJson($ctx.result),
+  "timestamp": "$util.time.nowISO8601()",
+  "requestId": "$context.requestId"
+}

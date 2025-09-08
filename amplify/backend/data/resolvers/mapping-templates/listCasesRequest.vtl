@@ -1,0 +1,23 @@
+## List Cases Request Mapping Template
+## VTL template for listCases query
+
+#set($limit = $context.arguments.limit)
+#set($nextToken = $context.arguments.nextToken)
+#set($status = $context.arguments.status)
+#set($categoryId = $context.arguments.categoryId)
+#set($identity = $util.toJson($context.identity))
+
+{
+  "version": "2017-02-28",
+  "operation": "Invoke",
+  "payload": {
+    "arguments": {
+      "limit": #if($limit)$limit#else null#end,
+      "nextToken": #if($nextToken)"$nextToken"#else null#end,
+      "status": #if($status)"$status"#else null#end,
+      "categoryId": #if($categoryId)"$categoryId"#else null#end
+    },
+    "identity": $identity,
+    "source": $util.toJson($context.source)
+  }
+}

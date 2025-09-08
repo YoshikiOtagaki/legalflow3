@@ -1,0 +1,417 @@
+# タイムシート機能用GraphQLスキーマ
+
+# タイマー状態
+enum TimerStatus {
+  STOPPED
+  RUNNING
+  PAUSED
+}
+
+# 期間種別
+enum PeriodType {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+  CUSTOM
+}
+
+# 時間カテゴリ
+enum TimeCategory {
+  RESEARCH
+  DRAFTING
+  MEETING
+  COURT
+  ADMINISTRATIVE
+  OTHER
+}
+
+# タイムシートエントリ
+type TimesheetEntry {
+  id: ID!
+  caseId: ID!
+  userId: ID!
+  taskId: ID
+  startTime: AWSDateTime!
+  endTime: AWSDateTime!
+  duration: Int! # 分単位
+  description: String
+  category: TimeCategory
+  billable: Boolean!
+  hourlyRate: Float
+  totalAmount: Float
+  isActive: Boolean!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  createdBy: String!
+  updatedBy: String!
+  case: Case
+  user: User
+  task: Task
+}
+
+# タイマー情報
+type Timer {
+  id: ID!
+  userId: ID!
+  caseId: ID
+  taskId: ID
+  status: TimerStatus!
+  startTime: AWSDateTime!
+  pausedAt: AWSDateTime
+  totalPausedTime: Int! # ミリ秒
+  currentSessionTime: Int! # ミリ秒
+  totalTime: Int! # ミリ秒
+  description: String!
+  lastUpdated: AWSDateTime!
+  createdAt: AWSDateTime!
+  case: Case
+  user: User
+  task: Task
+}
+
+# 時間カテゴリ
+type TimeCategory {
+  id: ID!
+  name: String!
+  description: String
+  color: String
+  isDefault: Boolean!
+  isActive: Boolean!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# タイムシート統計
+type TimesheetStats {
+  id: ID!
+  userId: ID
+  caseId: ID
+  period: PeriodType!
+  periodValue: String!
+  totalHours: Float!
+  totalMinutes: Int!
+  totalSeconds: Int!
+  dailyHours: Float!
+  weeklyHours: Float!
+  monthlyHours: Float!
+  caseHours: AWSJSON
+  taskHours: AWSJSON
+  averageSessionLength: Float!
+  totalSessions: Int!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# 入力型定義
+
+# タイムシートエントリ作成入力
+input CreateTimesheetEntryInput {
+  caseId: ID!
+  taskId: ID
+  startTime: AWSDateTime!
+  endTime: AWSDateTime!
+  description: String
+  category: TimeCategory
+  billable: Boolean!
+  hourlyRate: Float
+}
+
+# タイムシートエントリ更新入力
+input UpdateTimesheetEntryInput {
+  id: ID!
+  startTime: AWSDateTime
+  endTime: AWSDateTime
+  description: String
+  category: TimeCategory
+  billable: Boolean
+  hourlyRate: Float
+}
+
+# タイマー開始入力
+input StartTimerInput {
+  caseId: ID
+  taskId: ID
+  description: String!
+}
+
+# タイマー更新入力
+input UpdateTimerInput {
+  id: ID!
+  description: String
+}
+
+# 時間カテゴリ作成入力
+input CreateTimeCategoryInput {
+  name: String!
+  description: String
+  color: String
+  isDefault: Boolean
+}
+
+# 時間カテゴリ更新入力
+input UpdateTimeCategoryInput {
+  id: ID!
+  name: String
+  description: String
+  color: String
+  isActive: Boolean
+}
+
+# 統計取得フィルタ
+input TimesheetStatsFilter {
+  userId: ID
+  caseId: ID
+  startDate: AWSDate
+  endDate: AWSDate
+  period: PeriodType
+}
+
+# レスポンス型定義
+
+# タイムシートエントリ作成レスポンス
+type CreateTimesheetEntryResponse {
+  success: Boolean!
+  entry: TimesheetEntry
+  error: Error
+}
+
+# タイムシートエントリ更新レスポンス
+type UpdateTimesheetEntryResponse {
+  success: Boolean!
+  entry: TimesheetEntry
+  error: Error
+}
+
+# タイムシートエントリ削除レスポンス
+type DeleteTimesheetEntryResponse {
+  success: Boolean!
+  entry: TimesheetEntry
+  message: String
+  error: Error
+}
+
+# タイムシートエントリ取得レスポンス
+type GetTimesheetEntryResponse {
+  success: Boolean!
+  entry: TimesheetEntry
+  error: Error
+}
+
+# タイムシートエントリ一覧レスポンス
+type ListTimesheetEntriesResponse {
+  success: Boolean!
+  entries: [TimesheetEntry!]!
+  nextToken: String
+  totalCount: Int
+  error: Error
+}
+
+# タイマー開始レスポンス
+type StartTimerResponse {
+  success: Boolean!
+  timer: Timer
+  error: Error
+}
+
+# タイマー停止レスポンス
+type StopTimerResponse {
+  success: Boolean!
+  timer: Timer
+  entry: TimesheetEntry
+  error: Error
+}
+
+# タイマー一時停止レスポンス
+type PauseTimerResponse {
+  success: Boolean!
+  timer: Timer
+  error: Error
+}
+
+# タイマー再開レスポンス
+type ResumeTimerResponse {
+  success: Boolean!
+  timer: Timer
+  error: Error
+}
+
+# タイマー取得レスポンス
+type GetTimerResponse {
+  success: Boolean!
+  timer: Timer
+  error: Error
+}
+
+# タイマー一覧レスポンス
+type ListTimersResponse {
+  success: Boolean!
+  timers: [Timer!]!
+  nextToken: String
+  totalCount: Int
+  error: Error
+}
+
+# 統計取得レスポンス
+type GetTimesheetStatsResponse {
+  success: Boolean!
+  stats: TimesheetStats
+  error: Error
+}
+
+# エラー型
+type Error {
+  message: String!
+  code: String
+  details: AWSJSON
+}
+
+# クエリ定義
+extend type Query {
+  # タイムシートエントリ取得
+  getTimesheetEntry(id: ID!): GetTimesheetEntryResponse!
+
+  # タイムシートエントリ一覧取得
+  listTimesheetEntries(
+    userId: ID
+    caseId: ID
+    taskId: ID
+    startDate: AWSDate
+    endDate: AWSDate
+    limit: Int
+    nextToken: String
+  ): ListTimesheetEntriesResponse!
+
+  # ユーザーのタイムシートエントリ取得
+  getUserTimesheetEntries(
+    userId: ID!
+    startDate: AWSDate
+    endDate: AWSDate
+    limit: Int
+    nextToken: String
+  ): ListTimesheetEntriesResponse!
+
+  # ケースのタイムシートエントリ取得
+  getCaseTimesheetEntries(
+    caseId: ID!
+    startDate: AWSDate
+    endDate: AWSDate
+    limit: Int
+    nextToken: String
+  ): ListTimesheetEntriesResponse!
+
+  # タスクのタイムシートエントリ取得
+  getTaskTimesheetEntries(
+    taskId: ID!
+    startDate: AWSDate
+    endDate: AWSDate
+    limit: Int
+    nextToken: String
+  ): ListTimesheetEntriesResponse!
+
+  # タイマー取得
+  getTimer(id: ID!): GetTimerResponse!
+
+  # ユーザーのアクティブタイマー取得
+  getUserActiveTimers(userId: ID!): ListTimersResponse!
+
+  # タイマー一覧取得
+  listTimers(
+    userId: ID
+    status: TimerStatus
+    limit: Int
+    nextToken: String
+  ): ListTimersResponse!
+
+  # 時間カテゴリ一覧取得
+  listTimeCategories: [TimeCategory!]!
+
+  # 時間カテゴリ取得
+  getTimeCategory(id: ID!): TimeCategory
+
+  # タイムシート統計取得
+  getTimesheetStats(
+    filter: TimesheetStatsFilter!
+  ): GetTimesheetStatsResponse!
+
+  # ユーザーのタイムシート統計取得
+  getUserTimesheetStats(
+    userId: ID!
+    startDate: AWSDate
+    endDate: AWSDate
+  ): GetTimesheetStatsResponse!
+
+  # ケースのタイムシート統計取得
+  getCaseTimesheetStats(
+    caseId: ID!
+    startDate: AWSDate
+    endDate: AWSDate
+  ): GetTimesheetStatsResponse!
+}
+
+# ミューテーション定義
+extend type Mutation {
+  # タイムシートエントリ作成
+  createTimesheetEntry(input: CreateTimesheetEntryInput!): CreateTimesheetEntryResponse!
+
+  # タイムシートエントリ更新
+  updateTimesheetEntry(input: UpdateTimesheetEntryInput!): UpdateTimesheetEntryResponse!
+
+  # タイムシートエントリ削除
+  deleteTimesheetEntry(id: ID!): DeleteTimesheetEntryResponse!
+
+  # タイマー開始
+  startTimer(input: StartTimerInput!): StartTimerResponse!
+
+  # タイマー停止
+  stopTimer(id: ID!, saveEntry: Boolean): StopTimerResponse!
+
+  # タイマー一時停止
+  pauseTimer(id: ID!): PauseTimerResponse!
+
+  # タイマー再開
+  resumeTimer(id: ID!): ResumeTimerResponse!
+
+  # タイマー更新
+  updateTimer(input: UpdateTimerInput!): GetTimerResponse!
+
+  # 時間カテゴリ作成
+  createTimeCategory(input: CreateTimeCategoryInput!): TimeCategory
+
+  # 時間カテゴリ更新
+  updateTimeCategory(input: UpdateTimeCategoryInput!): TimeCategory
+
+  # 時間カテゴリ削除
+  deleteTimeCategory(id: ID!): DeleteTimesheetEntryResponse!
+}
+
+# サブスクリプション定義
+extend type Subscription {
+  # タイムシートエントリ作成通知
+  onTimesheetEntryCreated: TimesheetEntry
+    @aws_subscribe(mutations: ["createTimesheetEntry"])
+
+  # タイムシートエントリ更新通知
+  onTimesheetEntryUpdated: TimesheetEntry
+    @aws_subscribe(mutations: ["updateTimesheetEntry"])
+
+  # タイムシートエントリ削除通知
+  onTimesheetEntryDeleted: TimesheetEntry
+    @aws_subscribe(mutations: ["deleteTimesheetEntry"])
+
+  # タイマー開始通知
+  onTimerStarted: Timer
+    @aws_subscribe(mutations: ["startTimer"])
+
+  # タイマー停止通知
+  onTimerStopped: Timer
+    @aws_subscribe(mutations: ["stopTimer"])
+
+  # タイマー一時停止通知
+  onTimerPaused: Timer
+    @aws_subscribe(mutations: ["pauseTimer"])
+
+  # タイマー再開通知
+  onTimerResumed: Timer
+    @aws_subscribe(mutations: ["resumeTimer"])
+}

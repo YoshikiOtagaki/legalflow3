@@ -1,417 +1,887 @@
-"use client";
+import { useState, useCallback } from "react";
+import { generateClient } from "aws-amplify/api";
 
-import { useState, useEffect } from "react";
-import { useAuthStore } from "@/store/auth";
-import { fetchAuthSession } from "aws-amplify/auth";
-import {
-  TimesheetEntry,
-  TimesheetListResponse,
-  TimesheetFilters,
-  TimesheetSummary,
-  Timer,
-} from "@/types/timesheet";
+const client = generateClient();
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
+// タイムシートエントリの型定義
+export interface TimesheetEntry {
+  id: string;
+  caseId: string;
+  userId: string;
+  taskId?: string;
+  startTime: string;
+  endTime: string;
+  duration: number; // 分単位
+  description?: string;
+  category?:
+    | "RESEARCH"
+    | "DRAFTING"
+    | "MEETING"
+    | "COURT"
+    | "ADMINISTRATIVE"
+    | "OTHER";
+  billable: boolean;
+  hourlyRate?: number;
+  totalAmount?: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+  updatedBy: string;
+  case?: any;
+  user?: any;
+  task?: any;
+}
 
-export function useTimesheet(filters: TimesheetFilters = {}) {
-  const { isAuthenticated } = useAuthStore();
+// タイマーの型定義
+export interface Timer {
+  id: string;
+  userId: string;
+  caseId?: string;
+  taskId?: string;
+  status: "STOPPED" | "RUNNING" | "PAUSED";
+  startTime: string;
+  pausedAt?: string;
+  totalPausedTime: number; // ミリ秒
+  currentSessionTime: number; // ミリ秒
+  totalTime: number; // ミリ秒
+  description: string;
+  lastUpdated: string;
+  createdAt: string;
+  case?: any;
+  user?: any;
+  task?: any;
+}
+
+// 時間カテゴリの型定義
+export interface TimeCategory {
+  id: string;
+  name: string;
+  description?: string;
+  color: string;
+  isDefault: boolean;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// タイムシート統計の型定義
+export interface TimesheetStats {
+  id: string;
+  userId?: string;
+  caseId?: string;
+  period: "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY" | "CUSTOM";
+  periodValue: string;
+  totalHours: number;
+  totalMinutes: number;
+  totalSeconds: number;
+  dailyHours: number;
+  weeklyHours: number;
+  monthlyHours: number;
+  caseHours: Record<string, number>;
+  taskHours: Record<string, number>;
+  averageSessionLength: number;
+  totalSessions: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// タイムシート管理フック
+export const useTimesheet = () => {
   const [entries, setEntries] = useState<TimesheetEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [pagination, setPagination] = useState({
-    total: 0,
-    page: 1,
-    limit: 10,
-    totalPages: 0,
-  });
 
-  const fetchEntries = async (newFilters: TimesheetFilters = {}) => {
-    if (!isAuthenticated) return;
+  // タイムシートエントリ一覧取得
+  const fetchEntries = useCallback(
+    async (
+      params: {
+        userId?: string;
+        caseId?: string;
+        taskId?: string;
+        startDate?: string;
+        endDate?: string;
+        limit?: number;
+        nextToken?: string;
+      } = {},
+    ) => {
+      setLoading(true);
+      setError(null);
 
+      try {
+        const result = await client.graphql({
+          query: `
+          query ListTimesheetEntries(
+            $userId: ID
+            $caseId: ID
+            $taskId: ID
+            $startDate: AWSDate
+            $endDate: AWSDate
+            $limit: Int
+            $nextToken: String
+          ) {
+            listTimesheetEntries(
+              userId: $userId
+              caseId: $caseId
+              taskId: $taskId
+              startDate: $startDate
+              endDate: $endDate
+              limit: $limit
+              nextToken: $nextToken
+            ) {
+              success
+              entries {
+                id
+                caseId
+                userId
+                taskId
+                startTime
+                endTime
+                duration
+                description
+                category
+                billable
+                hourlyRate
+                totalAmount
+                isActive
+                createdAt
+                updatedAt
+                createdBy
+                updatedBy
+                case {
+                  id
+                  name
+                  caseNumber
+                }
+                user {
+                  id
+                  name
+                  email
+                }
+                task {
+                  id
+                  description
+                }
+              }
+              nextToken
+              totalCount
+              error {
+                message
+                code
+              }
+            }
+          }
+        `,
+          variables: params,
+        });
+
+        if (result.data.listTimesheetEntries.success) {
+          setEntries(result.data.listTimesheetEntries.entries);
+          return {
+            entries: result.data.listTimesheetEntries.entries,
+            nextToken: result.data.listTimesheetEntries.nextToken,
+            totalCount: result.data.listTimesheetEntries.totalCount,
+          };
+        } else {
+          throw new Error(result.data.listTimesheetEntries.error.message);
+        }
+      } catch (err: any) {
+        setError(err.message);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
+
+  // タイムシートエントリ作成
+  const createEntry = useCallback(
+    async (input: {
+      caseId: string;
+      taskId?: string;
+      startTime: string;
+      endTime: string;
+      description?: string;
+      category?:
+        | "RESEARCH"
+        | "DRAFTING"
+        | "MEETING"
+        | "COURT"
+        | "ADMINISTRATIVE"
+        | "OTHER";
+      billable: boolean;
+      hourlyRate?: number;
+    }): Promise<TimesheetEntry> => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const result = await client.graphql({
+          query: `
+          mutation CreateTimesheetEntry($input: CreateTimesheetEntryInput!) {
+            createTimesheetEntry(input: $input) {
+              success
+              entry {
+                id
+                caseId
+                userId
+                taskId
+                startTime
+                endTime
+                duration
+                description
+                category
+                billable
+                hourlyRate
+                totalAmount
+                isActive
+                createdAt
+                updatedAt
+                createdBy
+                updatedBy
+                case {
+                  id
+                  name
+                  caseNumber
+                }
+                user {
+                  id
+                  name
+                  email
+                }
+                task {
+                  id
+                  description
+                }
+              }
+              error {
+                message
+                code
+              }
+            }
+          }
+        `,
+          variables: { input },
+        });
+
+        if (result.data.createTimesheetEntry.success) {
+          const newEntry = result.data.createTimesheetEntry.entry;
+          setEntries((prev) => [newEntry, ...prev]);
+          return newEntry;
+        } else {
+          throw new Error(result.data.createTimesheetEntry.error.message);
+        }
+      } catch (err: any) {
+        setError(err.message);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
+
+  // タイムシートエントリ更新
+  const updateEntry = useCallback(
+    async (input: {
+      id: string;
+      startTime?: string;
+      endTime?: string;
+      description?: string;
+      category?:
+        | "RESEARCH"
+        | "DRAFTING"
+        | "MEETING"
+        | "COURT"
+        | "ADMINISTRATIVE"
+        | "OTHER";
+      billable?: boolean;
+      hourlyRate?: number;
+    }): Promise<TimesheetEntry> => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const result = await client.graphql({
+          query: `
+          mutation UpdateTimesheetEntry($input: UpdateTimesheetEntryInput!) {
+            updateTimesheetEntry(input: $input) {
+              success
+              entry {
+                id
+                caseId
+                userId
+                taskId
+                startTime
+                endTime
+                duration
+                description
+                category
+                billable
+                hourlyRate
+                totalAmount
+                isActive
+                createdAt
+                updatedAt
+                createdBy
+                updatedBy
+                case {
+                  id
+                  name
+                  caseNumber
+                }
+                user {
+                  id
+                  name
+                  email
+                }
+                task {
+                  id
+                  description
+                }
+              }
+              error {
+                message
+                code
+              }
+            }
+          }
+        `,
+          variables: { input },
+        });
+
+        if (result.data.updateTimesheetEntry.success) {
+          const updatedEntry = result.data.updateTimesheetEntry.entry;
+          setEntries((prev) =>
+            prev.map((entry) =>
+              entry.id === updatedEntry.id ? updatedEntry : entry,
+            ),
+          );
+          return updatedEntry;
+        } else {
+          throw new Error(result.data.updateTimesheetEntry.error.message);
+        }
+      } catch (err: any) {
+        setError(err.message);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
+
+  // タイムシートエントリ削除
+  const deleteEntry = useCallback(async (id: string): Promise<void> => {
     setLoading(true);
     setError(null);
 
     try {
-      const queryParams = new URLSearchParams();
-
-      Object.entries({ ...filters, ...newFilters }).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== "") {
-          queryParams.append(key, value.toString());
-        }
+      const result = await client.graphql({
+        query: `
+          mutation DeleteTimesheetEntry($id: ID!) {
+            deleteTimesheetEntry(id: $id) {
+              success
+              entry {
+                id
+              }
+              message
+              error {
+                message
+                code
+              }
+            }
+          }
+        `,
+        variables: { id },
       });
 
-      // 認証セッションからトークンを取得
-      const session = await fetchAuthSession();
-      const accessToken = session.tokens?.accessToken?.toString();
-
-      const response = await fetch(
-        `${API_BASE_URL}/timesheet-entries?${queryParams}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("タイムシートエントリの取得に失敗しました");
+      if (result.data.deleteTimesheetEntry.success) {
+        setEntries((prev) => prev.filter((entry) => entry.id !== id));
+      } else {
+        throw new Error(result.data.deleteTimesheetEntry.error.message);
       }
-
-      const data: TimesheetListResponse = await response.json();
-      setEntries(data.entries);
-      setPagination({
-        total: data.total,
-        page: data.page,
-        limit: data.limit,
-        totalPages: data.totalPages,
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "エラーが発生しました");
+    } catch (err: any) {
+      setError(err.message);
+      throw err;
     } finally {
       setLoading(false);
     }
-  };
-
-  const createEntry = async (
-    entryData: Omit<
-      TimesheetEntry,
-      "id" | "createdAt" | "updatedAt" | "userId"
-    >,
-  ) => {
-    if (!isAuthenticated) return;
-
-    try {
-      // 認証セッションからトークンを取得
-      const session = await fetchAuthSession();
-      const accessToken = session.tokens?.accessToken?.toString();
-
-      const response = await fetch(`${API_BASE_URL}/timesheet-entries`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(entryData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message || "タイムシートエントリの作成に失敗しました",
-        );
-      }
-
-      const newEntry = await response.json();
-      setEntries((prev) => [newEntry, ...prev]);
-      return newEntry;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "エラーが発生しました");
-      throw err;
-    }
-  };
-
-  const updateEntry = async (
-    id: string,
-    entryData: Partial<
-      Omit<TimesheetEntry, "id" | "createdAt" | "updatedAt" | "userId">
-    >,
-  ) => {
-    if (!isAuthenticated) return;
-
-    try {
-      // 認証セッションからトークンを取得
-      const session = await fetchAuthSession();
-      const accessToken = session.tokens?.accessToken?.toString();
-
-      const response = await fetch(`${API_BASE_URL}/timesheet-entries/${id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(entryData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message || "タイムシートエントリの更新に失敗しました",
-        );
-      }
-
-      const updatedEntry = await response.json();
-      setEntries((prev) =>
-        prev.map((entry) => (entry.id === id ? updatedEntry : entry)),
-      );
-      return updatedEntry;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "エラーが発生しました");
-      throw err;
-    }
-  };
-
-  const deleteEntry = async (id: string) => {
-    if (!isAuthenticated) return;
-
-    try {
-      // 認証セッションからトークンを取得
-      const session = await fetchAuthSession();
-      const accessToken = session.tokens?.accessToken?.toString();
-
-      const response = await fetch(`${API_BASE_URL}/timesheet-entries/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message || "タイムシートエントリの削除に失敗しました",
-        );
-      }
-
-      setEntries((prev) => prev.filter((entry) => entry.id !== id));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "エラーが発生しました");
-      throw err;
-    }
-  };
-
-  useEffect(() => {
-    fetchEntries();
-  }, [isAuthenticated]);
+  }, []);
 
   return {
     entries,
     loading,
     error,
-    pagination,
     fetchEntries,
     createEntry,
     updateEntry,
     deleteEntry,
   };
-}
+};
 
-export function useTimer() {
-  const { isAuthenticated } = useAuthStore();
-  const [timers, setTimers] = useState<Timer[]>([]);
-  const [currentTimer, setCurrentTimer] = useState<Timer | null>(null);
-  const [isRunning, setIsRunning] = useState(false);
+// タイマー管理フック
+export const useTimer = () => {
+  const [timer, setTimer] = useState<Timer | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchTimers = async () => {
-    if (!isAuthenticated) return;
+  // タイマー開始
+  const startTimer = useCallback(
+    async (input: {
+      caseId?: string;
+      taskId?: string;
+      description: string;
+    }): Promise<Timer> => {
+      setLoading(true);
+      setError(null);
 
+      try {
+        const result = await client.graphql({
+          query: `
+          mutation StartTimer($input: StartTimerInput!) {
+            startTimer(input: $input) {
+              success
+              timer {
+                id
+                userId
+                caseId
+                taskId
+                status
+                startTime
+                pausedAt
+                totalPausedTime
+                currentSessionTime
+                totalTime
+                description
+                lastUpdated
+                createdAt
+                case {
+                  id
+                  name
+                  caseNumber
+                }
+                user {
+                  id
+                  name
+                  email
+                }
+                task {
+                  id
+                  description
+                }
+              }
+              error {
+                message
+                code
+              }
+            }
+          }
+        `,
+          variables: { input },
+        });
+
+        if (result.data.startTimer.success) {
+          const newTimer = result.data.startTimer.timer;
+          setTimer(newTimer);
+          return newTimer;
+        } else {
+          throw new Error(result.data.startTimer.error.message);
+        }
+      } catch (err: any) {
+        setError(err.message);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
+
+  // タイマー停止
+  const stopTimer = useCallback(
+    async (
+      id: string,
+      saveEntry: boolean = true,
+    ): Promise<{
+      timer: Timer;
+      entry?: TimesheetEntry;
+    }> => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const result = await client.graphql({
+          query: `
+          mutation StopTimer($id: ID!, $saveEntry: Boolean) {
+            stopTimer(id: $id, saveEntry: $saveEntry) {
+              success
+              timer {
+                id
+                userId
+                caseId
+                taskId
+                status
+                startTime
+                pausedAt
+                totalPausedTime
+                currentSessionTime
+                totalTime
+                description
+                lastUpdated
+                createdAt
+                case {
+                  id
+                  name
+                  caseNumber
+                }
+                user {
+                  id
+                  name
+                  email
+                }
+                task {
+                  id
+                  description
+                }
+              }
+              entry {
+                id
+                caseId
+                userId
+                taskId
+                startTime
+                endTime
+                duration
+                description
+                category
+                billable
+                hourlyRate
+                totalAmount
+                isActive
+                createdAt
+                updatedAt
+                createdBy
+                updatedBy
+              }
+              error {
+                message
+                code
+              }
+            }
+          }
+        `,
+          variables: { id, saveEntry },
+        });
+
+        if (result.data.stopTimer.success) {
+          const stoppedTimer = result.data.stopTimer.timer;
+          setTimer(null);
+          return {
+            timer: stoppedTimer,
+            entry: result.data.stopTimer.entry,
+          };
+        } else {
+          throw new Error(result.data.stopTimer.error.message);
+        }
+      } catch (err: any) {
+        setError(err.message);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
+
+  // タイマー一時停止
+  const pauseTimer = useCallback(async (id: string): Promise<Timer> => {
     setLoading(true);
     setError(null);
 
     try {
-      // 認証セッションからトークンを取得
-      const session = await fetchAuthSession();
-      const accessToken = session.tokens?.accessToken?.toString();
-
-      const response = await fetch(`${API_BASE_URL}/timers`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
+      const result = await client.graphql({
+        query: `
+          mutation PauseTimer($id: ID!) {
+            pauseTimer(id: $id) {
+              success
+              timer {
+                id
+                userId
+                caseId
+                taskId
+                status
+                startTime
+                pausedAt
+                totalPausedTime
+                currentSessionTime
+                totalTime
+                description
+                lastUpdated
+                createdAt
+                case {
+                  id
+                  name
+                  caseNumber
+                }
+                user {
+                  id
+                  name
+                  email
+                }
+                task {
+                  id
+                  description
+                }
+              }
+              error {
+                message
+                code
+              }
+            }
+          }
+        `,
+        variables: { id },
       });
 
-      if (!response.ok) {
-        throw new Error("タイマーの取得に失敗しました");
+      if (result.data.pauseTimer.success) {
+        const pausedTimer = result.data.pauseTimer.timer;
+        setTimer(pausedTimer);
+        return pausedTimer;
+      } else {
+        throw new Error(result.data.pauseTimer.error.message);
       }
-
-      const data = await response.json();
-      setTimers(data.timers || []);
-
-      // 実行中のタイマーを探す
-      const runningTimer = data.timers?.find((timer: Timer) => timer.isRunning);
-      if (runningTimer) {
-        setCurrentTimer(runningTimer);
-        setIsRunning(true);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "エラーが発生しました");
+    } catch (err: any) {
+      setError(err.message);
+      throw err;
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const startTimer = async (
-    caseId: string | null,
-    description: string,
-    tags: string[] = [],
-  ) => {
-    if (!isAuthenticated) return;
+  // タイマー再開
+  const resumeTimer = useCallback(async (id: string): Promise<Timer> => {
+    setLoading(true);
+    setError(null);
 
     try {
-      // 認証セッションからトークンを取得
-      const session = await fetchAuthSession();
-      const accessToken = session.tokens?.accessToken?.toString();
-
-      const response = await fetch(`${API_BASE_URL}/timers/start`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          caseId,
-          description,
-          tags,
-        }),
+      const result = await client.graphql({
+        query: `
+          mutation ResumeTimer($id: ID!) {
+            resumeTimer(id: $id) {
+              success
+              timer {
+                id
+                userId
+                caseId
+                taskId
+                status
+                startTime
+                pausedAt
+                totalPausedTime
+                currentSessionTime
+                totalTime
+                description
+                lastUpdated
+                createdAt
+                case {
+                  id
+                  name
+                  caseNumber
+                }
+                user {
+                  id
+                  name
+                  email
+                }
+                task {
+                  id
+                  description
+                }
+              }
+              error {
+                message
+                code
+              }
+            }
+          }
+        `,
+        variables: { id },
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "タイマーの開始に失敗しました");
+      if (result.data.resumeTimer.success) {
+        const resumedTimer = result.data.resumeTimer.timer;
+        setTimer(resumedTimer);
+        return resumedTimer;
+      } else {
+        throw new Error(result.data.resumeTimer.error.message);
       }
-
-      const newTimer = await response.json();
-      setCurrentTimer(newTimer);
-      setIsRunning(true);
-      setTimers((prev) => [newTimer, ...prev]);
-      return newTimer;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "エラーが発生しました");
+    } catch (err: any) {
+      setError(err.message);
       throw err;
+    } finally {
+      setLoading(false);
     }
-  };
+  }, []);
 
-  const stopTimer = async (timerId: string) => {
-    if (!isAuthenticated) return;
+  // アクティブタイマー取得
+  const getActiveTimer = useCallback(
+    async (userId: string): Promise<Timer | null> => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      // 認証セッションからトークンを取得
-      const session = await fetchAuthSession();
-      const accessToken = session.tokens?.accessToken?.toString();
+      try {
+        const result = await client.graphql({
+          query: `
+          query GetUserActiveTimers($userId: ID!) {
+            getUserActiveTimers(userId: $userId) {
+              success
+              timers {
+                id
+                userId
+                caseId
+                taskId
+                status
+                startTime
+                pausedAt
+                totalPausedTime
+                currentSessionTime
+                totalTime
+                description
+                lastUpdated
+                createdAt
+                case {
+                  id
+                  name
+                  caseNumber
+                }
+                user {
+                  id
+                  name
+                  email
+                }
+                task {
+                  id
+                  description
+                }
+              }
+              error {
+                message
+                code
+              }
+            }
+          }
+        `,
+          variables: { userId },
+        });
 
-      const response = await fetch(`${API_BASE_URL}/timers/${timerId}/stop`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "タイマーの停止に失敗しました");
+        if (result.data.getUserActiveTimers.success) {
+          const timers = result.data.getUserActiveTimers.timers;
+          const activeTimer = timers.find(
+            (t) => t.status === "RUNNING" || t.status === "PAUSED",
+          );
+          setTimer(activeTimer || null);
+          return activeTimer || null;
+        } else {
+          throw new Error(result.data.getUserActiveTimers.error.message);
+        }
+      } catch (err: any) {
+        setError(err.message);
+        throw err;
+      } finally {
+        setLoading(false);
       }
-
-      const updatedTimer = await response.json();
-      setCurrentTimer(null);
-      setIsRunning(false);
-      setTimers((prev) =>
-        prev.map((timer) => (timer.id === timerId ? updatedTimer : timer)),
-      );
-      return updatedTimer;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "エラーが発生しました");
-      throw err;
-    }
-  };
-
-  const pauseTimer = async (timerId: string) => {
-    if (!isAuthenticated) return;
-
-    try {
-      // 認証セッションからトークンを取得
-      const session = await fetchAuthSession();
-      const accessToken = session.tokens?.accessToken?.toString();
-
-      const response = await fetch(`${API_BASE_URL}/timers/${timerId}/pause`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message || "タイマーの一時停止に失敗しました",
-        );
-      }
-
-      const updatedTimer = await response.json();
-      setCurrentTimer(updatedTimer);
-      setIsRunning(false);
-      setTimers((prev) =>
-        prev.map((timer) => (timer.id === timerId ? updatedTimer : timer)),
-      );
-      return updatedTimer;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "エラーが発生しました");
-      throw err;
-    }
-  };
-
-  const resumeTimer = async (timerId: string) => {
-    if (!isAuthenticated) return;
-
-    try {
-      // 認証セッションからトークンを取得
-      const session = await fetchAuthSession();
-      const accessToken = session.tokens?.accessToken?.toString();
-
-      const response = await fetch(`${API_BASE_URL}/timers/${timerId}/resume`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "タイマーの再開に失敗しました");
-      }
-
-      const updatedTimer = await response.json();
-      setCurrentTimer(updatedTimer);
-      setIsRunning(true);
-      setTimers((prev) =>
-        prev.map((timer) => (timer.id === timerId ? updatedTimer : timer)),
-      );
-      return updatedTimer;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "エラーが発生しました");
-      throw err;
-    }
-  };
-
-  useEffect(() => {
-    fetchTimers();
-  }, [isAuthenticated]);
+    },
+    [],
+  );
 
   return {
-    timers,
-    currentTimer,
-    isRunning,
+    timer,
     loading,
     error,
-    fetchTimers,
     startTimer,
     stopTimer,
     pauseTimer,
     resumeTimer,
+    getActiveTimer,
   };
-}
+};
+
+// タイムシート統計フック
+export const useTimesheetStats = () => {
+  const [stats, setStats] = useState<TimesheetStats | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // 統計取得
+  const fetchStats = useCallback(
+    async (filter: {
+      userId?: string;
+      caseId?: string;
+      startDate?: string;
+      endDate?: string;
+      period?: "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY" | "CUSTOM";
+    }): Promise<TimesheetStats> => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const result = await client.graphql({
+          query: `
+          query GetTimesheetStats($filter: TimesheetStatsFilter!) {
+            getTimesheetStats(filter: $filter) {
+              success
+              stats {
+                id
+                userId
+                caseId
+                period
+                periodValue
+                totalHours
+                totalMinutes
+                totalSeconds
+                dailyHours
+                weeklyHours
+                monthlyHours
+                caseHours
+                taskHours
+                averageSessionLength
+                totalSessions
+                createdAt
+                updatedAt
+              }
+              error {
+                message
+                code
+              }
+            }
+          }
+        `,
+          variables: { filter },
+        });
+
+        if (result.data.getTimesheetStats.success) {
+          const statsData = result.data.getTimesheetStats.stats;
+          setStats(statsData);
+          return statsData;
+        } else {
+          throw new Error(result.data.getTimesheetStats.error.message);
+        }
+      } catch (err: any) {
+        setError(err.message);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
+
+  return {
+    stats,
+    loading,
+    error,
+    fetchStats,
+  };
+};

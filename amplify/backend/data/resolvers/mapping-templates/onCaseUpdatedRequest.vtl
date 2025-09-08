@@ -1,0 +1,19 @@
+## On Case Updated Request Mapping Template
+## VTL template for onCaseUpdated subscription
+
+{
+  "version": "2017-02-28",
+  "operation": "UpdateItem",
+  "key": {
+    "id": $util.dynamodb.toDynamoDBJson($context.source.id)
+  },
+  "update": {
+    "expression": "SET #updatedAt = :updatedAt",
+    "expressionNames": {
+      "#updatedAt": "updatedAt"
+    },
+    "expressionValues": {
+      ":updatedAt": $util.dynamodb.toDynamoDBJson($util.time.nowISO8601())
+    }
+  }
+}

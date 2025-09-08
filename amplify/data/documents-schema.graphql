@@ -1,0 +1,319 @@
+# Document Management GraphQL Schema
+# Defines types, queries, mutations, and subscriptions for document management
+
+# Document Types
+type Document {
+  id: ID!
+  title: String!
+  description: String
+  type: DocumentType!
+  status: DocumentStatus!
+  case: Case!
+  template: DocumentTemplate
+  filePath: String
+  fileSize: Int
+  mimeType: String
+  version: Int!
+  isLatest: Boolean!
+  parentDocument: Document
+  childDocuments: [Document!]
+  tags: [String!]!
+  metadata: AWSJSON
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  createdBy: User!
+  updatedBy: User!
+}
+
+type DocumentVersion {
+  id: ID!
+  document: Document!
+  version: Int!
+  filePath: String!
+  fileSize: Int
+  mimeType: String
+  changeDescription: String
+  createdAt: AWSDateTime!
+  createdBy: User!
+}
+
+type DocumentTemplate {
+  id: ID!
+  name: String!
+  description: String
+  type: DocumentType!
+  category: String!
+  content: String!
+  placeholders: [String!]!
+  isActive: Boolean!
+  version: Int!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  createdBy: User!
+}
+
+type DocumentType {
+  id: ID!
+  name: String!
+  description: String
+  category: String!
+  mimeTypes: [String!]!
+  maxFileSize: Int!
+  isActive: Boolean!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type DocumentStatus {
+  id: ID!
+  name: String!
+  description: String
+  category: String!
+  color: String
+  isActive: Boolean!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# Input Types
+input CreateDocumentInput {
+  title: String!
+  description: String
+  typeId: ID!
+  statusId: ID!
+  caseId: ID!
+  templateId: ID
+  filePath: String
+  fileSize: Int
+  mimeType: String
+  tags: [String!]
+  metadata: AWSJSON
+}
+
+input UpdateDocumentInput {
+  id: ID!
+  title: String
+  description: String
+  statusId: ID
+  tags: [String!]
+  metadata: AWSJSON
+}
+
+input CreateDocumentVersionInput {
+  documentId: ID!
+  filePath: String!
+  fileSize: Int
+  mimeType: String
+  changeDescription: String
+}
+
+input CreateDocumentTemplateInput {
+  name: String!
+  description: String
+  typeId: ID!
+  category: String!
+  content: String!
+  placeholders: [String!]!
+}
+
+input UpdateDocumentTemplateInput {
+  id: ID!
+  name: String
+  description: String
+  category: String
+  content: String
+  placeholders: [String!]
+  isActive: Boolean
+}
+
+input CreateDocumentTypeInput {
+  name: String!
+  description: String
+  category: String!
+  mimeTypes: [String!]!
+  maxFileSize: Int!
+}
+
+input UpdateDocumentTypeInput {
+  id: ID!
+  name: String
+  description: String
+  category: String
+  mimeTypes: [String!]
+  maxFileSize: Int
+  isActive: Boolean
+}
+
+input CreateDocumentStatusInput {
+  name: String!
+  description: String
+  category: String!
+  color: String
+}
+
+input UpdateDocumentStatusInput {
+  id: ID!
+  name: String
+  description: String
+  category: String
+  color: String
+  isActive: Boolean
+}
+
+input DocumentFilters {
+  search: String
+  typeId: ID
+  statusId: ID
+  caseId: ID
+  templateId: ID
+  tags: [String!]
+  createdById: ID
+  dateFrom: AWSDate
+  dateTo: AWSDate
+  limit: Int
+  nextToken: String
+  sortBy: String
+  sortOrder: SortOrder
+}
+
+input DocumentGenerationInput {
+  templateId: ID!
+  caseId: ID!
+  data: AWSJSON!
+  outputFormat: DocumentOutputFormat!
+}
+
+enum SortOrder {
+  ASC
+  DESC
+}
+
+enum DocumentOutputFormat {
+  DOCX
+  PDF
+}
+
+# Response Types
+type DocumentListResponse {
+  documents: [Document!]!
+  nextToken: String
+  totalCount: Int
+}
+
+type DocumentVersionListResponse {
+  versions: [DocumentVersion!]!
+  nextToken: String
+  totalCount: Int
+}
+
+type DocumentTemplateListResponse {
+  templates: [DocumentTemplate!]!
+  nextToken: String
+  totalCount: Int
+}
+
+type DocumentTypeListResponse {
+  types: [DocumentType!]!
+  nextToken: String
+  totalCount: Int
+}
+
+type DocumentStatusListResponse {
+  statuses: [DocumentStatus!]!
+  nextToken: String
+  totalCount: Int
+}
+
+type DocumentGenerationResponse {
+  documentId: ID!
+  filePath: String!
+  downloadUrl: String!
+}
+
+# Queries
+type Query {
+  # Document Queries
+  getDocument(id: ID!): Document
+  listDocuments(filters: DocumentFilters): DocumentListResponse!
+  searchDocuments(query: String!, filters: DocumentFilters): DocumentListResponse!
+
+  # Document Version Queries
+  getDocumentVersions(documentId: ID!, limit: Int, nextToken: String): DocumentVersionListResponse!
+  getDocumentVersion(documentId: ID!, version: Int!): DocumentVersion
+
+  # Document Template Queries
+  getDocumentTemplate(id: ID!): DocumentTemplate
+  listDocumentTemplates(category: String, typeId: ID, limit: Int, nextToken: String): DocumentTemplateListResponse!
+  searchDocumentTemplates(query: String!, limit: Int, nextToken: String): DocumentTemplateListResponse!
+
+  # Document Type Queries
+  getDocumentType(id: ID!): DocumentType
+  listDocumentTypes(category: String, limit: Int, nextToken: String): DocumentTypeListResponse!
+
+  # Document Status Queries
+  getDocumentStatus(id: ID!): DocumentStatus
+  listDocumentStatuses(category: String, limit: Int, nextToken: String): DocumentStatusListResponse!
+
+  # Document Generation Queries
+  getDocumentGenerationStatus(documentId: ID!): DocumentGenerationResponse
+}
+
+# Mutations
+type Mutation {
+  # Document Mutations
+  createDocument(input: CreateDocumentInput!): Document!
+  updateDocument(input: UpdateDocumentInput!): Document!
+  deleteDocument(id: ID!): Boolean!
+  restoreDocument(id: ID!): Document!
+
+  # Document Version Mutations
+  createDocumentVersion(input: CreateDocumentVersionInput!): DocumentVersion!
+  deleteDocumentVersion(documentId: ID!, version: Int!): Boolean!
+
+  # Document Template Mutations
+  createDocumentTemplate(input: CreateDocumentTemplateInput!): DocumentTemplate!
+  updateDocumentTemplate(input: UpdateDocumentTemplateInput!): DocumentTemplate!
+  deleteDocumentTemplate(id: ID!): Boolean!
+
+  # Document Type Mutations
+  createDocumentType(input: CreateDocumentTypeInput!): DocumentType!
+  updateDocumentType(input: UpdateDocumentTypeInput!): DocumentType!
+  deleteDocumentType(id: ID!): Boolean!
+
+  # Document Status Mutations
+  createDocumentStatus(input: CreateDocumentStatusInput!): DocumentStatus!
+  updateDocumentStatus(input: UpdateDocumentStatusInput!): DocumentStatus!
+  deleteDocumentStatus(id: ID!): Boolean!
+
+  # Document Generation Mutations
+  generateDocument(input: DocumentGenerationInput!): DocumentGenerationResponse!
+  uploadDocument(file: AWSURL!, caseId: ID!, typeId: ID!): Document!
+  downloadDocument(id: ID!): AWSURL!
+}
+
+# Subscriptions
+type Subscription {
+  # Document Subscriptions
+  onDocumentCreated(caseId: ID): Document
+    @aws_subscribe(mutations: ["createDocument"])
+  onDocumentUpdated(caseId: ID): Document
+    @aws_subscribe(mutations: ["updateDocument"])
+  onDocumentDeleted(caseId: ID): Document
+    @aws_subscribe(mutations: ["deleteDocument"])
+
+  # Document Version Subscriptions
+  onDocumentVersionCreated(documentId: ID): DocumentVersion
+    @aws_subscribe(mutations: ["createDocumentVersion"])
+
+  # Document Template Subscriptions
+  onDocumentTemplateCreated: DocumentTemplate
+    @aws_subscribe(mutations: ["createDocumentTemplate"])
+  onDocumentTemplateUpdated: DocumentTemplate
+    @aws_subscribe(mutations: ["updateDocumentTemplate"])
+  onDocumentTemplateDeleted: DocumentTemplate
+    @aws_subscribe(mutations: ["deleteDocumentTemplate"])
+
+  # Document Generation Subscriptions
+  onDocumentGenerationCompleted(caseId: ID): DocumentGenerationResponse
+    @aws_subscribe(mutations: ["generateDocument"])
+}
