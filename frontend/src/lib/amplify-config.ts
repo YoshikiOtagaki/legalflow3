@@ -1,9 +1,12 @@
-// LegalFlow3 - AWS Amplify Configuration (Gen2)
+﻿// LegalFlow3 - AWS Amplify Configuration (Gen2)
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/api";
 import { getCurrentUser } from "aws-amplify/auth";
 
-// Amplify v6 configuration - 正しい形式
+// Amplify設定の状態を追跡
+let isAmplifyConfigured = false;
+
+// Amplify v6 configuration
 const amplifyConfig = {
   Auth: {
     Cognito: {
@@ -39,7 +42,13 @@ const amplifyConfig = {
 };
 
 // Initialize Amplify with configuration
-Amplify.configure(amplifyConfig);
+try {
+  Amplify.configure(amplifyConfig);
+  isAmplifyConfigured = true;
+  console.log("Amplify configured successfully");
+} catch (error) {
+  console.error("Failed to configure Amplify:", error);
+}
 
 // Log configuration for debugging (development only)
 if (process.env.NODE_ENV === "development") {
@@ -52,6 +61,9 @@ export const client = generateClient();
 // Auth helper functions using Gen2 API
 export const auth = {
   getCurrentUser: async () => {
+    if (!isAmplifyConfigured) {
+      throw new Error("Amplify not configured");
+    }
     try {
       return await getCurrentUser();
     } catch (error) {
@@ -61,6 +73,9 @@ export const auth = {
   },
 
   getUserId: async () => {
+    if (!isAmplifyConfigured) {
+      throw new Error("Amplify not configured");
+    }
     try {
       const user = await getCurrentUser();
       return user?.username || null;
