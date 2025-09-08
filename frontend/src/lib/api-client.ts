@@ -164,6 +164,7 @@ export class LegalFlowAPIClient {
 
 // Export singleton instance
 export const api = new LegalFlowAPIClient();
+export const apiClient = api; // Alias for backward compatibility
 
 // Export types
 export type {

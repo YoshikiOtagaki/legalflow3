@@ -9,16 +9,7 @@ import {
   AuthUser,
 } from "aws-amplify/auth";
 
-// Amplify設定を動的に読み込み
-const configureAmplify = async () => {
-  try {
-    const response = await fetch("/amplify_outputs.json");
-    const outputs = await response.json();
-    Amplify.configure(outputs);
-  } catch (error) {
-    console.error("Amplify設定の読み込みに失敗しました:", error);
-  }
-};
+// Amplify設定は amplify-config.ts で既に設定済み
 
 // ストアが持つ状態と関数の型を定義します
 interface AuthState {
@@ -55,8 +46,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      await configureAmplify();
-
       const { isSignedIn } = await signIn({
         username: credentials.email,
         password: credentials.password,
@@ -105,8 +94,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      await configureAmplify();
-
       const { userId } = await signUp({
         username: userData.email,
         password: userData.password,
@@ -181,7 +168,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      await configureAmplify();
       const currentUser = await getCurrentUser();
       set({
         isAuthenticated: true,

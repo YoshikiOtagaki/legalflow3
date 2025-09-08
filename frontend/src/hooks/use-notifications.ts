@@ -4,16 +4,18 @@ import { generateClient } from "aws-amplify/api";
 import {
   listNotifications,
   getNotification,
+  getNotificationStats,
+} from "../graphql/queries";
+import {
   createNotification,
   updateNotification,
   deleteNotification,
-  markNotificationAsRead,
-  markNotificationAsUnread,
-  markAllNotificationsAsRead,
+  markAsRead,
+  markAsUnread,
+  markAllAsRead,
   archiveNotification,
   unarchiveNotification,
   archiveAllNotifications,
-  getNotificationStats,
 } from "../graphql/mutations";
 import {
   Notification,
@@ -169,11 +171,11 @@ export function useNotifications(filters: NotificationFilters = {}) {
       setError(null);
 
       const result = await client.graphql({
-        query: markNotificationAsRead,
+        query: markAsRead,
         variables: { id },
       });
 
-      const notification = result.data.markNotificationAsRead;
+      const notification = result.data.markAsRead;
       setNotifications((prev) =>
         prev.map((n) => (n.id === id ? notification : n)),
       );
@@ -199,11 +201,11 @@ export function useNotifications(filters: NotificationFilters = {}) {
       setError(null);
 
       const result = await client.graphql({
-        query: markNotificationAsUnread,
+        query: markAsUnread,
         variables: { id },
       });
 
-      const notification = result.data.markNotificationAsUnread;
+      const notification = result.data.markAsUnread;
       setNotifications((prev) =>
         prev.map((n) => (n.id === id ? notification : n)),
       );
@@ -229,7 +231,7 @@ export function useNotifications(filters: NotificationFilters = {}) {
       setError(null);
 
       await client.graphql({
-        query: markAllNotificationsAsRead,
+        query: markAllAsRead,
         variables: { userId },
       });
 
