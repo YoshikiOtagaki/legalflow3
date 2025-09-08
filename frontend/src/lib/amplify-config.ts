@@ -4,16 +4,13 @@ import { generateClient } from "aws-amplify/api";
 import { getCurrentUser } from "aws-amplify/auth";
 import outputs from "../../public/amplify_outputs.json";
 
-// Initialize Amplify with Gen2 outputs
+// Initialize Amplify with Gen2 outputs directly
 Amplify.configure(outputs);
 
-// Log configuration for debugging
-console.log("Amplify Gen2 Configuration:", {
-  auth: outputs.auth,
-  data: outputs.data,
-  storage: outputs.storage,
-  version: outputs.version,
-});
+// Log configuration for debugging (development only)
+if (process.env.NODE_ENV === "development") {
+  console.log("Amplify Configuration:", outputs);
+}
 
 // Create GraphQL client
 export const client = generateClient();

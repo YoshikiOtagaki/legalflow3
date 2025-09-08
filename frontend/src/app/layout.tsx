@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/providers/query-provider";
+// Amplify設定を確実に読み込む
+import "@/lib/amplify-config";
 
 const inter = Inter({ subsets: ["latin"] });
 
