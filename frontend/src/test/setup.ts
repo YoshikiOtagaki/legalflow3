@@ -108,14 +108,9 @@ global.console = {
   error: vi.fn(),
 };
 
-// Set test environment variables
+// Set test environment variables (Gen2 compatible)
 process.env.NODE_ENV = "test";
-process.env.NEXT_PUBLIC_APPSYNC_ENDPOINT =
-  "https://test.appsync-api.us-east-1.amazonaws.com/graphql";
-process.env.NEXT_PUBLIC_AWS_REGION = "us-east-1";
-process.env.NEXT_PUBLIC_USER_POOL_ID = "test-user-pool-id";
-process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID = "test-user-pool-client-id";
-process.env.NEXT_PUBLIC_S3_BUCKET = "test-bucket";
+// Note: In Gen2, configuration comes from amplify_outputs.json, not environment variables
 
 // Global test utilities
 global.createMockCase = (overrides = {}) => ({

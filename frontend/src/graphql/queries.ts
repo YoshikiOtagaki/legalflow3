@@ -4,7 +4,7 @@ import { generateClient } from "aws-amplify/api";
 // Create GraphQL client
 const client = generateClient();
 
-// Helper function to create GraphQL operations
+// Helper function to create GraphQL operations (Gen2 compatible)
 const gql = (query: string) => query;
 
 // Notification Queries

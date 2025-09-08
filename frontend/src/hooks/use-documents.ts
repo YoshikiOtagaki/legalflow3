@@ -15,8 +15,8 @@ import {
   DocumentStatus,
 } from "@/types/document";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
+// Use Amplify Gen2 API instead of direct API calls
+// const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
 // Document management hook
 export function useDocuments(filters: DocumentFilters = {}) {

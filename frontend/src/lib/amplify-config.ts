@@ -1,42 +1,24 @@
-// LegalFlow3 - AWS Amplify Configuration
-// GraphQL API and Data Client setup
-
+// LegalFlow3 - AWS Amplify Configuration (Gen2)
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/api";
 import { getCurrentUser } from "aws-amplify/auth";
+import outputs from "../../public/amplify_outputs.json";
 
-// Amplify configuration
-const amplifyConfig = {
-  API: {
-    GraphQL: {
-      endpoint: process.env.NEXT_PUBLIC_APPSYNC_ENDPOINT,
-      region: process.env.NEXT_PUBLIC_AWS_REGION || "ap-northeast-1",
-      defaultAuthMode: "userPool",
-      apiKey: process.env.NEXT_PUBLIC_APPSYNC_API_KEY,
-    },
-  },
-  Auth: {
-    Cognito: {
-      userPoolId: process.env.NEXT_PUBLIC_USER_POOL_ID,
-      userPoolClientId: process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID,
-      region: process.env.NEXT_PUBLIC_AWS_REGION || "ap-northeast-1",
-    },
-  },
-  Storage: {
-    S3: {
-      bucket: process.env.NEXT_PUBLIC_S3_BUCKET,
-      region: process.env.NEXT_PUBLIC_AWS_REGION || "ap-northeast-1",
-    },
-  },
-};
+// Initialize Amplify with Gen2 outputs
+Amplify.configure(outputs);
 
-// Initialize Amplify
-Amplify.configure(amplifyConfig);
+// Log configuration for debugging
+console.log("Amplify Gen2 Configuration:", {
+  auth: outputs.auth,
+  data: outputs.data,
+  storage: outputs.storage,
+  version: outputs.version,
+});
 
 // Create GraphQL client
 export const client = generateClient();
 
-// Auth helper functions
+// Auth helper functions using Gen2 API
 export const auth = {
   getCurrentUser: async () => {
     try {
@@ -50,7 +32,7 @@ export const auth = {
   getUserId: async () => {
     try {
       const user = await getCurrentUser();
-      return user?.userId;
+      return user?.username || null;
     } catch (error) {
       console.error("Error getting user ID:", error);
       return null;
@@ -58,7 +40,7 @@ export const auth = {
   },
 };
 
-// GraphQL operations
+// GraphQL operations using Gen2 client
 export const graphqlOperations = {
   // Case operations
   createCase: `
