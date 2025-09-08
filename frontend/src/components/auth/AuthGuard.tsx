@@ -127,11 +127,15 @@ export const withAuthGuard = <P extends object>(
   Component: React.ComponentType<P>,
   options: Omit<AuthGuardProps, "children"> = {},
 ) => {
-  return (props: P) => (
+  const WrappedComponent = (props: P) => (
     <AuthGuard {...options}>
       <Component {...props} />
     </AuthGuard>
   );
+
+  WrappedComponent.displayName = `withAuthGuard(${Component.displayName || Component.name})`;
+
+  return WrappedComponent;
 };
 
 // ロール別のガード

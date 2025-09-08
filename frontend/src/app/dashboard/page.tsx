@@ -13,7 +13,6 @@ import {
 import { useDashboardStats } from "../../hooks/use-dashboard";
 import { useAuth } from "../../hooks/use-auth";
 import {
-  StatsCard,
   TimesheetStatsCard,
   CaseStatsCard,
   DocumentStatsCard,
@@ -29,7 +28,6 @@ import {
 import {
   ReportGenerator,
   QuickReportButtons,
-  ReportStatusIndicator,
 } from "../../components/dashboard/ReportGenerator";
 
 export default function DashboardPage() {
@@ -99,7 +97,7 @@ export default function DashboardPage() {
             No data available
           </h1>
           <p className="text-gray-600">
-            There's no data to display on the dashboard yet.
+            There&apos;s no data to display on the dashboard yet.
           </p>
         </div>
       </div>

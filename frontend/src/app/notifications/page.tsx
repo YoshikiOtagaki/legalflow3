@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Bell, Settings, BarChart3, Filter } from "lucide-react";
+import { Bell, Settings, BarChart3 } from "lucide-react";
 import { NotificationList } from "../../components/notifications/NotificationList";
 import { NotificationSettings } from "../../components/notifications/NotificationSettings";
 import { NotificationStats } from "../../components/notifications/NotificationStats";
@@ -45,7 +45,7 @@ export default function NotificationsPage() {
     console.log("All notifications archived");
   };
 
-  const handleSettingsUpdate = (settings: any) => {
+  const handleSettingsUpdate = (settings: Record<string, unknown>) => {
     console.log("Settings updated:", settings);
   };
 

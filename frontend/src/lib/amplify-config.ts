@@ -654,5 +654,5 @@ export interface ListResponse<T> {
   };
 }
 
-// Export apiClient alias for backward compatibility
-export const apiClient = api;
+// Export api alias for backward compatibility
+export const api = apiClient;

@@ -7,7 +7,7 @@ import { CaseDetail } from "@/components/cases/case-detail";
 
 export default function CasesPage() {
   const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showCreateForm] = useState(false);
 
   const handleCaseSelect = (caseId: string) => {
     setSelectedCaseId(caseId);
@@ -22,7 +22,7 @@ export default function CasesPage() {
   };
 
   const handleCloseCreateForm = () => {
-    setShowCreateForm(false);
+    // setShowCreateForm(false);
   };
 
   return (
