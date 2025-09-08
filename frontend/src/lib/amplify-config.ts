@@ -2,14 +2,48 @@
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/api";
 import { getCurrentUser } from "aws-amplify/auth";
-import outputs from "../../public/amplify_outputs.json";
 
-// Initialize Amplify with Gen2 outputs directly
-Amplify.configure(outputs);
+// Amplify Gen2 configuration
+const amplifyConfig = {
+  Auth: {
+    Cognito: {
+      userPoolId:
+        process.env.NEXT_PUBLIC_AWS_USER_POOL_ID || "ap-northeast-1_zZLG4sQHv",
+      userPoolClientId:
+        process.env.NEXT_PUBLIC_AWS_USER_POOL_CLIENT_ID ||
+        "12de3fn5enn01pjmi130lce8u8",
+      identityPoolId:
+        process.env.NEXT_PUBLIC_AWS_IDENTITY_POOL_ID ||
+        "ap-northeast-1:fea36535-eac7-462e-879c-f72a67ebc1db",
+      loginWith: {
+        email: true,
+        phone: false,
+      },
+    },
+  },
+  API: {
+    GraphQL: {
+      endpoint:
+        process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT ||
+        "https://f5sic7pcdjb7jntpdlrstxlmr4.appsync-api.ap-northeast-1.amazonaws.com/graphql",
+      region: process.env.NEXT_PUBLIC_AWS_REGION || "ap-northeast-1",
+      defaultAuthMode: "userPool",
+    },
+  },
+  Storage: {
+    S3: {
+      bucket: process.env.NEXT_PUBLIC_S3_BUCKET || "legalflow3-storage-bucket",
+      region: process.env.NEXT_PUBLIC_AWS_REGION || "ap-northeast-1",
+    },
+  },
+};
+
+// Initialize Amplify with configuration
+Amplify.configure(amplifyConfig);
 
 // Log configuration for debugging (development only)
 if (process.env.NODE_ENV === "development") {
-  console.log("Amplify Configuration:", outputs);
+  console.log("Amplify Configuration:", amplifyConfig);
 }
 
 // Create GraphQL client
