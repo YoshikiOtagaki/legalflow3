@@ -2,7 +2,7 @@
 // Centralized API client for all backend operations
 
 import {
-  apiClient,
+  api as apiClient,
   type Case,
   type CreateCaseInput,
   type UpdateCaseInput,

@@ -1,5 +1,11 @@
 // GraphQL Mutations for Notifications
-import { gql } from "aws-amplify/api";
+import { generateClient } from "aws-amplify/api";
+
+// Create GraphQL client
+const client = generateClient();
+
+// Helper function to create GraphQL operations
+const gql = (query: string) => query;
 
 // Notification Mutations
 export const createNotification = gql`

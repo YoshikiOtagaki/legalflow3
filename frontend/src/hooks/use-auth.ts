@@ -1,5 +1,17 @@
 import { useState, useEffect, useCallback } from "react";
-import { Auth } from "aws-amplify";
+import {
+  signIn,
+  signUp,
+  signOut,
+  getCurrentUser,
+  confirmSignUp,
+  resendSignUpCode,
+  resetPassword,
+  confirmResetPassword,
+  updatePassword,
+  updateUserAttributes,
+  fetchUserAttributes,
+} from "aws-amplify/auth";
 import { Hub } from "aws-amplify/utils";
 
 // ユーザー情報の型定義
@@ -41,15 +53,15 @@ export const useAuth = () => {
     try {
       setAuthState((prev) => ({ ...prev, isLoading: true, error: null }));
 
-      const cognitoUser = await Auth.currentAuthenticatedUser();
-      const attributes = cognitoUser.attributes;
+      const cognitoUser = await getCurrentUser();
+      const attributes = await fetchUserAttributes();
 
       const user: User = {
         id: cognitoUser.username,
-        email: attributes.email,
-        firstName: attributes.given_name,
-        lastName: attributes.family_name,
-        role: attributes["custom:role"],
+        email: attributes.email || "",
+        firstName: attributes.given_name || "",
+        lastName: attributes.family_name || "",
+        role: attributes["custom:role"] || "",
         lawFirmId: attributes["custom:lawFirmId"],
         position: attributes["custom:position"],
         barNumber: attributes["custom:barNumber"],
@@ -78,14 +90,16 @@ export const useAuth = () => {
   }, []);
 
   // ログイン
-  const signIn = useCallback(
+  const signInUser = useCallback(
     async (email: string, password: string) => {
       try {
         setAuthState((prev) => ({ ...prev, isLoading: true, error: null }));
 
-        const cognitoUser = await Auth.signIn(email, password);
+        const cognitoUser = await signIn({ username: email, password });
 
-        if (cognitoUser.challengeName === "SOFTWARE_TOKEN_MFA") {
+        if (
+          cognitoUser.nextStep?.signInStep === "CONFIRM_SIGN_IN_WITH_TOTP_CODE"
+        ) {
           // MFAが必要な場合
           throw new Error("MFA_REQUIRED");
         }
