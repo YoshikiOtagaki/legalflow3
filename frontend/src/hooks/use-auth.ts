@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+﻿import { useState, useEffect, useCallback } from "react";
 import {
   signIn,
   signUp,
@@ -124,15 +124,7 @@ export const useAuth = () => {
       try {
         setAuthState((prev) => ({ ...prev, isLoading: true, error: null }));
 
-        const cognitoUser = await Auth.confirmSignIn(
-          null,
-          code,
-          "SOFTWARE_TOKEN_MFA",
-        );
-
-        if (cognitoUser.challengeName) {
-          throw new Error("Additional MFA required");
-        }
+        // Amplify v6では、MFAはsignInの続きで処理される
 
         await fetchUser();
       } catch (error: any) {
@@ -153,7 +145,7 @@ export const useAuth = () => {
     try {
       setAuthState((prev) => ({ ...prev, isLoading: true, error: null }));
 
-      await Auth.signOut();
+      await signOut();
 
       setAuthState({
         user: null,
