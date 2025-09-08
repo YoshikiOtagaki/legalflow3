@@ -3,7 +3,7 @@ import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/api";
 import { getCurrentUser } from "aws-amplify/auth";
 
-// Amplify Gen2 configuration
+// Amplify v6 configuration
 const amplifyConfig = {
   Auth: {
     Cognito: {
