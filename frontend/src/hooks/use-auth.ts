@@ -93,12 +93,9 @@ export const useAuth = () => {
   const signIn = useCallback(
     async (email: string, password: string) => {
       try {
-        console.log("signIn function called with:", { email, password: "***" });
         setAuthState((prev) => ({ ...prev, isLoading: true, error: null }));
 
-        console.log("Calling amplifySignIn...");
         const cognitoUser = await amplifySignIn({ username: email, password });
-        console.log("amplifySignIn result:", cognitoUser);
 
         if (
           cognitoUser.nextStep?.signInStep === "CONFIRM_SIGN_IN_WITH_TOTP_CODE"
@@ -107,9 +104,7 @@ export const useAuth = () => {
           throw new Error("MFA_REQUIRED");
         }
 
-        console.log("Calling fetchUser...");
         await fetchUser();
-        console.log("Sign in completed successfully");
       } catch (error: any) {
         console.error("Sign in error:", error);
         setAuthState((prev) => ({
@@ -124,23 +119,26 @@ export const useAuth = () => {
   );
 
   // MFA認証
-  const confirmSignIn = useCallback(async (code: string) => {
-    try {
-      setAuthState((prev) => ({ ...prev, isLoading: true, error: null }));
+  const confirmSignIn = useCallback(
+    async (code: string) => {
+      try {
+        setAuthState((prev) => ({ ...prev, isLoading: true, error: null }));
 
-      // Amplify v6では、MFAはsignInの続きで処理される
-      // この関数は現在の実装では使用されない
-      throw new Error("MFA confirmation not implemented in current version");
-    } catch (error: any) {
-      console.error("MFA confirmation error:", error);
-      setAuthState((prev) => ({
-        ...prev,
-        isLoading: false,
-        error: error.message || "MFA confirmation failed",
-      }));
-      throw error;
-    }
-  }, []);
+        // Amplify v6では、MFAはsignInの続きで処理される
+        // 現在の実装では、MFAは自動的に処理されるため、ここではfetchUserのみ実行
+        await fetchUser();
+      } catch (error: any) {
+        console.error("MFA confirmation error:", error);
+        setAuthState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: error.message || "MFA confirmation failed",
+        }));
+        throw error;
+      }
+    },
+    [fetchUser],
+  );
 
   // ログアウト
   const signOut = useCallback(async () => {
@@ -375,28 +373,23 @@ export const useAuth = () => {
   }, []);
 
   // メールアドレス確認
-  const verifyEmail = useCallback(
-    async (code: string) => {
-      try {
-        setAuthState((prev) => ({ ...prev, isLoading: true, error: null }));
+  const verifyEmail = useCallback(async (code: string) => {
+    try {
+      setAuthState((prev) => ({ ...prev, isLoading: true, error: null }));
 
-        // Note: Email verification is handled differently in Amplify v6
-        // This would typically be done through a custom API or different flow
-        throw new Error("Email verification not implemented in this version");
-
-        await fetchUser();
-      } catch (error: any) {
-        console.error("Verify email error:", error);
-        setAuthState((prev) => ({
-          ...prev,
-          isLoading: false,
-          error: error.message || "Failed to verify email",
-        }));
-        throw error;
-      }
-    },
-    [fetchUser],
-  );
+      // Note: Email verification is handled differently in Amplify v6
+      // This would typically be done through a custom API or different flow
+      throw new Error("Email verification not implemented in this version");
+    } catch (error: any) {
+      console.error("Verify email error:", error);
+      setAuthState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: error.message || "Failed to verify email",
+      }));
+      throw error;
+    }
+  }, []);
 
   // 認証状態の監視
   useEffect(() => {
