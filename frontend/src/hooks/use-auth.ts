@@ -442,6 +442,11 @@ export const useAuth = () => {
     };
   }, [fetchUser]);
 
+  // エラーをクリアする関数
+  const clearError = useCallback(() => {
+    setAuthState((prev) => ({ ...prev, error: null }));
+  }, []);
+
   return {
     ...authState,
     authLoading: authState.isLoading,
@@ -458,5 +463,6 @@ export const useAuth = () => {
     updateEmail,
     verifyEmail,
     fetchUser,
+    clearError,
   };
 };
