@@ -31,7 +31,7 @@ import {
 } from "../../components/dashboard/ReportGenerator";
 
 export default function DashboardPage() {
-  const { user } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const { stats, loading, error, refetch } = useDashboardStats(user?.id || "");
   const [selectedPeriod, setSelectedPeriod] = useState<
     "daily" | "weekly" | "monthly"
@@ -44,7 +44,20 @@ export default function DashboardPage() {
     setRefreshing(false);
   };
 
-  if (!user) {
+  // 認証状態の読み込み中
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 認証されていない場合
+  if (!isAuthenticated || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -121,7 +134,12 @@ export default function DashboardPage() {
     labels: ["Active", "Completed", "On Hold", "Cancelled"],
     datasets: [
       {
-        data: [stats.cases.activeCases, stats.cases.completedCases, 2, 1],
+        data: [
+          stats?.cases?.activeCases || 0,
+          stats?.cases?.completedCases || 0,
+          2,
+          1,
+        ],
         backgroundColor: ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"],
       },
     ],
@@ -205,10 +223,10 @@ export default function DashboardPage() {
                 <TrendingUp className="w-5 h-5 text-blue-600" />
               </div>
               <TimesheetStatsCard
-                totalHours={stats.timesheet.totalHours}
-                dailyHours={stats.timesheet.dailyHours}
-                weeklyHours={stats.timesheet.weeklyHours}
-                monthlyHours={stats.timesheet.monthlyHours}
+                totalHours={stats?.timesheet?.totalHours || 0}
+                dailyHours={stats?.timesheet?.dailyHours || 0}
+                weeklyHours={stats?.timesheet?.weeklyHours || 0}
+                monthlyHours={stats?.timesheet?.monthlyHours || 0}
               />
             </div>
 
@@ -219,10 +237,10 @@ export default function DashboardPage() {
                 <FileText className="w-5 h-5 text-green-600" />
               </div>
               <CaseStatsCard
-                totalCases={stats.cases.totalCases}
-                activeCases={stats.cases.activeCases}
-                completedCases={stats.cases.completedCases}
-                newCases={stats.cases.newCases}
+                totalCases={stats?.cases?.totalCases || 0}
+                activeCases={stats?.cases?.activeCases || 0}
+                completedCases={stats?.cases?.completedCases || 0}
+                newCases={stats?.cases?.newCases || 0}
               />
             </div>
           </div>
@@ -261,8 +279,8 @@ export default function DashboardPage() {
                 <FileText className="w-5 h-5 text-purple-600" />
               </div>
               <DocumentStatsCard
-                totalDocuments={stats.documents.totalDocuments}
-                storageUsed={stats.documents.storageUsed}
+                totalDocuments={stats?.documents?.totalDocuments || 0}
+                storageUsed={stats?.documents?.storageUsed || 0}
               />
             </div>
 
@@ -275,8 +293,12 @@ export default function DashboardPage() {
                 <Bell className="w-5 h-5 text-yellow-600" />
               </div>
               <NotificationStatsCard
-                totalNotifications={stats.notifications.totalNotifications}
-                unreadNotifications={stats.notifications.unreadNotifications}
+                totalNotifications={
+                  stats?.notifications?.totalNotifications || 0
+                }
+                unreadNotifications={
+                  stats?.notifications?.unreadNotifications || 0
+                }
               />
             </div>
 
@@ -287,10 +309,10 @@ export default function DashboardPage() {
                 <Settings className="w-5 h-5 text-gray-600" />
               </div>
               <SystemStatsCard
-                apiResponseTime={stats.system.apiResponseTime}
-                errorRate={stats.system.errorRate}
-                activeUsers={stats.system.activeUsers}
-                totalUsers={stats.system.totalUsers}
+                apiResponseTime={stats?.system?.apiResponseTime || 0}
+                errorRate={stats?.system?.errorRate || 0}
+                activeUsers={stats?.system?.activeUsers || 0}
+                totalUsers={stats?.system?.totalUsers || 0}
               />
             </div>
           </div>
