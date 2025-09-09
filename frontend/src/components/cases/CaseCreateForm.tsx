@@ -225,12 +225,27 @@ export default function CaseCreateForm({
 
                 <div className="space-y-2">
                   <Label htmlFor="categoryId">カテゴリ *</Label>
-                  <Input
-                    id="categoryId"
-                    {...register("categoryId")}
-                    placeholder="カテゴリIDを入力してください"
-                    className={cn(errors.categoryId && "border-red-500")}
-                  />
+                  <Select
+                    value={watchedValues.categoryId}
+                    onValueChange={(value) => setValue("categoryId", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="カテゴリを選択してください" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="civil">民事事件</SelectItem>
+                      <SelectItem value="criminal">刑事事件</SelectItem>
+                      <SelectItem value="family">家事事件</SelectItem>
+                      <SelectItem value="labor">労働事件</SelectItem>
+                      <SelectItem value="corporate">企業法務</SelectItem>
+                      <SelectItem value="real-estate">不動産</SelectItem>
+                      <SelectItem value="intellectual-property">
+                        知的財産
+                      </SelectItem>
+                      <SelectItem value="tax">税務</SelectItem>
+                      <SelectItem value="other">その他</SelectItem>
+                    </SelectContent>
+                  </Select>
                   {errors.categoryId && (
                     <p className="text-sm text-red-500">
                       {errors.categoryId.message}
@@ -252,6 +267,47 @@ export default function CaseCreateForm({
                       {errors.hourlyRate.message}
                     </p>
                   )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="courtDivisionId">裁判所</Label>
+                  <Select
+                    value={watchedValues.courtDivisionId}
+                    onValueChange={(value) =>
+                      setValue("courtDivisionId", value)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="裁判所を選択してください" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="tokyo-district">
+                        東京地方裁判所
+                      </SelectItem>
+                      <SelectItem value="osaka-district">
+                        大阪地方裁判所
+                      </SelectItem>
+                      <SelectItem value="nagoya-district">
+                        名古屋地方裁判所
+                      </SelectItem>
+                      <SelectItem value="fukuoka-district">
+                        福岡地方裁判所
+                      </SelectItem>
+                      <SelectItem value="sapporo-district">
+                        札幌地方裁判所
+                      </SelectItem>
+                      <SelectItem value="sendai-district">
+                        仙台地方裁判所
+                      </SelectItem>
+                      <SelectItem value="hiroshima-district">
+                        広島地方裁判所
+                      </SelectItem>
+                      <SelectItem value="takamatsu-district">
+                        高松地方裁判所
+                      </SelectItem>
+                      <SelectItem value="other">その他</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>

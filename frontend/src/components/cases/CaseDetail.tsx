@@ -211,8 +211,9 @@ export default function CaseDetail({
 
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="overview">概要</TabsTrigger>
+              <TabsTrigger value="assignments">担当者</TabsTrigger>
               <TabsTrigger value="parties">当事者</TabsTrigger>
               <TabsTrigger value="tasks">タスク</TabsTrigger>
               <TabsTrigger value="timesheet">タイムシート</TabsTrigger>
@@ -352,8 +353,71 @@ export default function CaseDetail({
               )}
             </TabsContent>
 
+            {/* Assignments Tab */}
+            <TabsContent value="assignments" className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium">担当者</h3>
+                <Button size="sm" variant="outline">
+                  <User className="h-4 w-4 mr-2" />
+                  担当者を追加
+                </Button>
+              </div>
+              {caseItem.assignments && caseItem.assignments.length > 0 ? (
+                <div className="grid gap-4 md:grid-cols-2">
+                  {caseItem.assignments.map((assignment, index) => (
+                    <Card key={index}>
+                      <CardHeader>
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4" />
+                          <CardTitle className="text-lg">
+                            {assignment.user?.name || "担当者"}
+                          </CardTitle>
+                        </div>
+                        <Badge variant="outline">{assignment.role}</Badge>
+                      </CardHeader>
+                      <CardContent className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          <span>
+                            {assignment.user?.email || "メールアドレス不明"}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <span>
+                            割り当て日: {formatDate(assignment.assignedAt)}
+                          </span>
+                        </div>
+                        {assignment.lastAccessedAt && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <Clock className="h-4 w-4 text-muted-foreground" />
+                            <span>
+                              最終アクセス:{" "}
+                              {formatDate(assignment.lastAccessedAt)}
+                            </span>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <User className="h-12 w-12 mx-auto mb-4" />
+                  <p>担当者が割り当てられていません</p>
+                </div>
+              )}
+            </TabsContent>
+
             {/* Parties Tab */}
             <TabsContent value="parties" className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium">当事者</h3>
+                <Button size="sm" variant="outline">
+                  <Users className="h-4 w-4 mr-2" />
+                  当事者を追加
+                </Button>
+              </div>
               {caseItem.parties && caseItem.parties.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2">
                   {caseItem.parties.map((party, index) => (

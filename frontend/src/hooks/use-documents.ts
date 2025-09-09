@@ -2,7 +2,7 @@
 // Provides comprehensive document management functionality
 
 import { useState, useEffect, useCallback } from "react";
-import { useAuthStore } from "@/store/auth";
+import { useAuth } from "@/hooks/use-auth";
 import { fetchAuthSession } from "aws-amplify/auth";
 import {
   Document,
@@ -20,7 +20,7 @@ import {
 
 // Document management hook
 export function useDocuments(filters: DocumentFilters = {}) {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuth();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -101,7 +101,7 @@ export function useDocuments(filters: DocumentFilters = {}) {
 
 // Single document hook
 export function useDocument(id: string) {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuth();
   const [document, setDocument] = useState<Document | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -154,7 +154,7 @@ export function useDocument(id: string) {
 
 // Document creation hook
 export function useCreateDocument() {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuth();
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -219,7 +219,7 @@ export function useCreateDocument() {
 
 // Document update hook
 export function useUpdateDocument() {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuth();
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -279,7 +279,7 @@ export function useUpdateDocument() {
 
 // Document deletion hook
 export function useDeleteDocument() {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuth();
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -330,7 +330,7 @@ export function useDeleteDocument() {
 
 // Document generation hook
 export function useDocumentGeneration() {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuth();
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -385,7 +385,7 @@ export function useDocumentGeneration() {
 
 // Document upload hook
 export function useDocumentUpload() {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -446,7 +446,7 @@ export function useDocumentUpload() {
 
 // Document templates hook
 export function useDocumentTemplates() {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuth();
   const [templates, setTemplates] = useState<DocumentTemplate[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -504,7 +504,7 @@ export function useDocumentTemplates() {
 
 // Document types hook
 export function useDocumentTypes() {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuth();
   const [types, setTypes] = useState<DocumentType[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -561,7 +561,7 @@ export function useDocumentTypes() {
 
 // Document statuses hook
 export function useDocumentStatuses() {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuth();
   const [statuses, setStatuses] = useState<DocumentStatus[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

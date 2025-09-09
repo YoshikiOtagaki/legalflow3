@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { LoginForm } from "./login-form";
 import { RegisterForm } from "./register-form";
 
 export function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
+  const router = useRouter();
 
   const handleSuccess = () => {
     // 認証成功時の処理（リダイレクトなど）
-    window.location.href = "/dashboard";
+    router.push("/dashboard");
   };
 
   const handleSwitchToRegister = () => {

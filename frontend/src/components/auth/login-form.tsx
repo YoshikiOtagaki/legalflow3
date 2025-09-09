@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useAuthStore } from "@/store/auth";
+import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,7 +29,7 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
-  const { login, isLoading, error, clearError } = useAuthStore();
+  const { signIn, isLoading, error, clearError } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -45,10 +45,10 @@ export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
     clearError();
 
     try {
-      await login(data);
+      await signIn(data.email, data.password);
       onSuccess?.();
     } catch (error) {
-      // エラーはstoreで管理される
+      // エラーはuseAuthで管理される
     } finally {
       setIsSubmitting(false);
     }

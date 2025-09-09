@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuthStore } from "@/store/auth";
+import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import {
   Menu,
@@ -31,10 +31,10 @@ const navigation = [
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
-  const { user, logout } = useAuthStore();
+  const { user, signOut } = useAuth();
 
   const handleLogout = () => {
-    logout();
+    signOut();
     setIsOpen(false);
   };
 

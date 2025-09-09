@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useAuthStore } from "@/store/auth";
+import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -49,7 +49,7 @@ interface CaseCreateFormProps {
 }
 
 export function CaseCreateForm({ onSuccess, onCancel }: CaseCreateFormProps) {
-  const {} = useAuthStore();
+  const {} = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [categories, setCategories] = useState<Option[]>([]);
   const [statuses, setStatuses] = useState<Option[]>([]);

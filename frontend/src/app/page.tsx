@@ -2,21 +2,21 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/store/auth";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Home() {
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const { isAuthenticated, authLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading) {
+    if (!authLoading) {
       if (isAuthenticated) {
         router.push("/dashboard");
       } else {
         router.push("/auth");
       }
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, authLoading, router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">

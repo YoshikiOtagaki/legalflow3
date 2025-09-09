@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useAuthStore } from "@/store/auth";
+import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -49,12 +49,7 @@ export function RegisterForm({
   onSuccess,
   onSwitchToLogin,
 }: RegisterFormProps) {
-  const {
-    register: registerUser,
-    isLoading,
-    error,
-    clearError,
-  } = useAuthStore();
+  const { signUp, isLoading, error, clearError } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -78,10 +73,17 @@ export function RegisterForm({
 
     try {
       const { confirmPassword, ...registerData } = data;
-      await registerUser(registerData);
+      const userData = {
+        email: registerData.email,
+        password: registerData.password,
+        firstName: registerData.name.split(" ")[0] || registerData.name,
+        lastName: registerData.name.split(" ")[1] || "",
+        role: registerData.role,
+      };
+      await signUp(userData);
       onSuccess?.();
     } catch (error) {
-      // エラーはstoreで管理される
+      // エラーはuseAuthで管理される
     } finally {
       setIsSubmitting(false);
     }

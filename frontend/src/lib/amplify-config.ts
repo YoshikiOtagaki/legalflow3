@@ -2,57 +2,14 @@
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/api";
 import { getCurrentUser } from "aws-amplify/auth";
+import outputs from "../../../amplify_outputs.json";
 
-// Amplify設定の状態を追跡
-let isAmplifyConfigured = false;
-
-// Amplify v6 configuration
-const amplifyConfig = {
-  Auth: {
-    Cognito: {
-      userPoolId:
-        process.env.NEXT_PUBLIC_AWS_USER_POOL_ID || "ap-northeast-1_zZLG4sQHv",
-      userPoolClientId:
-        process.env.NEXT_PUBLIC_AWS_USER_POOL_CLIENT_ID ||
-        "12de3fn5enn01pjmi130lce8u8",
-      identityPoolId:
-        process.env.NEXT_PUBLIC_AWS_IDENTITY_POOL_ID ||
-        "ap-northeast-1:fea36535-eac7-462e-879c-f72a67ebc1db",
-      loginWith: {
-        email: true,
-        phone: false,
-      },
-    },
-  },
-  API: {
-    GraphQL: {
-      endpoint:
-        process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT ||
-        "https://f5sic7pcdjb7jntpdlrstxlmr4.appsync-api.ap-northeast-1.amazonaws.com/graphql",
-      region: process.env.NEXT_PUBLIC_AWS_REGION || "ap-northeast-1",
-      defaultAuthMode: "userPool",
-    },
-  },
-  Storage: {
-    S3: {
-      bucket: process.env.NEXT_PUBLIC_S3_BUCKET || "legalflow3-storage-bucket",
-      region: process.env.NEXT_PUBLIC_AWS_REGION || "ap-northeast-1",
-    },
-  },
-};
-
-// Initialize Amplify with configuration
-try {
-  Amplify.configure(amplifyConfig);
-  isAmplifyConfigured = true;
-  console.log("Amplify configured successfully");
-} catch (error) {
-  console.error("Failed to configure Amplify:", error);
-}
+// Initialize Amplify with Gen2 outputs
+Amplify.configure(outputs);
 
 // Log configuration for debugging (development only)
 if (process.env.NODE_ENV === "development") {
-  console.log("Amplify Configuration:", amplifyConfig);
+  console.log("Amplify Gen2 Configuration:", outputs);
 }
 
 // Create GraphQL client
@@ -61,9 +18,6 @@ export const client = generateClient();
 // Auth helper functions using Gen2 API
 export const auth = {
   getCurrentUser: async () => {
-    if (!isAmplifyConfigured) {
-      throw new Error("Amplify not configured");
-    }
     try {
       return await getCurrentUser();
     } catch (error) {
@@ -73,9 +27,6 @@ export const auth = {
   },
 
   getUserId: async () => {
-    if (!isAmplifyConfigured) {
-      throw new Error("Amplify not configured");
-    }
     try {
       const user = await getCurrentUser();
       return user?.username || null;
