@@ -93,9 +93,12 @@ export const useAuth = () => {
   const signIn = useCallback(
     async (email: string, password: string) => {
       try {
+        console.log("signIn function called with:", { email, password: "***" });
         setAuthState((prev) => ({ ...prev, isLoading: true, error: null }));
 
+        console.log("Calling amplifySignIn...");
         const cognitoUser = await amplifySignIn({ username: email, password });
+        console.log("amplifySignIn result:", cognitoUser);
 
         if (
           cognitoUser.nextStep?.signInStep === "CONFIRM_SIGN_IN_WITH_TOTP_CODE"
@@ -104,7 +107,9 @@ export const useAuth = () => {
           throw new Error("MFA_REQUIRED");
         }
 
+        console.log("Calling fetchUser...");
         await fetchUser();
+        console.log("Sign in completed successfully");
       } catch (error: any) {
         console.error("Sign in error:", error);
         setAuthState((prev) => ({
@@ -119,26 +124,23 @@ export const useAuth = () => {
   );
 
   // MFA認証
-  const confirmSignIn = useCallback(
-    async (code: string) => {
-      try {
-        setAuthState((prev) => ({ ...prev, isLoading: true, error: null }));
+  const confirmSignIn = useCallback(async (code: string) => {
+    try {
+      setAuthState((prev) => ({ ...prev, isLoading: true, error: null }));
 
-        // Amplify v6では、MFAはsignInの続きで処理される
-
-        await fetchUser();
-      } catch (error: any) {
-        console.error("MFA confirmation error:", error);
-        setAuthState((prev) => ({
-          ...prev,
-          isLoading: false,
-          error: error.message || "MFA confirmation failed",
-        }));
-        throw error;
-      }
-    },
-    [fetchUser],
-  );
+      // Amplify v6では、MFAはsignInの続きで処理される
+      // この関数は現在の実装では使用されない
+      throw new Error("MFA confirmation not implemented in current version");
+    } catch (error: any) {
+      console.error("MFA confirmation error:", error);
+      setAuthState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: error.message || "MFA confirmation failed",
+      }));
+      throw error;
+    }
+  }, []);
 
   // ログアウト
   const signOut = useCallback(async () => {
@@ -449,6 +451,7 @@ export const useAuth = () => {
 
   return {
     ...authState,
+    authLoading: authState.isLoading,
     signIn,
     confirmSignIn,
     signOut,
