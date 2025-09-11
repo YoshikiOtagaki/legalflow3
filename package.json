@@ -39,15 +39,16 @@
     "clean:backend": "cd backend/api_service && npm run clean",
     "clean:frontend": "cd frontend && npm run clean",
     "setup": "npm run install:all && npm run build:all",
-    "amplify:build": "npx @aws-amplify/backend-cli pipeline-deploy --branch $AWS_BRANCH --app-id $AWS_APP_ID",
-    "amplify:deploy": "npx @aws-amplify/backend-cli sandbox deploy",
+    "amplify:sandbox": "npx @aws-amplify/backend-cli sandbox",
+    "amplify:deploy": "npx @aws-amplify/backend-cli sandbox --once",
     "amplify:delete": "npx @aws-amplify/backend-cli sandbox delete",
-    "build": "npm run amplify:build"
+    "build": "npm run amplify:deploy"
   },
   "devDependencies": {
     "@aws-amplify/backend": "^1.16.1",
     "@aws-amplify/backend-cli": "^1.8.0",
     "@aws-amplify/cli": "^12.0.0",
+    "@types/node": "^24.3.1",
     "aws-cdk-lib": "^2.204.0",
     "concurrently": "^8.2.2",
     "constructs": "^10.4.2",
@@ -60,7 +61,6 @@
     "npm": ">=8.0.0"
   },
   "workspaces": [
-    "backend/api_service",
     "frontend"
   ],
   "dependencies": {

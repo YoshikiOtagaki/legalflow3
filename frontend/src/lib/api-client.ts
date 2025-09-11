@@ -1,5 +1,5 @@
 // LegalFlow3 - API Client
-// Centralized API client for all backend operations
+// Centralized API client for all backend operations using Amplify GraphQL
 
 import {
   apiClient,

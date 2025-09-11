@@ -381,6 +381,55 @@ type Notification @model @auth(rules: [{ allow: owner, operations: [create, read
   updatedAt: AWSDateTime!
 }
 
+type Document @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  caseId: ID! @index(name: "byCase")
+  title: String!
+  url: String!
+  type: String!
+  size: Int!
+  uploadedAt: AWSDateTime!
+  uploadedBy: String!
+  tags: [String!]!
+  description: String
+  isPublic: Boolean!
+  version: Int!
+  lastModified: AWSDateTime!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type DocumentTemplate @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  name: String!
+  description: String
+  templatePath: String!
+  categoryId: ID!
+  isActive: Boolean!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type DocumentType @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  name: String!
+  description: String
+  category: String!
+  isActive: Boolean!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type DocumentStatus @model @auth(rules: [{ allow: owner, operations: [create, read, update, delete] }]) {
+  id: ID!
+  name: String!
+  description: String
+  category: String!
+  isActive: Boolean!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
 # Enums
 enum Role {
   ADMIN
